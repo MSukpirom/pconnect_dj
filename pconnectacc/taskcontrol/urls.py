@@ -4,5 +4,5 @@ from .views import *
 App_name = "taskcontrol"
 
 urlpatterns = [
-    # path('', home),
+    path('', home),
 ]
