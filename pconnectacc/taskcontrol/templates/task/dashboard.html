@@ -1,0 +1,663 @@
+{% extends 'task/index.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .card-date {
+        background-color: #FFFFFF;
+        border-radius: 15px;
+        box-shadow: 0px 0px 10px #efefef;
+    }
+
+    .calendar-toolbar {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding-bottom: 10px;
+    }
+
+    .calendar-toolbar>.current-month {
+        font-size: 18px;
+        font-weight: bold;
+        color: #19181a;
+    }
+
+    .calendar-toolbar>[class$="month-btn"] {
+        width: 40px;
+        aspect-ratio: 1;
+        text-align: center;
+        line-height: 40px;
+        font-size: 14px;
+        color: #19181a;
+        background: #f8f7fa;
+        border: none;
+        border-radius: 15px;
+    }
+
+    .weekdays,
+    .calendar-days {
+        display: flex;
+        flex-wrap: wrap;
+        padding-inline: 30px;
+    }
+
+    .weekdays {
+        padding-top: 30px;
+        margin-bottom: 5px;
+    }
+
+    .calendar-days {
+        padding-bottom: 12px;
+    }
+
+    .weekday-name,
+    [class$="-day"] {
+        width: 40px;
+        color: #19181a;
+        text-align: center;
+        line-height: 35px;
+        font-size: 0.8331rem;
+    }
+
+    .weekday-name {
+        color: #19181a;
+        font-weight: 700;
+        font-size: 14px;
+    }
+
+    .current-day {
+        background-color: #fa6b6b;
+        color: #f8f7fa;
+        border-radius: 15px;
+        font-weight: 700;
+        transition: 0.5s;
+        cursor: pointer;
+    }
+
+    .padding-day {
+        color: #a5a5a5;
+        user-select: none;
+    }
+
+    .calendar-toolbar>[class$="month-btn"]:hover,
+    .month-day:hover,
+    .btn-date:hover {
+        border-radius: 15px;
+        background-color: #f8f7fa;
+        color: #fa6b6b;
+        transition: 0.1s;
+        cursor: pointer;
+        box-shadow: inset 0px 0px 0px 1.5px #fa6b6b;
+    }
+
+    .calendar-toolbar>[class$="month-btn"]:focus,
+    .month-day:focus,
+    .btn-date:focus {
+        border-radius: 15px;
+        background-color: #fa6b6b;
+        color: #f8f7fa;
+    }
+
+    .goto-buttons {
+        padding-block: 25px;
+        display: flex;
+        justify-content: space-evenly;
+    }
+
+    .btn-date {
+        background: #f8f7fa;
+        border: none;
+        border-radius: 15px;
+        padding: 8px 14px;
+        color: #19181a;
+        font-weight: 500;
+        font-size: 0.9rem;
+        margin-right: 1px;
+        box-shadow: 0px 0px 0px #efefef;
+    }
+    .selected-day {
+        background-color: rgb(112, 71, 235);
+        color: #f8f7fa;
+        border-radius: 50%;
+        font-weight: 700;
+    }
+
+    /* ให้ตัว container ที่ครอบองค์ประกอบทั้งหมดมี display: flex */
+    .container {
+        display: flex;
+        align-items: center;
+    }
+
+    /* ให้ chart-container เป็นส่วนหนึ่งของ container และมี flex-grow: 1 เพื่อให้ยืดตามพื้นที่ที่เหลือ */
+    .chart-container {
+        position: relative;
+        width: 320px;
+        height: 320px;
+    }
+
+
+    .legend {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 60px;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+
+    .legend-item .icon {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        margin-right: 5px;
+        border-radius: 50%;
+    }
+
+    #open_job_count .icon { background-color: #ff6384; }
+    #in_progress_count .icon { background-color: #36a2eb; }
+    #review_count .icon { background-color: #ffce56; }
+    #pending_client_count .icon { background-color: #4bc0c0; }
+    #done_count .icon { background-color: #cb99ff; }
+
+    #centerText {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 16px;
+        color: #393E46;
+        font-family: "Bai Jamjuree", sans-serif;
+        font-weight: 600;
+    }
+
+</style>
+
+<div class="row">
+    <div class="col-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <h5>Clients</h5>
+                        <h2>{{ total_clients }} <span style="font-size: 15px;">ราย</span></h2>
+                    </div>
+                    <div class="col-auto mr-auto">
+                        <div class="bg-primary rounded-circle text-light d-flex justify-content-center align-items-center" style="width: 50px; height: 50px;">
+                            <i class="fas fa-users" style="font-size: 20px;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col mt-0">
+                        <h5>Engagements</h5>
+                        <h2>{{ total_engagements }} <span style="font-size: 15px;">รายการ</span></h2>
+                    </div>
+                    <div class="col-auto mr-auto">
+                        <div class="bg-primary rounded-circle text-light d-flex justify-content-center align-items-center" style="width: 50px; height: 50px;">
+                            <i class="fa-solid fa-box-archive"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col mt-0">
+                        <h5>Open Jobs</h5>
+                        <h2>{{ open_job_engagement }} <span style="font-size: 15px;">งาน</span></h2>
+                    </div>
+                    <div class="col-auto mr-auto">
+                        <div class="bg-warning rounded-circle text-light d-flex justify-content-center align-items-center" style="width: 50px; height: 50px;">
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col mt-0">
+                        <h5>Completed</h5>
+                        <h2>{{ done_job_engagement }} <span style="font-size: 15px;">งาน</span></h2>
+                    </div>
+                    <div class="col-auto mr-auto">
+                        <div class="bg-success rounded-circle text-light d-flex justify-content-center align-items-center" style="width: 50px; height: 50px;">
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <div class="card">
+            <div class="card-body" style="position: relative;">
+                <h5>จำนวนงานต่อวัน</h5>
+                <canvas id="engagementChartLine" style="width: 100%; height: 300px;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-8">
+        <div class="card">
+            <div class="card-body mb-3">
+                <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill"
+                            data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home"
+                            aria-selected="true">Engagements</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill"
+                            data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile"
+                            aria-selected="false">Accounting</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill"
+                            data-bs-target="#pills-contact" type="button" role="tab" aria-controls="pills-contact"
+                            aria-selected="false">Tax</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill"
+                            data-bs-target="#pills-contact" type="button" role="tab" aria-controls="pills-contact"
+                            aria-selected="false">Payroll</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill"
+                            data-bs-target="#pills-contact" type="button" role="tab" aria-controls="pills-contact"
+                            aria-selected="false">Report</button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="pills-tabContent">
+                    <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab" tabindex="0">
+                        <h5 style="margin-bottom: 20px;">สรุปงาน</h5>
+                        <div class="container">
+                            <div class="chart-container">
+                                <canvas id="doughnutChart"></canvas>
+                                <div id="centerText">Total</div>
+                            </div>
+                            <div class="legend">
+                                <div id="open_job_count" class="legend-item"></div>
+                                <div id="in_progress_count" class="legend-item"></div>
+                                <div id="review_count" class="legend-item"></div>
+                                <div id="pending_client_count" class="legend-item"></div>
+                                <div id="done_count" class="legend-item"></div>
+                                <div id="total_counts" class="legend-item"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab" tabindex="0">
+                        <div style="display: flex;">
+                            <canvas id="accountingChart" style="width: 33%;"></canvas>
+                            <canvas id="documentFollowChart" style="width: 33%;"></canvas>
+                            <canvas id="documentStorageChart" style="width: 33%;"></canvas>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab"
+                        tabindex="0">go
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="calendar-toolbar">
+                    <button class="prev month-btn">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="current-month"></div>
+                    <button class="next month-btn">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                <div class="calendar">
+                    <div class="weekdays">
+                        <div class="weekday-name">Su</div>
+                        <div class="weekday-name">Mo</div>
+                        <div class="weekday-name">Tu</div>
+                        <div class="weekday-name">We</div>
+                        <div class="weekday-name">Th</div>
+                        <div class="weekday-name">Fr</div>
+                        <div class="weekday-name">Sa</div>
+                    </div>
+                    <div class="calendar-days"></div>
+                </div>
+                <div class="goto-buttons">
+                    <button type="button" class="btn btn-date today">Today</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <form id="frmSearch" method="GET" action="{% url 'taskcontrol:search_datatable' %}">
+                        <div class="row mb-3">
+                            <div class="col-1">
+                                <label for="" class="form-label">ชื่อบริษัท :</label>
+                            </div>
+                            <div class="col">
+                                <select name="client_id" id="client_id" class="form-select">
+                                    <option value selected disabled hidden>-- กรุณาเลือก --</option>
+                                    {% for client in clients %}
+                                        <option value="{{ client.id }}">{{ client.company_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-1">
+                                <label for="" class="form-label">รอบบัญชี :</label>
+                            </div>
+                            <div class="col-5">
+                                <input type="checkbox" name="" id="" class="form-check-input">
+                                <label for="" class="form-label">จากวันที่</label> 
+                                <input type="date" class="form-control" name="start_date_period" value="{{ start_date_period }}">
+                            </div>
+                            <div class="col">
+                                <label for="" class="form-label">ถึงวันที่</label>
+                                <input type="date" class="form-control" name="to_date_period" value="{{ to_date_period }}">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-1"></div>
+                            <div class="col">
+                                <input type="checkbox" name="per_month" id="per_month" class="form-check-input">
+                                <label for="" class="form-label">Show only the current month</label>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label for="" class="form-label">หมวดหมู่ :</label>
+                                <select name="category_id" id="category_id" class="form-select">
+                                    <option value selected disabled hidden>-- กรุณาเลือก --</option>
+                                    {% for ca in category %}
+                                        <option value="{{ ca.id }}">{{ ca.name_th }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label for="" class="form-label">ประเภทงาน :</label>
+                                <select name="type_id" id="type_id" class="form-select">
+                                    <option value selected disabled hidden>-- กรุณาเลือก --</option>
+                                    {% for t in type %}
+                                        <option value="{{ t.id }}">{{ t.name_th }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <input type="checkbox" name="deadline_days" id="deadline_days" class="form-check-input">
+                                <label for="deadline_days" class="form-label">ใกล้ถึงเดดไลน์</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="submit" id="btnSearch" class="btn btn-outline-dark"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+                                <button type="reset" id="btnReset" class="btn btn-outline-dark">Reset</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card-body" id="result">
+                    <table id="engagement_table" class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Engagement</th>
+                                <th>ลูกค้า</th>
+                                <th>รอบ</th>
+                                <th>ผู้ดูแล</th>
+                                <th>งาน</th>
+                                <th>เดดไลน์</th>
+                                <th>เหลือเวลา</th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-group-divider" id="dataBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+<script src="{% static 'assets/js/date.js' %}"></script>
+
+<script>
+    // ดึงข้อมูล JSON จาก Django view เพื่อสร้างกราฟแบบเส้น
+    fetch('{% url 'taskcontrol:get_engagement_data' %}')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('engagementChartLine').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.dates,
+                    datasets: [{
+                        label: 'Counts',
+                        backgroundColor: 'rgba(54, 162, 235)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1.5,
+                        tension: 0,
+                        data: data.engagement_counts
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            type: 'time',
+                            position: 'bottom',
+                            time: {
+                                unit: 'day'
+                            },
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Date'
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            position: 'left',
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Engagement Counts'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+    fetch('{% url 'taskcontrol:get_engagement_summary' %}')
+        .then(response => response.json())
+        .then(data => {
+            createDoughnutChart(data.labels, data.percentages, data.total_percentage);
+
+            document.getElementById('open_job_count').innerHTML = `<span class="icon" style="background-color: #ff6384;"></span> เปิดงาน: ${data.counts[0].toFixed(0)} รายการ (${data.percentages[0].toFixed(2)}%)`;
+            document.getElementById('in_progress_count').innerHTML = `<span class="icon" style="background-color: #36a2eb;"></span> กำลังดำเนินการ: ${data.counts[1].toFixed(0)} รายการ (${data.percentages[1].toFixed(2)}%)`;
+            document.getElementById('review_count').innerHTML = `<span class="icon" style="background-color: #ffce56;"></span> รอตรวจทาน: ${data.counts[2].toFixed(0)} รายการ (${data.percentages[2].toFixed(2)}%)`;
+            document.getElementById('pending_client_count').innerHTML = `<span class="icon" style="background-color: #4bc0c0;"></span> รอลูกค้า: ${data.counts[3].toFixed(0)} รายการ (${data.percentages[3].toFixed(2)}%)`;
+            document.getElementById('done_count').innerHTML = `<span class="icon" style="background-color: #cb99ff;"></span> เรียบร้อย: ${data.counts[4].toFixed(0)} รายการ (${data.percentages[4].toFixed(2)}%)`;
+            document.getElementById('total_counts').innerText = `ทั้งหมด: ${data.total_counts} รายการ (${data.total_percentage.toFixed(2)}%)`;
+
+            var totalPercentage = data.percentages.reduce((a, b) => a + b, 0).toFixed(2);
+            document.getElementById('centerText').innerText = 'ทั้งหมด ' + totalPercentage + '%';
+        });
+
+    // ฟังก์ชันสำหรับสร้างกราฟวงกลม
+    function createDoughnutChart(labels, percentages, totalPercentage) {
+        var ctx = document.getElementById('doughnutChart').getContext('2d');
+        var myDoughnutChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: percentages,
+                    backgroundColor: ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#cb99ff']
+                }],
+            },
+            options: {
+                responsive: true,
+                cutoutPercentage: 50,
+                title: {
+                    display: true,
+                    text: 'สรุปงาน'
+                },
+                plugins: {
+                    
+                },
+            }
+        });
+    }
+
+
+    $(document).ready(function () {
+        $('#engagement_table').DataTable({
+            responsive: true,
+            "language": {
+                "search": "ค้นหา",
+                "lengthMenu": "แสดง _MENU_ รายการ",
+                "info": "แสดง _START_ ถึง _END_ จากทั้งหมด _TOTAL_ รายการ",
+                "infoFiltered": "(กรองจากทั้งหมด _MAX_ รายการ)",
+                "paginate": {
+                    "previous": "ก่อนหน้า",
+                    "next": "ถัดไป"
+                }
+            }
+        });
+
+        function loadInitialData() {
+            var data = $('#frmSearch').serialize(); // Serialize form data
+            var currentDate = new Date(); // Current date
+            var perMonth = $('#per_month').prop('checked'); // Value of per_month checkbox
+            var deadlineDays = $('#deadline_days').prop('checked');
+
+            // AJAX request to load data
+            $.ajax({
+                url: '{% url "taskcontrol:search_datatable" %}',
+                type: 'GET',
+                data: data,
+                dataType: 'json',
+                success: function(response) {
+                    displayResults(response, currentDate, deadlineDays); // Display results
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                }
+            });
+        }
+
+        // Function to display results in the table
+        function displayResults(data, today, deadlineDays) {
+            var resultContainer = $('#dataBody');
+            resultContainer.empty();
+
+            $.each(data, function(index, item) {
+                // Construct table row
+                var resultRow = $('<tr>');
+                resultRow.append($('<td>').text(item.job_code || ' '));
+                resultRow.append($('<td>').text(item.client__company_name || ' '));
+                // Format start_date_period if it's not null or undefined
+                var startDateText = item.start_date_period ? formatDate(item.start_date_period) : ' ';
+                resultRow.append($('<td>').text(startDateText));
+                resultRow.append($('<td>').text(item.administrator__first_name + ' ' + item.administrator__last_name || ' '));
+                resultRow.append($('<td>').text(item.type__name_th || ' '));
+
+                // Process deadlines
+                var deadlines = "";
+                $.each(item.engagement_detail_deadlines, function(idx, deadline) {
+                    deadlines += formatDate(deadline.deadline);
+                });
+                resultRow.append($('<td>').text(deadlines || ' '));
+
+                // Process remaining days
+                var remainingDaysText = '';
+                var remainingDaysCell = $('<td>');
+
+                if (item.remaining_days === 0) {
+                    remainingDaysText = 'ครบกำหนด';
+                    remainingDaysCell.addClass('fw-semibold text-success');
+                } else if (item.remaining_days < 1) {
+                    remainingDaysText = item.remaining_days + ' วัน';
+                    remainingDaysCell.addClass('fw-semibold text-danger');
+                } else {
+                    if (item.remaining_days < 7) {
+                        remainingDaysCell.addClass('fw-semibold text-warning');
+                    }
+                    remainingDaysText = item.remaining_days + ' วัน';
+                    remainingDaysCell.addClass('fw-semibold');
+                }
+
+                remainingDaysCell.text(remainingDaysText || ' ');
+                resultRow.append(remainingDaysCell);
+
+                // Append the row to the table body
+                resultContainer.append(resultRow);
+            });
+        }
+
+        // Function to format date as "d/m/Y"
+        function formatDate(dateString) {
+            var date = new Date(dateString);
+            var day = ('0' + date.getDate()).slice(-2);
+            var month = ('0' + (date.getMonth() + 1)).slice(-2);
+            var year = date.getFullYear();
+            return day + '/' + month + '/' + year;
+        }
+
+        // Load initial data when document is ready
+        loadInitialData();
+
+        // Event listener for form submission
+        $('#frmSearch').submit(function(event) {
+            event.preventDefault();
+            loadInitialData();
+        });
+
+        // Event listener for reset button
+        $('#btnReset').click(function() {
+            $('#frmSearch')[0].reset();
+            loadInitialData();
+        });
+
+        // Event listener for checkbox changes
+        $('#per_month, #deadline_days').change(function() {
+            loadInitialData();
+        });
+    });
+
+</script>
+{% endblock content %}

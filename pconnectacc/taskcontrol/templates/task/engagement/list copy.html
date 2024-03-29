@@ -1,0 +1,126 @@
+{% comment %} <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รายการสัญญาว่าจ้าง</title>
+</head>
+<body>
+    <h1>รายการสัญญาว่าจ้าง</h1>
+    <a href="{% url 'taskcontrol:create_egagement' %}">เพิ่ม</a>
+    <h3>รายละเอียด</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>รหัสงาน</th>
+                <th>ชื่อบริษัท</th>
+                <th>วันที่เริ่มบริการ</th>
+                <th>วันที่สิ้นสุดบริการ</th>
+                <th>รอบที่เริ่มให้บริการ</th>
+                <th>รอบที่สิ้นสุดให้บริการ</th>
+                <th>ผู้ดูแล</th>
+                <th>ผู้ตรวจทาน</th>
+                <th>ผู้อนุมัติ</th>
+                <th>เอกสาร</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for egagement in egagements %}
+                <tr>
+                    <td>{{ egagement.job_code }}</td>
+                    <td>{{ egagement.client.code }} {{ egagement.client.company_name }}</td>
+                    <td>{{ egagement.start_date_service|date:'d-m-Y' }}</td>
+                    <td>{{ egagement.end_date_service|date:'d-m-Y' }}</td>
+                    <td>{{ egagement.start_date_period|date:'d-m-Y' }}</td>
+                    <td>{{ egagement.end_date_period|date:'d-m-Y' }}</td>
+                    <td>{{ egagement.administrator }}</td>
+                    <td>{{ egagement.approver }}</td>
+                    <td>{{ egagement.reviewer }}</td>
+                    <td>{{ egagement.document_type.name_th }}</td>
+                    <td>
+                        <a href="{% url 'taskcontrol:update_egagement' pk=egagement.id %}" onclick="updated()">Edit</a>
+                    </td>
+                    <td>
+                        <a href="{% url 'taskcontrol:delete_egagement' pk=egagement.id %}" onclick="deleted()">Delete</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <script>
+        function updated() {
+            alert("บันทึกรายการแก้ไขใช่หรือไม่?");
+        }
+
+        function deleted() {
+            var confirmDelete = confirm("คุณต้องการลบรายการนี้ใช่หรือไม่?");
+            if (confirmDelete) {
+                alert("ลบรายการเรียบร้อยแล้ว");
+            }
+        }
+    </script>
+</body>
+</html> {% endcomment %}
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'src/demo.css' %}">
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="card shadow border-0 mb-7">
+        <div class="card-header">
+            <h5 class="mb-0">รายการ</h5>
+        </div>
+        <div style="text-align: right;">
+            <a href="{% url 'taskcontrol:create_egagement' %}" class="btn btn-sm btn-success">เพิ่มรายการ <i class="bi bi-plus-circle-fill"></i></a>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover table-nowrap">
+                <thead class="thead-light">
+                    <tr>
+                        <th scope="col">เลขที่</th>
+                        <th scope="col">รหัสลูกค้า</th>
+                        <th scope="col">ชื่อบริษัท</th>
+                        <th scope="col">เลขที่นิติ</th>
+                        <th scope="col">สถานะ</th>
+                        <th scope="col">บัญชี</th>
+                        <th scope="col">เงินเดือน</th>
+                        <th scope="col">ภาษี</th>
+                        <th scope="col">รายงาน</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                    {% for e in egagements %}
+                        <tr>
+                            <td>{{ e.job_code }}</td>
+                            <td>{{ e.client__code}}</td>
+                            <td>{{ e.client__company_name }}</td>
+                            <td>{{ e.client__tax_id }}</td>
+                            <td>{{ e.client__status }}</td>
+                            <td>{{ e.document_type__account_category__name_th }}</td>
+                            <td>{{ e. }}</td>
+                            <td>{{ e. }}</td>
+                            <td>{{ e. }}</td>
+                            <td>
+                                <a href="{% url 'taskcontrol:update_client' pk=forloop.counter %}" class="btn btn-sm btn-neutral">แก้ไข</a>
+                                <a href="{% url 'taskcontrol:delete_client' pk=forloop.counter %}" onclick="deleted()"><button type="button" class="btn btn-sm btn-square btn-danger"><i class="bi bi-trash"></i>
+                            </button></a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

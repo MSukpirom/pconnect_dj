@@ -1,0 +1,222 @@
+{% extends 'task/index.html' %} {% block content %}
+<div class="row">
+    <div class="card w-100">
+        <div class="card-body">
+            <div class="row mb-5">
+                <div class="col-md-4">
+                    <a href="{% url 'taskcontrol:engagement_list'%}">
+                        <button type="button" class="btn btn-outline-dark">
+                            <i class="fa-solid fa-circle-chevron-left fa-lg"></i> กลับหน้ารายการ
+                        </button>
+                    </a>
+                </div>
+            </div>
+            <form method="post" action="{% url 'taskcontrol:engagement_create' %}">
+                {% csrf_token %}
+                <div class="h4 pb-2 mb-4 text-primary fw-semibold border-bottom border-primary">เพิ่ม Engagement</div>
+                <div class="row mb-3">
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <div class="form-check form-switch">
+                            <label for="e_status" class="form-check-label fw-semibold">สถานะ</label>
+                            <input class="form-check-input" type="checkbox" data-bs-switch id="e_status" name="e_status" checked>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label for="" class="form-label fw-semibold">รหัสลูกค้า</label>
+                        <select name="client_id" id="" class="selectpicker" data-live-search="true">
+                            {% for c in client %}
+                            <option value="{{ c.id }}" {% if c.id == selected_client_id %}selected{% endif %}>
+                                {{ c.code }} {{ c.company_name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label for="" class="form-label fw-semibold">รหัส Job</label>
+                        <input type="text" name="job_code" class="form-control">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="" class="form-label fw-semibold">วันที่เริ่มบริการ</label>
+                        <input type="date" name="start_date_service" class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="" class="form-label fw-semibold">วันที่สิ้นสุดบริการ</label>
+                        <input type="date" name="end_date_service" class="form-control">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="start_date_period" class="form-label fw-semibold">รอบที่เริ่มให้บริการ</label>
+                        <input type="date" name="start_date_period" class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="end_date_period" class="form-label fw-semibold">รอบที่สิ้นสุดให้บริการ</label>
+                        <input type="date" name="end_date_period" class="form-control">
+                    </div>
+                </div>
+
+                <!--Add Job-->
+                <h4 class="fw-semibold mb-4">เพิ่มหมวดงาน</h4>
+                <button type="button" class="btn btn-primary"
+                    onclick="addCategory(categoryCounter)">เพิ่มหมวดงาน</button>
+                <div id="categoryList">
+                    <!-- รายการหมวดงานจะปรากฏที่นี่ -->
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="submit" class="btn btn-success">บันทึกข้อมูล</button>
+                    <button type="resert" class="btn btn-light">ล้างข้อมูล</button>
+                </div>
+
+            </form>
+            <div class="d-grid gap-2 d-md-flex">
+                <a class="btn btn-dark" href="{% url 'taskcontrol:engagement_list' %}">กลับไปยังหน้ารายการ</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let categoryCounter = 1;
+    let selectedCategories = new Set();
+
+    function addCategory(counter) {
+        const categoryElement = document.createElement("div");
+        categoryElement.innerHTML = `
+        <label class="form-label fw-semibold" for="category${counter}">หมวดงาน ${counter}</label>
+        <select name="category_id" class="form-select" id="category${counter}" onchange="handleCategoryChange(${counter})">
+            <option value selected disabled hidden>-- เลือก --</option>
+            {% for ca in category %}
+                <option value="{{ ca.id }}">{{ ca.name_th }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <div class="checkbox-container" id="checkboxContainer${counter}">
+            ${generateCheckboxSection(counter, 1, "บันทึกบัญชี")}
+            ${generateCheckboxSection(counter, 2, "ตามเอกสาร")}
+            ${generateCheckboxSection(counter, 3, "เก็บเอกสาร")}
+        </div>
+        <br>
+    `;
+        document.getElementById("categoryList").appendChild(categoryElement);
+        categoryCounter++;
+    }
+
+    function generateCheckboxSection(counter, checkboxNumber, label) {
+        return `
+        <input type="checkbox" name="type_job_id" class="form-check-input" id="checkbox${checkboxNumber}${counter}" 
+            onchange="handleCheckboxChange(${counter}, ${checkboxNumber})" value="${3 + checkboxNumber}">
+        <label for="checkbox${checkboxNumber}${counter}" class="form-label fw-semibold">${label}</label>
+        <div id="dateInputContainer${checkboxNumber}_${counter}" style="display: none;">
+            ${generateDateInputs(counter, checkboxNumber)}
+        </div>
+        <br>
+    `;
+    }
+
+    function generateDateInputs(counter, checkboxNumber) {
+        return `
+        <div class="row mb-3">
+            <div class="col-md-2">
+                <label for="typeContainer${checkboxNumber}_${counter}" class="form-label fw-semibold">ประเภท</label>
+                <select name="type" id="typeContainer${checkboxNumber}_${counter}" class="form-select">
+                    <option value selected disabled hidden>-- เลือก --</option>
+                    <option value="ครั้งเดียว">ครั้งเดียว</option>
+                    <option value="รายเดือน">รายเดือน</option>
+                    <option value="รายปี">รายปี</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="deadlineContainer${checkboxNumber}_${counter}" class="form-label fw-semibold">เดดไลน์</label>
+                <input type="date" name="deadline" id="deadlineContainer${checkboxNumber}_${counter}" class="form-control">
+            </div>
+            <div class="col-md-2">
+                <label for="notificationContainer${checkboxNumber}_${counter}" class="form-label fw-semibold">แจ้งเตือน</label>
+                <select name="notification" id="notificationContainer${checkboxNumber}_${counter}" class="form-select">
+                    <option value selected disabled hidden>-- เลือก --</option>
+                    <option value="3">3 วัน</option>
+                    <option value="5">5 วัน</option>
+                    <option value="7">7 วัน</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="startdateContainer${checkboxNumber}_${counter}" class="form-label fw-semibold">เริ่มต้น</label>
+                <input type="date" name="start_date" id="startdateContainer${checkboxNumber}_${counter}" class="form-control">
+            </div>
+            <div class="col-md-2">
+                <label for="enddateContainer${checkboxNumber}_${counter}" class="form-label fw-semibold">สิ้นสุด</label>
+                <input type="date" name="end_date" id="enddateContainer${checkboxNumber}_${counter}" class="form-control">
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-2">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="reviewContainer${checkboxNumber}_${counter}">
+                    <label class="form-label fw-semibold" for="">ผู้ตรวจทาน</label>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="approveContainer${checkboxNumber}_${counter}">
+                    <label class="form-label fw-semibold" for="">ผู้อนุมัติ</label>
+                </div>
+            </div>
+        </div>
+    `;
+    }
+
+    function handleCategoryChange(counter) {
+        const categorySelect = document.getElementById(`category${counter}`);
+        const checkboxContainer = document.getElementById(`checkboxContainer${counter}`);
+        const selectedCategoryId = categorySelect.value;
+        if (selectedCategoryId) {
+            checkboxContainer.style.display = 'block';
+            selectedCategories.add(selectedCategoryId);
+        } else {
+            checkboxContainer.style.display = 'none';
+            hideAllDateInputs(counter);
+        }
+    }
+
+    function handleCheckboxChange(counter, checkboxNumber) {
+        const checkbox = document.getElementById(`checkbox${checkboxNumber}${counter}`);
+        const dateInputContainer = document.getElementById(`dateInputContainer${checkboxNumber}_${counter}`);
+        dateInputContainer.style.display = checkbox.checked ? 'block' : 'none';
+        // เพิ่มเงื่อนไขตรวจสอบค่า type_job_id
+        const typeJobNameInput = document.getElementsByName('type_job_id')[0];
+        if (typeJobNameInput && typeJobNameInput.value === '4') {
+            // ตั้งค่า TypeJobDetail เป็น id 6, 7, 8, 9 ตามที่ต้องการ
+            if (checkbox.checked) {
+                // แสดงว่า checkbox ถูกเลือก
+                // ตรวจสอบว่า dateInputContainer มีอยู่หรือไม่ และกำหนดการแสดงผลตามความเหมาะสม
+                if (dateInputContainer) {
+                    dateInputContainer.style.display = 'block';
+                }
+                // ทำงานอื่น ๆ ที่ต้องการเมื่อ checkbox ถูกเลือก
+            } else {
+                // แสดงว่า checkbox ไม่ได้ถูกเลือก
+                // ตรวจสอบว่า dateInputContainer มีอยู่หรือไม่ และกำหนดการแสดงผลตามความเหมาะสม
+                if (dateInputContainer) {
+                    dateInputContainer.style.display = 'none';
+                }
+                // ทำงานอื่น ๆ ที่ต้องการเมื่อ checkbox ไม่ได้ถูกเลือก
+            }
+        }
+    }
+
+    function hideAllDateInputs(counter) {
+        for (let i = 1; i <= 3; i++) {
+            const dateInputContainer = document.getElementById(`dateInputContainer${i}_${counter}`);
+            if (dateInputContainer) {
+                dateInputContainer.style.display = 'none';
+            }
+        }
+    }
+</script>
+{% endblock content %}

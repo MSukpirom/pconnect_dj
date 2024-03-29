@@ -1,0 +1,395 @@
+{% extends 'task/index.html' %} {% block content %}
+<div class="row">
+    <div class="card w-100">
+        <div class="card-body">
+            <form method="post" id="form1" enctype="multipart/form-data" action="{% url 'taskcontrol:client_create' %}">
+                {% csrf_token %}
+                <!--Client-->
+                <div class="h4 pb-2 mb-4 text-primary fw-semibold border-bottom border-primary"> สร้างลูกค้า</div>
+                <div class="row mb-3">
+                    <div class="col-md-2">
+                        <label for="" class="form-label fw-semibold">วันที่สร้าง
+                            <span class="badge text-bg-dark fw-semibold">อัตโนมัติ</span>
+                        </label>
+                        <input type="date" name="c_create_client_date" id="c_create_client_date" class="form-control" />
+                    </div>
+                    <div class="col-md-8"></div>
+                    <div class="col-md-2">
+                        <div class="form-check form-switch">
+                            <label for="c_status" class="form-check-label fw-semibold">สถานะ</label>
+                            <input class="form-check-input" type="checkbox" data-bs-switch id="c_status" name="c_status" checked>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-2">
+                        <label for="" class="form-label fw-semibold">รหัสลูกค้า</label>
+                        <input type="text" name="c_code" id="" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="" class="form-label fw-semibold">ชื่อลูกค้า</label>
+                        <input type="text" name="c_company_name" id="" class="form-control" />
+                    </div>
+                    <div class="col-md-2">
+                        <label for="" class="form-label fw-semibold">เลขที่นิติ</label>
+                        <input type="text" name="c_tax_id" id="" class="form-control" maxlength="13"/>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="" class="form-label fw-semibold">ค่าบริการ</label>
+                        <input type="number" name="c_service_fee" id="" step="0.01" class="form-control" />
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label for="" class="form-label fw-semibold">ที่อยู่บริษัท</label>
+                        <input type="text" name="c_address" id="company-address" class="form-control" />
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <select name="c_province" id="province" class="form-select">
+                            <option value selected disabled hidden>จังหวัด</option>
+                            {% for p in province %}
+                            <option value="{{ p.id }}">{{ p.name_th }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select name="c_district" id="district" class="form-select">
+                            <option value="" selected disabled hidden>อำเภอ/เขต</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select name="c_subdistrict" id="subdistrict" class="form-select">
+                            <option value="" selected disabled hidden>ตำบล/แขวง/รหัสไปรษณีย์</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <label for="" class="form-label fw-semibold">ช่องทางรู้จักเรา</label>
+                        <select class="form-select" name="c_channal" onchange="toggleTextInput()">
+                            <option value selected disabled hidden>- กรุณาเลือก -</option>
+                            <option value="Facebook">Facebook</option>
+                            <option value="Youtube">Youtube</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="col-md-8 form-group" id="otherInputContainer" style="display: none;">
+                        <label for="" class="form-label fw-semibold">(อื่นๆ) :</label>
+                        <input type="text" class="form-control" id="otherInput" name="c_channal" placeholder="โปรดระบุ">
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <label for="" class="form-label fw-semibold">รายละเอียดเพิ่มเติม</label>
+                        <input type="text" name="c_detail" id="" class="form-control">
+                    </div>
+                </div>
+
+                <!--Tax Register-->
+                <div class="h4 pb-2 mb-4 text-primary fw-semibold border-bottom border-primary">จดทะเบียน</div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">จดทะเบียนบริษัท</label>
+                        <div class="form-check">
+                            <input type="radio" name="r_company" class="form-check-input" value="ใช่"
+                                onchange="handleCompanyChange()">
+                            <label class="form-check-label" for="">ใช่</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="radio" name="r_company" class="form-check-input" value="ไม่ใช่"
+                                onchange="handleCompanyChange()">
+                            <label class="form-check-label" for="">ไม่ใช่</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-check-label" for="r_company_date">วันที่จด</label>
+                        <input type="date" name="r_company_date" id="r_company_date" class="form-control" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-check-label" for="r_company_period_date">รอบบัญชี (วันที่/เดือน)</label>
+                        <input type="text" name="r_company_period_date" id="r_company_period_date" class="form-control"
+                            placeholder="dd/mm" />
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">จดทะเบียนภาษีมูลค่าเพิ่ม</label>
+                        <div class="form-check">
+                            <input type="radio" name="r_vat" class="form-check-input" value="ใช่"
+                                onchange="handleVatChange()">
+                            <label class="form-check-label" for="">ใช่</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="radio" name="r_vat" class="form-check-input" value="ไม่ใช่"
+                                onchange="handleVatChange()">
+                            <label class="form-check-label" for="">ไม่ใช่</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-check-label" for="r_vat_date">วันที่จด</label>
+                        <input type="date" name="r_vat_date" id="r_vat_date" class="form-control" />
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">จดทะเบียนภาษีธุรกิจเฉพาะ</label>
+                        <div class="form-check">
+                            <input type="radio" name="r_sbt" class="form-check-input" value="ใช่"
+                                onchange="handleSbtChange()">
+                            <label class="form-check-label" for="">ใช่</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="radio" name="r_sbt" class="form-check-input" value="ไม่ใช่"
+                                onchange="handleSbtChange()">
+                            <label class="form-check-label" for="">ไม่ใช่</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-check-label" for="r_sbt_date">วันที่จด</label>
+                        <input type="date" name="r_sbt_date" id="r_sbt_date" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">จดทะเบียนนายจ้าง</label>
+                        <div class="form-check">
+                            <input type="radio" name="r_sso" class="form-check-input" value="ใช่"
+                                onchange="handleSsoChange()">
+                            <label class="form-check-label" for="">ใช่</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="radio" name="r_sso" class="form-check-input" value="ไม่ใช่"
+                                onchange="handleSsoChange()">
+                            <label class="form-check-label" for="">ไม่ใช่</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-check-label" for="r_sso_date">วันที่จด</label>
+                        <input type="date" name="r_sso_date" id="r_sso_date" class="form-control" />
+                    </div>
+                </div>
+                <div class="row mb-5">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">จดทะเบียนยื่นภาษีออนไลน์</label>
+                        <div class="form-check">
+                            <input type="radio" name="r_dbd_e_filling" class="form-check-input" value="ใช่"
+                                onchange="handleDbd_e_fillingChange()">
+                            <label class="form-check-label" for="">ใช่</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="radio" name="r_dbd_e_filling" class="form-check-input" value="ไม่ใช่"
+                                onchange="handleDbd_e_fillingChange()">
+                            <label class="form-check-label" for="">ไม่ใช่</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-check-label" for="r_dbd_e_filling_date">วันที่จด</label>
+                        <input type="date" name="r_dbd_e_filling_date" id="r_dbd_e_filling_date" class="form-control" />
+                    </div>
+                </div>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-4">
+                    <button type="submit" class="btn btn-primary me-md-2"><i class="fa-solid fa-circle-check"></i> บันทึกข้อมูล</button>
+                    <button type="reset" class="btn btn-light">ล้างข้อมูล</button>
+                    <a href="{% url 'taskcontrol:client_list' %}" class="btn btn-outline-danger">
+                        <i class="fa-solid fa-circle-xmark"></i> ยกเลิก
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+<script type="text/javascript">
+    $(function() {
+        $('#province').change(function() {
+            $("#district").empty()
+            $.ajax({
+                url: '{% url 'taskcontrol:GetDistrict' %}',
+                data: {province_id: $(this).val()
+                },
+                success: function(data) {
+                    $("#district").append('<option value selected disabled hidden>อำเภอ/เขต</option>')
+                    $.each(data, function(index, value) {
+                        $("#district").append('<option value="' + data[index].id + '">' + data[index].name_th + '</option>')
+                    })
+                }
+            })
+        })
+        $('#district').change(function() {
+            $('#subdistrict').empty()
+            $.ajax({
+                url : '{% url 'taskcontrol:GetSubdistrict' %}',
+                data: {district_id: $(this).val()},
+                success: function(data) {
+                    $('#subdistrict').append('<option value selected disabled hidden>ตำบล/แขวง</option>')
+                    $.each(data, function(i, v) {
+                        $('#subdistrict').append('<option value="' + data[i].id + '">' + data[i].name_th + '  ' + data[i].zipcode + '</option>');
+                    })
+                }
+            })
+        })
+    });
+    $(function() {
+        $('#province2').change(function() {
+            $("#district2").empty()
+            $.ajax({
+                url: '{% url 'taskcontrol:GetDistrict' %}',
+                data: {province_id: $(this).val()
+                },
+                success: function(data) {
+                    $("#district2").append('<option value selected disabled hidden>อำเภอ/เขต</option>')
+                    $.each(data, function(index, value) {
+                        $("#district2").append('<option value="' + data[index].id + '">' + data[index].name_th + '</option>')
+                    })
+                }
+            })
+        })
+        $('#district2').change(function() {
+            $('#subdistrict2').empty()
+            $.ajax({
+                url : '{% url 'taskcontrol:GetSubdistrict' %}',
+                data: {district_id: $(this).val()},
+                success: function(data) {
+                    $('#subdistrict2').append('<option value selected disabled hidden>ตำบล/แขวง</option>')
+                    $.each(data, function(i, v) {
+                        $('#subdistrict2').append('<option value="' + data[i].id + '">' + data[i].name_th + ' ' + data[i].zipcode + '</option>');
+                    })
+                }
+            })
+        })
+    });
+
+    $(document).ready(function() {
+        document.getElementById('c_create_client_date').valueAsDate = new Date();
+    });
+
+
+    $('#same-as-company').change(function () {
+        var companyAddress = $('#company-address').val();
+        var contactAddress = $('#contact-address');
+        contactAddress.val(this.checked ? companyAddress : '');
+        contactAddress.prop('disabled', this.checked);
+    });
+
+    function handleVatChange() {
+        var vatDateInput = document.getElementById("r_vat_date");
+        var vatRadioOptions = document.getElementsByName("r_vat");
+
+        for (var i = 0; i < vatRadioOptions.length; i++) {
+            if (vatRadioOptions[i].checked) {
+                if (vatRadioOptions[i].value === "ใช่") {
+                    vatDateInput.disabled = false;
+                } else {
+                    vatDateInput.disabled = true;
+                    vatDateInput.value = "";
+                }
+                break;
+            }
+        }
+    }
+
+    function handleSbtChange() {
+        var sbtDateInput = document.getElementById("r_sbt_date");
+        var sbtRadioOptions = document.getElementsByName("r_sbt");
+
+        for (var i = 0; i < sbtRadioOptions.length; i++) {
+            if (sbtRadioOptions[i].checked) {
+                if (sbtRadioOptions[i].value === "ใช่") {
+                    sbtDateInput.disabled = false;
+                } else {
+                    sbtDateInput.disabled = true;
+                    sbtDateInput.value = "";
+                }
+                break;
+            }
+        }
+    }
+
+    function handleSsoChange() {
+        var ssoDateInput = document.getElementById("r_sso_date");
+        var ssoRadioOptions = document.getElementsByName("r_sso");
+
+        for (var i = 0; i < ssoRadioOptions.length; i++) {
+            if (ssoRadioOptions[i].checked) {
+                if (ssoRadioOptions[i].value === "ใช่") {
+                    ssoDateInput.disabled = false;
+                } else {
+                    ssoDateInput.disabled = true;
+                    ssoDateInput.value = "";
+                }
+                break;
+            }
+        }
+    }
+
+    function handleDbd_e_fillingChange() {
+        var dbd_e_fillingDateInput = document.getElementById("r_dbd_e_filling_date");
+        var dbd_e_fillingRadioOptions = document.getElementsByName("r_dbd_e_filling");
+
+        for (var i = 0; i < dbd_e_fillingRadioOptions.length; i++) {
+            if (dbd_e_fillingRadioOptions[i].checked) {
+                if (dbd_e_fillingRadioOptions[i].value === "ใช่") {
+                    dbd_e_fillingDateInput.disabled = false;
+                } else {
+                    dbd_e_fillingDateInput.disabled = true;
+                    dbd_e_fillingDateInput.value = "";
+                }
+                break;
+            }
+        }
+    }
+
+    function handleCompanyChange() {
+        var companyDateInput = document.getElementById("r_company_date");
+        var companyRadioOptions = document.getElementsByName("r_company");
+        var companyTextOptions = document.getElementsByName("r_company_period_date");
+
+        for (var i = 0; i < companyRadioOptions.length; i++) {
+            if (companyRadioOptions[i].checked) {
+                if (companyRadioOptions[i].value === "ใช่") {
+                    companyDateInput.disabled = false;
+                    companyTextOptions.disabled = false;
+                } else {
+                    companyDateInput.disabled = true;
+                    companyDateInput.value = "";
+                    companyTextOptions.disabled = true;
+                    companyTextOptions.value = "";
+                }
+                break;
+            }
+        }
+    }
+
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    function showSuccessNotification(message) {
+        alert(message + ' แล้ว');
+    }
+
+    function toggleTextInput() {
+        var selectElement = document.querySelector('select[name="c_channal"]');
+        var otherInputContainer = document.getElementById('otherInputContainer');
+        var selectedOption = selectElement.options[selectElement.selectedIndex].value;
+        var otherInput = document.getElementById('otherInput');
+
+        if (selectedOption === 'Other') {
+            otherInputContainer.style.display = 'block';
+            document.querySelector('input[name="c_channal"]').value = otherInput.value;
+        } else {
+            otherInputContainer.style.display = 'none';
+            document.querySelector('input[name="c_channal"]').value = selectedOption;
+        }
+    }
+
+
+</script>
+{% endblock content %}

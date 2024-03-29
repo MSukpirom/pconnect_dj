@@ -1,0 +1,258 @@
+{% extends 'task/index.html' %} 
+{% block content %}
+<style>
+    tr.group,
+    tr.group:hover {
+    background-color: #E1F2FB !important;
+        
+        td {
+            font-weight: bold !important;
+            text-align: left !important;
+        }
+    }
+</style>
+<div class="row">
+    <div class="card w-100">
+        <div class="card-body mb-4">
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    {% comment %} <a href="{% url 'taskcontrol:engagements' engagement_id=engagement.id %}">
+                        <button type="button" class="btn btn-outline-dark">
+                            <i class="fa-solid fa-circle-chevron-left fa-lg"></i> ย้อนกลับ
+                        </button>
+                    </a> {% endcomment %}
+                </div>
+                <form method="post" action="{% url 'taskcontrol:engagement_detail_create' engagement_id=engagement.id %}">
+                    {% csrf_token %}
+                    <div class="row mb-3">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="" class="form-label">หมวดงาน</label>
+                                <select name="category_id" id="category" class="form-select" onchange="loadEngagementDoc()">
+                                    <option value selected disabled hidden>- เลือก -</option>
+                                    {% for c in categories %}
+                                    <option value="{{ c.id }}">{{ c.name_th }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <span style="color: tomato; font-size: 13px;">*กรุณาเลือกหมวดหมู่งานก่อน</span>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="" class="form-label">ประเภทงาน</label>
+                                <select name="type_id" id="types" class="form-select">
+                                    <option value="" selected disabled hidden>- เลือก -</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="" class="form-label">ประเภท</label>
+                            <select class="form-select" name="type" id="">
+                                <option value="" selected disabled hidden>- เลือก -</option>
+                                <option value="ครั้งเดียว">ครั้งเดียว</option>
+                                <option value="รายเดือน">รายเดือน</option>
+                                <option value="รายปี">รายปี</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="" class="form-label">เดดไลน์</label>
+                            <input type="date" class="form-control" name="deadline" id="">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="" class="form-label">การแจ้งเตือน</label>
+                            <select class="form-select" name="notification" id="">
+                                <option value="" selected disabled hidden>- เลือก -</option>
+                                <option value="3">3 วัน</option>
+                                <option value="5">5 วัน</option>
+                                <option value="7">7 วัน</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="" class="form-label">เริ่มต้น</label>
+                            <input type="date" class="form-control" name="start_date" id="">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="" class="form-label">สิ้นสุด</label>
+                            <input type="date" class="form-control" name="end_date" id="">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="review_by" id="review_by">
+                                <label class="form-check-label" for="review_by">ผู้ตรวจทาน <span
+                                        class="fw-semibold text-decoration-underline"
+                                        style="color: #222831;">{{ engagement.reviewer.first_name }}
+                                        {{ engagement.reviewer.last_name }}</span></label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="approved_by" id="approved_by">
+                                <label class="form-check-label" for="approved_by">ผู้อนุมัติ <span
+                                        class="fw-semibold text-decoration-underline"
+                                        style="color: #222831;">{{ engagement.approver.first_name }}
+                                        {{ engagement.approver.last_name }}</span></label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-5">
+                        <div class="col">
+                            <button type="reset" class="btn btn-light">ล้าง</button>
+                            <button type="submit" class="btn btn-primary">บันทึก</button>
+                        </div>
+                    </div>
+                </form>
+                <div class="table-responsive mb-5">
+                    <table id="example" class="table table-bordered display" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>หมวดงาน</th>
+                                <th>ประเภทงาน</th>
+                                <th>ประเภท</th>
+                                <th>เดดไลน์</th>
+                                <th>แจ้งเตือน</th>
+                                <th>เริ่มต้น</th>
+                                <th>สิ้นสุด</th>
+                                <th>ผู้ตรวจทาน</th>
+                                <th>ผู้อนุมัติ</th>
+                                <th style="width:15px;" class="text-center"><i class="fa-solid fa-gear"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-group-divider">
+                            {% for e_detail in engagement_detail_lists %}
+                            <tr>
+                                <td>{{ e_detail.engagement_category.name_th }}</td>
+                                <td>{{ e_detail.engagement_type.name_th }}</td>
+                                <td>{{ e_detail.type }}</td>
+                                <td>{{ e_detail.deadline|date:"d/m/Y" }}</td>
+                                <td>{{ e_detail.notification }} วัน</td>
+                                <td>{{ e_detail.start_date|date:"d/m/Y" }}</td>
+                                <td>{{ e_detail.end_date|date:"d/m/Y" }}</td>
+                                <td>
+                                    {% if e_detail.review_by %}
+                                    {{ e_detail.engagement.reviewer.first_name }}
+                                    {{ e_detail.engagement.reviewer.last_name }}
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if e_detail.approved_by %}
+                                    {{ e_detail.engagement.approver.first_name }}
+                                    {{ e_detail.engagement.approver.last_name }}
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'taskcontrol:engagement_detail_delete' engagement_detail_id=e_detail.id %}"
+                                        class="delete-engagement_doc_detail"
+                                        data-engagement-id="{{ e_detail.id }}">
+                                        <i class="fa-solid fa-circle-xmark fa-lg" style="color: #f64c4c;"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function loadEngagementDoc() {
+        var categorySelect = document.getElementById("category");
+        var engagementType = document.getElementById("types");
+        var categoryId = categorySelect.value;
+
+        if (categoryId !== "") {
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+
+            $.ajax({
+                url: '{% url 'taskcontrol:GetEngagementType' %}',
+                type: 'POST',
+                headers: { "X-CSRFToken": csrftoken },
+                data: { category_id: categoryId },
+                success: function(data) {
+                    engagementType.innerHTML = '<option value="" selected disabled hidden>ประเภทงาน</option>';
+                    data.forEach(function(doc) {
+                        engagementType.innerHTML += '<option value="' + doc.id + '">' + doc.name_th + '</option>';
+                    });
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    console.error('Error:', errorThrown);
+                }
+            });
+        } else {
+            engagementType.innerHTML = '<option value="" selected disabled hidden>ประเภทงาน</option>';
+        }
+    }
+
+    $(document).ready(function() {
+        var table = $('#example').DataTable({
+            "columnDefs": [
+                { "visible": false, "targets": 0 }
+            ],
+            "order": [[ 0, 'asc' ]],
+            "language": {
+                "search": "ค้นหา",
+                "lengthMenu": "แสดง _MENU_ รายการ",
+                "info": "แสดง _START_ ถึง _END_ จากทั้งหมด _TOTAL_ รายการ",
+                "paginate": {
+                    "previous": "ก่อนหน้า",
+                    "next": "ถัดไป"
+                }
+            },
+            "drawCallback": function ( settings ) {
+                var api = this.api();
+                var rows = api.rows( {page:'current'} ).nodes();
+                var last=null;
+        
+                api.column(0, {page:'current'} ).data().each( function ( group, i ) {
+                    if ( last !== group ) {
+                        $(rows).eq( i ).before(
+                            '<tr class="group"><td colspan="9">'+group+'</td></tr>'
+                        );
+        
+                        last = group;
+                    }
+                });
+            }
+        });
+    });
+
+    {% comment %} $(document).ready(function() {
+        $(".delete-engagement_doc_detail").on("click", function(event) {
+            event.preventDefault(); // ป้องกันการเปลี่ยนเส้นทางของลิงก์
+            
+            var engagementDocDetailId = $(this).data("engagement-id");
+            if (confirm("ต้องการลบรายการนี้?")) {
+                var engagementDocDetailUrl = "{% url 'taskcontrol:delect_engagement_descri' engagement_detail_id=0 %}".replace("0", engagementDocDetailId);
+
+                $.ajax({
+                    type: 'POST',
+                    url: engagementDocDetailUrl,
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                    },
+                    success: function(response) {
+                        // ในที่นี้คุณสามารถปรับปรุงหน้าเว็บไซต์ให้แสดงข้อความหรือทำอย่างอื่นตามต้องการ
+                        // ตัวอย่าง: รีเฟรชหน้า
+                        location.reload();
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(xhr.responseText);
+                    }
+                });
+            }
+        });
+    }); {% endcomment %}
+
+</script>
+
+{% endblock content %}

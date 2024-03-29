@@ -1,0 +1,49 @@
+{% extends 'task/index.html' %} {% block content %}
+
+<div class="row">
+    <div class="card w-100">
+        <div class="card-body">
+            <div class="container">
+                <div class="row mb-4">
+                    <div class="col md-4">
+                        <a href="{% url 'taskcontrol:category' %}" class="btn btn-outline-dark menu-item">
+                            <i class="fa-solid fa-layer-group fa-lg"></i>
+                            <p>หมวดหมู่งาน</p>
+                            <span>- เพิ่มหมวดงาน</span><br>
+                            <span>- เพิ่มประเภทงาน</span>
+                        </a>
+                        
+                    </div>
+                    <div class="col">
+                        <a href="#" class="btn btn-outline-dark menu-item">
+                            <i class="fa-solid fa-user-gear fa-lg"></i> โปรไฟล์
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a href="#" class="btn btn-outline-dark menu-item">
+                            <i class="fa-regular fa-address-card"></i> #
+                        </a>
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col">
+                        <a href="#" class="btn btn-outline-dark menu-item">
+                            <i class="fa-regular fa-address-card"></i> #
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a href="#" class="btn btn-outline-dark menu-item">
+                            <i class="fa-regular fa-address-card"></i> #
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a href="#" class="btn btn-outline-dark menu-item">
+                            <i class="fa-regular fa-address-card"></i> #
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

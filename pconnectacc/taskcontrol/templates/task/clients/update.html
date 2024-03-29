@@ -1,0 +1,373 @@
+{% extends 'task/index.html' %} {% block content %}
+<div class="row">
+    <div class="card w-100">
+        <div class="card-body">
+            <div class="row mb-5">
+                <div class="col-md-4">
+                    <a href="{% url 'taskcontrol:client_detail' client_id=client.id %}">
+                        <button type="button" class="btn btn-outline-dark">
+                            <i class="fa-solid fa-circle-chevron-left fa-lg"></i> ย้อนกลับ
+                        </button>
+                    </a>
+                </div>
+            </div>
+            <form method="post" action="{% url 'taskcontrol:client_update' client_id=client.id %}">
+                {% csrf_token %}
+                <!--Client-->
+                <div class="h4 pb-2 mb-4 text-warning fw-semibold border-bottom border-warning"> แก้ไขข้อมูล {{ client.company_name }}</div>
+                <div class="row mb-3">
+                    <div class="col-md-2">
+                        <label for="" class="form-label fw-semibold">วันที่สร้าง
+                            <span class="badge text-bg-dark">อัตโนมัติ</span>
+                        </label>
+                        <input type="date" name="c_create_client_date" id="" class="form-control" value="{{ client.create_client_date|date:'Y-m-d' }}" />
+                    </div>
+                    <div class="col-md-8"></div>
+                    <div class="col-md-2">
+                        <div class="form-check form-switch">
+                            <label for="c_status" class="form-check-label fw-semibold">สถานะ</label>
+                            <input type="checkbox"  class="form-check-input" data-bs-switch id="toggleStatus" name="c_status" {% if client.status %}checked{% endif %}>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-2">
+                        <label for="" class="form-label fw-semibold">รหัสลูกค้า</label>
+                        <input type="text" name="c_code" id="" class="form-control" value="{{ client.code }}" />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="" class="form-label fw-semibold">ชื่อลูกค้า</label>
+                        <input type="text" name="c_company_name" id="" class="form-control" value="{{ client.company_name }}" />
+                    </div>
+                    <div class="col-md-2">
+                        <label for="" class="form-label fw-semibold">เลขที่นิติ</label>
+                        <input type="text" name="c_tax_id" id="" class="form-control" maxlength="13"  value="{{ client.tax_id }}"/>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="" class="form-label fw-semibold">ค่าบริการ</label>
+                        <input type="number" name="c_service_fee" id="" step="0.01" class="form-control" value="{{ client.service_fee }}" />
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label for="" class="form-label fw-semibold">ที่อยู่บริษัท</label>
+                        <input type="text" name="c_address" id="company-address" class="form-control" value="{{ client.company_address.address }}" />
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <select name="c_province" id="province" class="form-select">
+                            <option value="" disabled hidden>เลือกจังหวัด</option>
+                            {% for p in province %}
+                                <option value="{{ p.id }}" {% if p.id == client.company_address.province.id %} selected {% endif %}>
+                                    {{ p.name_th }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select name="c_district" id="district" class="form-select">
+                            <option value="" selected disabled hidden>เลือกอำเภอ/เขต</option>
+                            {% for d in district %}
+                                {% if d.id %}
+                                    <option value="{{ d.id }}" {% if d.id == client.company_address.district.id %} selected {% endif %}>
+                                        {{ d.name_th }}
+                                    </option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select name="c_subdistrict" id="subdistrict" class="form-select">
+                            <option value="" selected disabled hidden>เลือกตำบล/แขวง</option>
+                            {% for s in subdistrict %}
+                                <option value="{{ s.id }}" {% if s.id == client.company_address.subdistrict.id %} selected {% endif %}>
+                                    {{ s.name_th }} {{ s.zipcode }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <label for="" class="form-label fw-semibold">ช่องทางรู้จักเรา</label>
+                        <select class="form-select" name="c_channal" onchange="toggleTextInput()">
+                            <option value="" disabled hidden>- กรุณาเลือก -</option>
+                            <option value="Facebook" {% if client.channal == 'Facebook' %} selected {% endif %}>Facebook</option>
+                            <option value="Youtube" {% if client.channal == 'Youtube' %} selected {% endif %}>Youtube</option>
+                            <option value="อื่นๆ" {% if client.channal == 'อื่นๆ' %} selected {% endif %}>อื่นๆ</option>
+                        </select>
+                    </div>
+                    <div class="col-md-8 form-group" id="otherInputContainer" {% if client.channal == 'อื่นๆ' %} style="display: block;" {% else %} style="display: none;" {% endif %}>
+                        <label for="otherInput" class="form-label fw-semibold">(อื่นๆ) :</label>
+                        <input type="text" class="form-control" id="otherInput" name="c_channal" placeholder="โปรดระบุ" {% if client.channal == 'อื่นๆ' %} value="{{ client.c_channal }}" required {% else %} disabled {% endif %}>
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <label for="" class="form-label fw-semibold">รายละเอียดเพิ่มเติม</label>
+                        <input type="text" name="c_detail" id="" class="form-control" value="{{ client.detail }}">
+                    </div>
+                </div>
+                <!--Tax Register-->
+                <div class="h4 pb-2 mb-4 text-warning fw-semibold border-bottom border-warning">จดทะเบียน</div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">จดทะเบียนบริษัท</label>
+                        <div class="form-check">
+                            <input type="radio" name="r_company" class="form-check-input" value="ใช่"
+                                onchange="handleCompanyChange()" {% if client.register_tax.company == 'ใช่' %} checked {% endif %}>
+                            <label class="form-check-label" for="">ใช่</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="radio" name="r_company" class="form-check-input" value="ไม่ใช่"
+                                onchange="handleCompanyChange()" {% if client.register_tax.company == 'ไม่ใช่' %} checked {% endif %}>
+                            <label class="form-check-label" for="">ไม่ใช่</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-check-label" for="r_company_date">วันที่จด</label>
+                        <input type="date" name="r_company_date" id="r_company_date" class="form-control" value="{{ client.register_tax.company_date|date:'Y-m-d' }}" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-check-label" for="r_company_period_date">รอบบัญชี (วันที่/เดือน)</label>
+                        <input type="text" name="r_company_period_date" id="r_company_period_date" class="form-control"
+                            placeholder="dd/mm" value="{{ client.register_tax.company_period_date }}" />
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">จดทะเบียนภาษีมูลค่าเพิ่ม</label>
+                        <div class="form-check">
+                            <input type="radio" name="r_vat" class="form-check-input" value="ใช่"
+                                onchange="handleVatChange()" {% if client.register_tax.vat == 'ใช่' %} checked {% endif %}>
+                            <label class="form-check-label" for="">ใช่</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="radio" name="r_vat" class="form-check-input" value="ไม่ใช่"
+                                onchange="handleVatChange()" {% if client.register_tax.vat == 'ไม่ใช่' %} checked {% endif %}>
+                            <label class="form-check-label" for="">ไม่ใช่</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-check-label" for="r_vat_date">วันที่จด</label>
+                        <input type="date" name="r_vat_date" id="r_vat_date" class="form-control" value="{{ client.register_tax.vat_date|date:'Y-m-d' }}"/>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">จดทะเบียนภาษีธุรกิจเฉพาะ</label>
+                        <div class="form-check">
+                            <input type="radio" name="r_sbt" class="form-check-input" value="ใช่"
+                                onchange="handleSbtChange()" {% if client.register_tax.sbt == 'ใช่' %} checked {% endif %} >
+                            <label class="form-check-label" for="">ใช่</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="radio" name="r_sbt" class="form-check-input" value="ไม่ใช่"
+                                onchange="handleSbtChange()" {% if client.register_tax.sbt == 'ไม่ใช่' %} checked {% endif %} >
+                            <label class="form-check-label" for="">ไม่ใช่</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-check-label" for="r_sbt_date">วันที่จด</label>
+                        <input type="date" name="r_sbt_date" id="r_sbt_date" class="form-control" value="{{ client.register_tax.sbt_date|date:'Y-m-d' }}" />
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">จดทะเบียนนายจ้าง</label>
+                        <div class="form-check">
+                            <input type="radio" name="r_sso" class="form-check-input" value="ใช่"
+                                onchange="handleSsoChange()" {% if client.register_tax.sso == 'ใช่' %} checked {% endif %} >
+                            <label class="form-check-label" for="">ใช่</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="radio" name="r_sso" class="form-check-input" value="ไม่ใช่"
+                                onchange="handleSsoChange()" {% if client.register_tax.sso == 'ไม่ใช่' %} checked {% endif %} >
+                            <label class="form-check-label" for="">ไม่ใช่</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-check-label" for="r_sso_date">วันที่จด</label>
+                        <input type="date" name="r_sso_date" id="r_sso_date" class="form-control" value="{{ client.register_tax.sso_date|date:'Y-m-d' }}" />
+                    </div>
+                </div>
+                <div class="row mb-5">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">จดทะเบียนยื่นภาษีออนไลน์</label>
+                        <div class="form-check">
+                            <input type="radio" name="r_dbd_e_filling" class="form-check-input" value="ใช่"
+                                onchange="handleDbd_e_fillingChange()" {% if client.register_tax.dbd_e_filling == 'ใช่' %} checked {% endif %}>
+                            <label class="form-check-label" for="">ใช่</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="radio" name="r_dbd_e_filling" class="form-check-input" value="ไม่ใช่"
+                                onchange="handleDbd_e_fillingChange()" {% if client.register_tax.dbd_e_filling == 'ไม่ใช่' %} checked {% endif %}>
+                            <label class="form-check-label" for="">ไม่ใช่</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-check-label" for="r_dbd_e_filling_date">วันที่จด</label>
+                        <input type="date" name="r_dbd_e_filling_date" id="r_dbd_e_filling_date" class="form-control" value="{{ client.register_tax.dbd_e_filling_date|date:'Y-m-d' }}" />
+                    </div>
+                </div>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-4 mt-5">
+                    <button class="btn btn-light" type="reset">ล้างข้อมูล</button>
+                    <button class="btn btn-primary" type="submit"><i class="fa-solid fa-circle-check"></i> บันทึกข้อมูล</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        function updateDropdown(dropdown, data) {
+            dropdown.empty();
+            dropdown.append('<option value="" selected disabled hidden>เลือก</option>');
+            $.each(data, function(index, value) {
+                if (value.id !== '') {
+                    dropdown.append('<option value="' + value.id + '">' + value.name_th + ' ' + value.zipcode + '</option>');
+                }
+            });
+        }
+
+        function fetchData(url, data, dropdown) {
+            $.ajax({
+                url: url,
+                data: data,
+                success: function(data) {
+                    updateDropdown(dropdown, data);
+                }
+            });
+        }
+
+        function populateDropdown(target, placeholder, data, callback) {
+            target.empty();
+            target.append('<option value="" selected disabled hidden>' + placeholder + '</option>');
+            var uniqueNames = [];
+            $.each(data, function(index, value) {
+                if (value.id !== '' && uniqueNames.indexOf(value.name_th) === -1) {
+                    uniqueNames.push(value.name_th);
+                    target.append('<option value="' + value.id + '">' + value.name_th + '</option>');  // ตรงนี้เพิ่ม '+' ต่อท้าย
+                }
+            });
+
+            if (typeof callback === 'function') {
+                callback();
+            }
+        }
+
+        function populateDropdown2(target, placeholder, data, callback) {
+            target.empty();
+            target.append('<option value="" selected disabled hidden>' + placeholder + '</option>');
+            var uniqueData = [];
+
+            $.each(data, function(index, value) {
+                if (value.id !== '' && uniqueData.indexOf(value.name_th) === -1) {
+                    uniqueData.push(value.name_th);
+                    var optionText = value.name_th + ' ' + value.zipcode;
+                    target.append('<option value="' + value.id + '">' + optionText + '</option>');
+                }
+            });
+
+            if (typeof callback === 'function') {
+                callback();
+            }
+        }
+
+        function updateSubdistricts(targetId, districtId) {
+            var target = $('#' + targetId);
+            target.empty();
+
+            console.log('Updating subdistricts for district ID:', districtId);
+
+            if (districtId) {
+                $.ajax({
+                    url: '{% url 'taskcontrol:GetSubdistrict' %}',
+                    data: { district_id: districtId },
+                    success: function(data) {
+                        data = data.filter(function(subdistrict) {
+                            return subdistrict.id !== '';
+                        });
+                        populateDropdown2(target, 'ตำบล/แขวง/รหัสไปรษณีย์', data);
+                    }
+                });
+            }
+        }
+
+        $('#province').change(function() {
+            var provinceId = $(this).val();
+            var url = '{% url 'taskcontrol:GetDistrict' %}';
+            var target = $('#district');
+
+            $.ajax({
+                url: url,
+                data: { province_id: provinceId },
+                success: function(data) {
+                    populateDropdown(target, 'อำเภอ/เขต', data);
+
+                    var districtId = $('#district').val() || '';  // หรือเปลี่ยนเป็น -1 หรือค่าอื่นที่ไม่ใช่ null/undefined
+
+                    // เรียกใช้งานฟังก์ชัน updateSubdistricts
+                    updateSubdistricts('subdistrict', districtId);
+                }
+            });
+        });
+
+        $('#district').change(function() {
+            var districtId = $(this).val();
+            var target = $('#subdistrict');
+            updateSubdistricts('subdistrict', districtId);
+        });
+
+        $('#same-as-company').change(function () {
+            var companyAddress = $('#company-address').val();
+            var contactAddress = $('#contact-address');
+            contactAddress.val(this.checked ? companyAddress : '');
+            contactAddress.prop('disabled', this.checked);
+        });
+
+        $('#toggleStatus').change(function() {
+            var isChecked = $(this).prop('checked');
+            console.log('Previous Status:', isChecked ? 'True' : 'False');
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // เพิ่มโค้ด JavaScript ที่คุณต้องการในนี้
+
+        // เช่น ตัวอย่างการจัดการเหตุการณ์เมื่อมีการเปลี่ยนแปลงใน Radio Buttons
+        var vatRadioButtons = document.getElementsByName('r_vat');
+        for (var i = 0; i < vatRadioButtons.length; i++) {
+            vatRadioButtons[i].addEventListener('change', function () {
+                handleVatChange(this.value);
+            });
+        }
+
+        function handleVatChange(value) {
+            // ตัวอย่าง: ทำสิ่งที่คุณต้องการเมื่อมีการเปลี่ยนแปลงใน Radio Buttons ของ "จดทะเบียนภาษีมูลค่าเพิ่ม"
+            console.log('Selected VAT value:', value);
+        }
+    });
+
+    function toggleTextInput() {
+        var selectElement = document.querySelector("[name='c_channal']");
+        var otherInputContainer = document.getElementById("otherInputContainer");
+        var otherInput = document.getElementById("otherInput");
+
+        if (selectElement.value === "อื่นๆ") {
+            otherInputContainer.style.display = "block";
+            otherInput.removeAttribute("disabled");
+            otherInput.setAttribute("required", "required");
+        } else {
+            otherInputContainer.style.display = "none";
+            otherInput.setAttribute("disabled", "disabled");
+            otherInput.removeAttribute("required");
+        }
+    }
+
+</script>
+{% endblock content %}

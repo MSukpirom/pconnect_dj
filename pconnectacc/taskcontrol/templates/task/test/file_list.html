@@ -1,0 +1,130 @@
+{% extends 'task/index.html' %} {% block content %}
+<div class="row">
+    <div class="card w-100">
+        <div class="card-body">
+            <div class="row mb-5">
+                <div class="col-md-4">
+                    <a href="{% url 'taskcontrol:client_detail' client_id=client.id %}">
+                        <button type="button" class="btn btn-outline-dark">
+                            <i class="fa-solid fa-circle-chevron-left fa-lg"></i> ย้อนกลับ
+                        </button>
+                    </a>
+                </div>
+                <div class="col-md-8 text-end">
+                    <div class="btn-group">
+                        <a href="{% url 'taskcontrol:create_contact' client_id=client.id %}" class="btn btn-outline-primary">
+                            <i class="fa-solid fa-address-book"></i> ผู้ติดต่อ
+                        </a>
+                        <a href="{% url 'taskcontrol:create_password' client_id=client.id %}" class="btn btn-outline-primary">
+                            <i class="fa-solid fa-lock"></i> รหัสลูกค้า
+                        </a>
+                        <a href="{% url 'taskcontrol:create_file' client_id=client.id %}" class="btn btn-outline-primary">
+                            <i class="fa-solid fa-file-circle-plus"></i> แนบไฟล์
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="h4 pb-2 mb-4 text-primary fw-semibold border-bottom border-primary">แนบเอกสารของ {{ client.company_name }}</div>
+            <form method="post" enctype="multipart/form-data" action="{% url 'taskcontrol:create_file' client_id=client.id %}">
+                {% csrf_token %}
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label for="c_description" class="form-label">คำอธิบาย :</label>
+                        <input type="text" name="c_description" class="form-control" required>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="c_file" class="form-label">ไฟล์ :</label>
+                        <input type="file" name="c_file" class="form-control" accept=".pdf, .doc, .docx, .txt">
+                        <span style="font-size: 0.85rem; color: tomato;">ไฟล์ .pdf, .doc, .docx, .txt</span>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="c_image" class="form-label">รูปภาพ :</label>
+                        <input type="file" name="c_image" class="form-control" accept="image/*">
+                        <span style="font-size: 0.85rem; color: tomato;">ไฟล์รูปภาพ</span>
+                    </div>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-primary">อัปโหลด  <i class="fa-solid fa-upload"></i></button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>คำอธิบาย</th>
+                            <th>ไฟล์ | รูปภาพแนบ</th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for file in files %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ file.description }}</td>
+                                <td>{{ file.file_client }} | {{ file.image_client }}</td>
+                                <td>
+                                    {% if file.file_client %}
+                                        <a href="{% url 'taskcontrol:download_file' file_id=file.id %}" download target="_blank">
+                                            <i class="fa-solid fa-file-pdf fa-xl"></i>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if file.image_client %}
+                                        <a href="{% url 'taskcontrol:download_image' image_id=file.id %}" download target="_blank">
+                                            <i class="fa-solid fa-file-image fa-xl"></i>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'taskcontrol:delete_file' file_id=file.id %}" class="delete-file" data-file-id="{{ file.id }}">
+                                        <i class="fa-solid fa-circle-xmark fa-lg" style="color: #f64c4c;"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    $(document).ready(function() {
+        $(".delete-file").on("click", function() {
+            var fileId = $(this).data("file-id");
+            var createfileUrl = "{% url 'taskcontrol:delete_file' file_id=0 %}".replace("0", fileId);
+
+            if (confirm("ต้องการลบไฟล์นี้?")) {
+                $.ajax({
+                    type: 'POST',
+                    url: createfileUrl,
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                    },
+                    success: function() {
+                        location.reload();
+                        alert("ลบไฟล์สำเร็จ");
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(xhr.responseText);
+                        alert("เกิดข้อผิดพลาดในการลบไฟล์");
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock content %}

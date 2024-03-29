@@ -1,0 +1,136 @@
+{% extends 'task/index.html' %}
+{% block content %}
+<style>
+    th{
+        font-size: 13.5px;
+    }
+    tr, td{
+        font-size: 13px;
+    }
+    .badge-success {
+        color: #22a300;
+        font-size: 11px;
+        font-weight: 600;
+        background-color: #dcfce7;
+        border-radius: 40px;
+        border: 1px solid #29c600;
+    }
+
+    .badge-danger{
+        color: #b91c1b;
+        font-weight: 600;
+        background-color: #fee2e1;
+        border-radius: 40px;
+    }
+</style>
+<div class="row">
+    <div class="card w-100">
+        <div class="card-body">
+            <h4 class="fw-semibold mb-2">ข้อมูล Engagement</h4>
+            <span class="badge text-bg-primary">ทั้งหมด : {{ total_engagements }} รายการ</span>
+            <span class="badge text-bg-success">เปิดงาน : {{ open_engagements }} รายการ</span>
+            <span class="badge text-bg-danger">ปิดงาน : {{ closed_engagements }} รายการ</span>
+            <div style="text-align: right;">
+                <a href="{% url 'taskcontrol:engagement_create' %}" class="btn btn-success"><i class="fa-solid fa-circle-plus"></i> Engagement</a>
+            </div>
+            
+            <div class="col-md-12 mt-4">
+                <div class="table-responsive">
+                    <table id="engagement_table" class="table" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>เลขที่</th>
+                                <th>รหัสลูกค้า</th>
+                                <th>สถานะ</th>
+                                <th>ผู้รับผิดชอบ</th>
+                                <th>เริ่มให้บริการ</th>
+                                <th>สิ้นสุดให้บริการ</th>
+                                <th>บัญชี</th>
+                                <th>ภาษี</th>
+                                <th>เงินเดือน</th>
+                                <th>รายงาน</th>
+                                <th><i class="fa-solid fa-gears"></i></th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for engagement in engagements|slice:"0:value" %}
+                                <tr data-toggle="collapse" data-target="#demo{{ forloop.counter }}" class="accordion-toggle">
+                                    <td><a href="{% url 'taskcontrol:engagements' engagement_id=engagement.id %}" class="fw-semibold">{{ engagement.job_code }}</a></td>
+                                    <td>
+                                        <span class="fw-semibold">[{{ engagement.client.code }}]</span><br>
+                                        <span class="fw-semibold">{{ engagement.client.company_name }}</span><br>
+                                        <span style="font-size:11px;">{{ engagement.client.tax_id }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        {% if engagement.status %}
+                                        <span class="badge badge-success">เปิด</span>
+                                        {% else %}
+                                        <span class="badge badge-danger">ปิด</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ engagement.administrator.first_name }} {{ engagement.administrator.last_name }}</td>
+                                    <td>{{ engagement.start_date_service|date:"d/m/Y" }}</td>
+                                    <td>{{ engagement.end_date_service|date:"d/m/Y" }}</td>
+                                    <td>
+                                        {% for detail in engagement_details %}
+                                            {% if detail.engagement == engagement and detail.engagement_category.name_th == 'บัญชี' %}
+                                                {{ detail.type }} <br>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </td>
+                                    <td>
+                                        {% for detail in engagement_details %}
+                                            {% if detail.engagement == engagement and detail.engagement_category.name_th == 'ภาษี' %}
+                                                {{ detail.type }} <br>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </td>
+                                    <td>
+                                        {% for detail in engagement_details %}
+                                            {% if detail.engagement == engagement and detail.engagement_category.name_th == 'เงินเดือน' %}
+                                                {{ detail.type }} <br>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </td>
+                                    <td>
+                                        {% for detail in engagement_details %}
+                                            {% if detail.engagement == engagement and detail.engagement_category.name_th == 'รายงาน' %}
+                                                {{ detail.engagement_type.name_th }} <br>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="{% url 'taskcontrol:engagement_delete' engagement_id=engagement.id %}" onclick="return confirm('ต้องการลบข้อมูลลูกค้ารายนี้ ?')">
+                                            <i class="fa-regular fa-trash-can" style="color: #FF1818;"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#engagement_table').DataTable({
+            responsive: true,
+            "language": {
+                "search": "ค้นหา",
+                "lengthMenu": "แสดง _MENU_ รายการ",
+                "info": "แสดง _START_ ถึง _END_ จากทั้งหมด _TOTAL_ รายการ",
+                "infoFiltered": "(กรองจากทั้งหมด _MAX_ รายการ)",
+                "paginate": {
+                    "previous": "ก่อนหน้า",
+                    "next": "ถัดไป"
+                }
+            }
+        });
+    });
+</script>
+
+{% endblock content %}
