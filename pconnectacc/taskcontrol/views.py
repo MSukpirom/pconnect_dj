@@ -21,6 +21,40 @@ STATUS_DONE = 'DONE'
 
 def handler404(request, exception):
     return render(request, 'task/404.html')
+
+#TODO Login Logout
+def login_view(request):
+    if request.method == "POST":
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            messages.success(request, 'เข้าสู่ระบบสำเร็จ')
+            return redirect('taskcontrol:dashboard')
+        else:
+            messages.error(request, 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง')
+    return render(request, 'accounts/login.html')
+
+def logout_view(request):
+    if request.user.is_authenticated:
+        last_login_time = request.user.last_login
+
+        logout(request)
+        messages.success(request, 'ออกจากระบบเรียบร้อย.')
+
+        if last_login_time is not None:
+            # ถ้ามีการเข้าสู่ระบบครั้งล่าสุด
+            current_time = datetime.now()
+            time_difference = current_time - last_login_time
+
+            # ถ้าผ่านไปมากกว่า 1 ชั่วโมงให้แจ้งเตือน
+            if time_difference.total_seconds() > 3600:  # 1 ชั่วโมง = 3600 วินาที
+                messages.success(request, 'ออกจากระบบเนื่องจากไม่มีการใช้งานเกิน 1 ชั่วโมง.')
+    return redirect('taskcontrol:login')
+
 #TODO Others
 def parse_date(date_string):
     if not date_string:
