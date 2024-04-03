@@ -25,8 +25,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'crispy_forms',
+    'crispy_bootstrap4',
     'taskcontrol'
 ]
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
+
+CRISPY_TEMPLATE_PACK = "bootstrap4"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -44,9 +50,8 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'pconnectacc', 'templates'),
-            os.path.join(BASE_DIR, 'taskcontrol', 'templates'),
-            os.path.join(BASE_DIR, 'user', 'templates'),
+            os.path.join(BASE_DIR, 'pconnectacc', 'templates/'),
+            os.path.join(BASE_DIR, 'taskcontrol', 'templates/'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -66,12 +71,21 @@ WSGI_APPLICATION = 'pconnectacc.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'demopconnect',
+    #     'USER': 'pconnect',
+    #     'PASSWORD': 'Pc0nnect@cc',
+    #     'HOST': '52.76.167.149',
+    #     'PORT': '3306',
+    # },
+
+    'default':{
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'demodb',
-        'USER': 'pconnect',
-        'PASSWORD': 'Pc0nnect@cc',
-        'HOST': '52.76.167.149',
+        'NAME': 'DemonPconnectacc',
+        'USER': 'demoacc',
+        'PASSWORD': 'P@ssw0rd',
+        'HOST': '127.0.0.1',
         'PORT': '3306',
     }
 }
@@ -97,21 +111,26 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'th-TH'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Bangkok'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+# Static files (CSS, JavaScript, images)
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
+# Media files (uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SILENCED_SYSTEM_CHECKS = ["fields.E304"]
