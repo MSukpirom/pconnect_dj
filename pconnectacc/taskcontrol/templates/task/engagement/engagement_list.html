@@ -8,19 +8,17 @@
         font-size: 13px;
     }
     .badge-success {
-        color: #22a300;
-        font-size: 11px;
+        color: #1cc752;
         font-weight: 600;
-        background-color: #dcfce7;
-        border-radius: 40px;
-        border: 1px solid #29c600;
+        background-color: #c0ffd4;
+        border-radius: 8px;
     }
 
     .badge-danger{
-        color: #b91c1b;
+        color: #fe2e53;
         font-weight: 600;
-        background-color: #fee2e1;
-        border-radius: 40px;
+        background-color: #ffe0e4;
+        border-radius: 8px;
     }
 </style>
 <div class="row">
@@ -31,7 +29,7 @@
             <span class="badge text-bg-success">เปิดงาน : {{ open_engagements }} รายการ</span>
             <span class="badge text-bg-danger">ปิดงาน : {{ closed_engagements }} รายการ</span>
             <div style="text-align: right;">
-                <a href="{% url 'taskcontrol:engagement_create' %}" class="btn btn-success"><i class="fa-solid fa-circle-plus"></i> Engagement</a>
+                <a href="{% url 'taskcontrol:engagement_create' %}" class="btn btn-outline-primary"><i class="fa-solid fa-circle-plus"></i> Engagement</a>
             </div>
             
             <div class="col-md-12 mt-4">
@@ -56,14 +54,14 @@
                         <tbody>
                             {% for engagement in engagements|slice:"0:value" %}
                                 <tr data-toggle="collapse" data-target="#demo{{ forloop.counter }}" class="accordion-toggle">
-                                    <td><a href="{% url 'taskcontrol:engagements' engagement_id=engagement.id %}" class="fw-semibold">{{ engagement.job_code }}</a></td>
+                                    <td><a href="{% url 'taskcontrol:engagement_detail' engagement_id=engagement.id %}" class="fw-semibold">{{ engagement.job_code }}</a></td>
                                     <td>
                                         <span class="fw-semibold">[{{ engagement.client.code }}]</span><br>
                                         <span class="fw-semibold">{{ engagement.client.company_name }}</span><br>
                                         <span style="font-size:11px;">{{ engagement.client.tax_id }}</span>
                                     </td>
                                     <td class="text-center">
-                                        {% if engagement.status %}
+                                        {% if engagement.status == "OPENJOB" %}
                                         <span class="badge badge-success">เปิด</span>
                                         {% else %}
                                         <span class="badge badge-danger">ปิด</span>

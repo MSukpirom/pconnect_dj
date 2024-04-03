@@ -18,19 +18,18 @@ class Geography(models.Model):
 
 class AddressBase(models.Model):
     address = models.CharField(max_length=255, default=None, null=True, blank=True)
+    address2 = models.CharField(max_length=255, default=None, null=True, blank=True)
     province = models.ForeignKey('Province', on_delete=models.CASCADE, blank=True, null=True)
     district = models.ForeignKey('District', on_delete=models.CASCADE, blank=True, null=True)
     subdistrict = models.ForeignKey('Subdistrict', on_delete=models.CASCADE, blank=True, null=True)
     client = models.ForeignKey('Client', on_delete=models.CASCADE, blank=True, null=True, related_name='client_addressbase')
     contact = models.ForeignKey('Contact', on_delete=models.CASCADE, blank=True, null=True, related_name='contact_addressbase')
-    created_at = models.DateTimeField(default=timezone.now)
-    created_by = models.IntegerField()
-    updated_at = models.DateTimeField(null=True, blank=True)
-    updated_by = models.IntegerField(null=True, blank=True)
-    deleted_at = models.DateTimeField(null=True, blank=True)
-    deleted_by = models.IntegerField(null=True, blank=True)
-    voided_at = models.DateTimeField(null=True, blank=True)
-    voided_by = models.IntegerField(null=True, blank=True)
+    create_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='address_create_by')
+    create_at = models.DateTimeField(default=timezone.now)
+    update_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='address_update_by')
+    update_at = models.DateTimeField(default=timezone.now)
+    voide_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='address_voide_by')
+    voide_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = 'address_base'
@@ -48,37 +47,29 @@ class Client(models.Model):
     register_tax = models.ForeignKey('RegisterTax', on_delete=models.CASCADE, blank=True, null=True, related_name='client_register_tax')
     company_address = models.ForeignKey(AddressBase, on_delete=models.CASCADE, blank=True, null=True, related_name='client_company_address')
     file = models.ForeignKey('FileManage', on_delete=models.CASCADE, blank=True, null=True, related_name='client_file')
-    created_at = models.DateTimeField(default=timezone.now)
-    created_by = models.IntegerField()
-    updated_at = models.DateTimeField(null=True, blank=True)
-    updated_by = models.IntegerField(null=True, blank=True)
-    deleted_at = models.DateTimeField(null=True, blank=True)
-    deleted_by = models.IntegerField(null=True, blank=True)
-    voided_at = models.DateTimeField(null=True, blank=True)
-    voided_by = models.IntegerField(null=True, blank=True)
+    create_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='client_create_by')
+    create_at = models.DateTimeField(default=timezone.now)
+    update_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='client_update_by')
+    update_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = 'client'
 
 class FileManage(models.Model):
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, blank=True, null=True)
-    file_client = models.FileField(upload_to='files/client/', null=True, max_length=255, blank=True)
-    image_client = models.ImageField(upload_to='images/client/', null=True, blank=True)
+    client = models.ForeignKey('Client', on_delete=models.CASCADE, blank=True, null=True)
+    file_client = models.FileField(upload_to='client_files/', blank=True, null=True)
+    image_client = models.ImageField(upload_to='client_images/', blank=True, null=True)
     engagement = models.ForeignKey('Engagement', on_delete=models.CASCADE, blank=True, null=True)
-    file_engagement = models.FileField(upload_to='files/engagement/', null=True, max_length=255, blank=True)
-    image_engagement = models.ImageField(upload_to='images/engagement/', null=True, blank=True)
+    file_engagement = models.FileField(upload_to='engagement_files/', blank=True, null=True)
+    image_engagement = models.ImageField(upload_to='engagement_images/', blank=True, null=True)
     task = models.ForeignKey('Task', on_delete=models.CASCADE, blank=True, null=True)
-    file_task = models.FileField(upload_to='files/task/', null=True, max_length=255, blank=True)
-    image_task = models.ImageField(upload_to='images/task/', null=True, blank=True)
+    file_task = models.FileField(upload_to='task_files/', blank=True, null=True)
+    image_task = models.ImageField(upload_to='task_images/', blank=True, null=True)
     description = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(default=timezone.now)
-    created_by = models.IntegerField()
-    updated_at = models.DateTimeField(null=True, blank=True)
-    updated_by = models.IntegerField(null=True, blank=True)
-    deleted_at = models.DateTimeField(null=True, blank=True)
-    deleted_by = models.IntegerField(null=True, blank=True)
-    voided_at = models.DateTimeField(null=True, blank=True)
-    voided_by = models.IntegerField(null=True, blank=True)
+    create_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='file_create_by')
+    create_at = models.DateTimeField(default=timezone.now)
+    update_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='file_update_by')
+    update_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = 'file_manage'
@@ -121,12 +112,10 @@ class RegisterTax(models.Model):
     company = models.CharField(max_length=255, default=None, null=True, blank=True)
     company_date = models.DateField(blank=True, null=True)
     company_period_date = models.CharField(max_length=255, default=None, null=True, blank=True)
-    created_at = models.DateTimeField(default=timezone.now)
-    created_by = models.IntegerField()
-    updated_at = models.DateTimeField(null=True, blank=True)
-    updated_by = models.IntegerField(null=True, blank=True)
-    deleted_at = models.DateTimeField(null=True, blank=True)
-    deleted_by = models.IntegerField(null=True, blank=True)
+    create_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='register_tax_create_by')
+    create_at = models.DateTimeField(default=timezone.now)
+    update_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='register_tax_update_by')
+    update_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = 'register_tax'
@@ -135,12 +124,11 @@ class RegisterType(models.Model):
     short_name = models.CharField(max_length=255, default=None, null=True, blank=True)
     name_th =  models.CharField(max_length=255, default=None, null=True, blank=True)
     name_en =  models.CharField(max_length=255, default=None, null=True, blank=True)
-    created_at = models.DateTimeField(default=timezone.now)
-    created_by = models.IntegerField()
-    updated_at = models.DateTimeField(null=True, blank=True)
-    updated_by = models.IntegerField(null=True, blank=True)
-    deleted_at = models.DateTimeField(null=True, blank=True)
-    deleted_by = models.IntegerField(null=True, blank=True)
+    create_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='register_type_create_by')
+    create_at = models.DateTimeField(default=timezone.now)
+    update_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='register_type_update_by')
+    update_at = models.DateTimeField(default=timezone.now)
+
 
     class Meta:
         db_table = 'register_type'
@@ -155,14 +143,10 @@ class Contact(models.Model):
     other = models.CharField(max_length=255, default=None, null=True, blank=True)
     address = models.ForeignKey(AddressBase, on_delete=models.CASCADE, blank=True, null=True, related_name='contact_address')
     address2 = models.ForeignKey(AddressBase, on_delete=models.CASCADE, blank=True, null=True, related_name='company_address')
-    created_at = models.DateTimeField(default=timezone.now)
-    created_by = models.IntegerField()
-    updated_at = models.DateTimeField(null=True, blank=True)
-    updated_by = models.IntegerField(null=True, blank=True)
-    deleted_at = models.DateTimeField(null=True, blank=True)
-    deleted_by = models.IntegerField(null=True, blank=True)
-    voided_at = models.DateTimeField(null=True, blank=True)
-    voided_by = models.IntegerField(null=True, blank=True)
+    create_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='contact_create_by')
+    create_at = models.DateTimeField(default=timezone.now)
+    update_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='contact_update_by')
+    update_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = 'contact'
@@ -172,12 +156,10 @@ class ClientPassword(models.Model):
     type_password = models.ForeignKey('RegisterType', null=True, blank=True, on_delete=models.CASCADE)
     username =  models.CharField(max_length=255, default=None, null=True, blank=True)
     password = models.TextField(default=None, null=True, blank=True)
-    created_at = models.DateTimeField(default=timezone.now)
-    created_by = models.IntegerField()
-    updated_at = models.DateTimeField(null=True, blank=True)
-    updated_by = models.IntegerField(null=True, blank=True)
-    deleted_at = models.DateTimeField(null=True, blank=True)
-    deleted_by = models.IntegerField(null=True, blank=True)
+    create_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='client_password_create_by')
+    create_at = models.DateTimeField(default=timezone.now)
+    update_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='client_password_update_by')
+    update_at = models.DateTimeField(default=timezone.now)
     
     class Meta:
         db_table = 'client_password'
@@ -193,24 +175,22 @@ class Engagement(models.Model):
     approver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='approver_engagements',null=True, blank=True)
     approved_date = models.DateTimeField(null=True, blank=True)
     reviewer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reviewer_engagements',null=True, blank=True)
-    review_date = models.DateTimeField(auto_now_add=True)
+    review_date = models.DateTimeField(default=timezone.now)
     status = models.CharField(max_length=255, default=None, null=True, blank=True)
     file = models.ForeignKey('FileManage', on_delete=models.CASCADE, related_name='engagement_file', null=True, blank=True)
     create_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='engagement_create_by')
-    create_at = models.DateTimeField(auto_now_add=True)
+    create_at = models.DateTimeField(default=timezone.now)
     update_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='engagement_update_by')
-    update_at = models.DateTimeField(auto_now=True)
+    update_at = models.DateTimeField(default=timezone.now)
     category = models.ForeignKey('EngagementCategory', on_delete=models.CASCADE, related_name='engagement_category', null=True, blank=True)
     type = models.ForeignKey('EngagementType', on_delete=models.CASCADE, related_name='engagement_type', null=True, blank=True)
     notes = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(default=timezone.now)
-    created_by = models.IntegerField()
-    updated_at = models.DateTimeField(null=True, blank=True)
-    updated_by = models.IntegerField(null=True, blank=True)
-    deleted_at = models.DateTimeField(null=True, blank=True)
-    deleted_by = models.IntegerField(null=True, blank=True)
-    voided_at = models.DateTimeField(null=True, blank=True)
-    voided_by = models.IntegerField(null=True, blank=True)
+    create_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='engagement_create_by')
+    create_at = models.DateTimeField(default=timezone.now)
+    update_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='engagement_update_by')
+    update_at = models.DateTimeField(default=timezone.now)
+    voide_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='engagement_voide_by')
+    voide_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = 'engagement'
@@ -241,12 +221,10 @@ class Engagement(models.Model):
 class EngagementCategory(models.Model):
     name_th = models.CharField(max_length=255, default=None, null=True, blank=True)
     name_en = models.CharField(max_length=255, default=None, null=True, blank=True)
-    created_at = models.DateTimeField(default=timezone.now)
-    created_by = models.IntegerField()
-    updated_at = models.DateTimeField(null=True, blank=True)
-    updated_by = models.IntegerField(null=True, blank=True)
-    deleted_at = models.DateTimeField(null=True, blank=True)
-    deleted_by = models.IntegerField(null=True, blank=True)
+    create_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='engagement_category_create_by')
+    create_at = models.DateTimeField(default=timezone.now)
+    update_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='engagement_category_update_by')
+    update_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = 'engagement_category'
@@ -262,14 +240,12 @@ class EngagementDetail(models.Model):
     end_date = models.DateField(null=True, blank=True)
     review_by = models.BooleanField(default=False)
     approved_by = models.BooleanField(default=False)
-    created_at = models.DateTimeField(default=timezone.now)
-    created_by = models.IntegerField()
-    updated_at = models.DateTimeField(null=True, blank=True)
-    updated_by = models.IntegerField(null=True, blank=True)
-    deleted_at = models.DateTimeField(null=True, blank=True)
-    deleted_by = models.IntegerField(null=True, blank=True)
-    voided_at = models.DateTimeField(null=True, blank=True)
-    voided_by = models.IntegerField(null=True, blank=True)
+    create_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='engagement_detail_create_by')
+    create_at = models.DateTimeField(default=timezone.now)
+    update_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='engagement_detail_update_by')
+    update_at = models.DateTimeField(default=timezone.now)
+    voide_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='engagement_detail_voide_by')
+    voide_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = 'engagement_detail'
@@ -279,12 +255,11 @@ class EngagementType(models.Model):
     name_en = models.CharField(max_length=255, default=None, null=True, blank=True)
     description = models.CharField(max_length=255, default=None, null=True, blank=True)
     category = models.ForeignKey(EngagementCategory, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(default=timezone.now)
-    created_by = models.IntegerField()
-    updated_at = models.DateTimeField(null=True, blank=True)
-    updated_by = models.IntegerField(null=True, blank=True)
-    deleted_at = models.DateTimeField(null=True, blank=True)
-    deleted_by = models.IntegerField(null=True, blank=True)
+    create_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='engagement_type_create_by')
+    create_at = models.DateTimeField(default=timezone.now)
+    update_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='engagement_type_update_by')
+    update_at = models.DateTimeField(default=timezone.now)
+
 
     class Meta:
         db_table = 'engagement_type'
@@ -305,14 +280,10 @@ class Task(models.Model):
     ]
     engagement = models.ForeignKey(Engagement, on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=OPENJOB)
-    created_at = models.DateTimeField(default=timezone.now)
-    created_by = models.IntegerField()
-    updated_at = models.DateTimeField(null=True, blank=True)
-    updated_by = models.IntegerField(null=True, blank=True)
-    deleted_at = models.DateTimeField(null=True, blank=True)
-    deleted_by = models.IntegerField(null=True, blank=True)
-    voided_at = models.DateTimeField(null=True, blank=True)
-    voided_by = models.IntegerField(null=True, blank=True)
+    create_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='task_create_by')
+    create_at = models.DateTimeField(default=timezone.now)
+    update_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='task_update_by')
+    update_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = 'task'

@@ -30,7 +30,7 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="client" class="form-label fw-semibold">รหัสลูกค้า</label>
-                        <select name="client" id="" class="selectpicker" data-live-search="true">
+                        <select name="client_id" id="client" class="selectpicker" data-live-search="true">
                             {% for c in clients %}
                                 <option value="{{ c.id }}" {% if c.id == engagement.client.id %}selected{% endif %}>
                                     {{ c.code }} {{ c.company_name }}
@@ -129,7 +129,7 @@
 
     var initialClientId = "{{ engagement.client.id }}" || null;
 
-    var clientDropdown = $('#client');
+    var clientDropdown = $('#client_id');
 
     clientDropdown.append('<option value="" disabled selected>-- กรุณาเลือกลูกค้า --</option>');
 
@@ -144,6 +144,7 @@
 
         clientDropdown.selectpicker('refresh');
     }
+
 </script>
 
 {% endblock content %}

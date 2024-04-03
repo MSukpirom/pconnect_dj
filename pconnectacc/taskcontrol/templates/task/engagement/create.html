@@ -4,7 +4,7 @@
     <div class="card w-100">
         <div class="card-body">
             <div class="col text-end">
-                <span class="badge text-bg-secondary">วันที่ : <span id="currentDate"></span></span>
+                <span class="badge text-bg-light">วันที่ : <span id="currentDate"></span></span>
             </div>
             <div class="h4 pb-2 mb-4 text-primary fw-semibold border-bottom border-primary">สร้าง Engagement</div>
             
@@ -31,7 +31,7 @@
                 <div class="row mb-3">
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="job_code" class="form-label fw-semibold">รหัส Job <span class="badge text-bg-secondary">อัตโนมัติ</span></label>
+                            <label for="job_code" class="form-label fw-semibold">รหัส Job <span class="badge text-bg-dark">อัตโนมัติ</span></label>
                             <input type="text" name="job_code" id="job_code_display" class="form-control">
                         </div>
                     </div>
@@ -82,10 +82,10 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="approver" class="form-label fw-semibold">ผู้อนุมัติ</label>
-                        <select id="administrator" name="administrator" class="form-control">
-                            <option disabled selected>Select Administrator</option>
-                            {% for admin in administrators_data %}
-                                <option value="{{ admin.id }}">{{ admin.first_name }} {{ admin.last_name }}</option>
+                        <select id="approver" name="approver" class="form-control">
+                            <option disabled selected>-- กรุณาเลือก --</option>
+                            {% for approver in approvers %}
+                                <option value="{{ approver.id }}">{{ approver.first_name }} {{ approver.last_name }}</option>
                             {% endfor %}
                         </select>
 
@@ -93,11 +93,11 @@
                 </div>
 
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-4">
-                    <button type="submit" class="btn btn-primary me-md-2"><i class="fa-solid fa-circle-check"></i> บันทึกข้อมูล</button>
-                    <button type="reset" class="btn btn-light">ล้างข้อมูล</button>
                     <a href="{% url 'taskcontrol:engagement_list' %}" class="btn btn-outline-danger">
                         <i class="fa-solid fa-circle-xmark"></i> ยกเลิก
                     </a>
+                    <button type="reset" class="btn btn-light">ล้างข้อมูล</button>
+                    <button type="submit" class="btn btn-primary me-md-2"><i class="fa-solid fa-circle-check"></i> บันทึกข้อมูล</button>
                 </div>
             </form>
         </div>

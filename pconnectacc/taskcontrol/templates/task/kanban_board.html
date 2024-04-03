@@ -1,7 +1,6 @@
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-
 {% extends 'task/index.html' %}
 {% block content %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
 
 <style>
     .page-title-box .page-title {
@@ -196,55 +195,55 @@
     }
 </style>
 
-    <div class="row">
-        <div class="card w-100">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-8">
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-outline-primary filter-btn" data-filter="เดดไลน์">เดดไลน์</button>
-                            <button type="button" class="btn btn-outline-primary filter-btn" data-filter="ผู้รับผิดชอบ">ผู้รับผิดชอบ</button>
-                            <button type="button" class="btn btn-outline-primary filter-btn" data-filter="ประเภทงาน">ประเภทงาน</button>
-                            <button type="button" class="btn btn-outline-primary filter-btn" data-filter="งวดบัญชี">งวดบัญชี</button>
-                        </div>
-                    </div>
-                    <div class="col-md-4 text-end">
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fa fa-search"></i></span>
-                            <input type="text" class="form-control" placeholder="ค้นหา">
-                        </div>
+<div class="row">
+    <div class="card w-100">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-primary filter-btn" data-filter="เดดไลน์">เดดไลน์</button>
+                        <button type="button" class="btn btn-outline-primary filter-btn" data-filter="ผู้รับผิดชอบ">ผู้รับผิดชอบ</button>
+                        <button type="button" class="btn btn-outline-primary filter-btn" data-filter="ประเภทงาน">ประเภทงาน</button>
+                        <button type="button" class="btn btn-outline-primary filter-btn" data-filter="งวดบัญชี">งวดบัญชี</button>
                     </div>
                 </div>
-
-                <div class="board mt-3">
-                    <div class="tasks-todo">
-                        <h5 class="task-header-todo fw-semibold" id="todo-header">เปิดงาน (0)</h5>
-                        <div id="task-list-one" class="task-list-items"></div>
+                <div class="col-md-4 text-end">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa fa-search"></i></span>
+                        <input type="text" class="form-control" placeholder="ค้นหา">
                     </div>
+                </div>
+            </div>
 
-                    <div class="tasks-pending">
-                        <h5 class="task-header-progress fw-semibold" id="progress-header">กำลังดำเนินงาน (0)</h5>
-                        <div id="task-list-two" class="task-list-items"></div>
-                    </div>
+            <div class="board mt-3">
+                <div class="tasks-todo">
+                    <h5 class="task-header-todo fw-semibold" id="todo-header">เปิดงาน (0)</h5>
+                    <div id="task-list-one" class="task-list-items"></div>
+                </div>
 
-                    <div class="tasks-review">
-                        <h5 class="task-header-review fw-semibold" id="review-header">รอตรวจสอบ (0)</h5>
-                        <div id="task-list-three" class="task-list-items"></div>
-                    </div>
+                <div class="tasks-pending">
+                    <h5 class="task-header-progress fw-semibold" id="progress-header">กำลังดำเนินงาน (0)</h5>
+                    <div id="task-list-two" class="task-list-items"></div>
+                </div>
 
-                    <div class="tasks-client">
-                        <h5 class="task-header-client fw-semibold" id="client-header">รอลูกค้า (0)</h5>
-                        <div id="task-list-four" class="task-list-items"></div>
-                    </div>
+                <div class="tasks-review">
+                    <h5 class="task-header-review fw-semibold" id="review-header">รอตรวจสอบ (0)</h5>
+                    <div id="task-list-three" class="task-list-items"></div>
+                </div>
 
-                    <div class="tasks-done">
-                        <h5 class="task-header-done fw-semibold" id="done-header">เรียบร้อย (0)</h5>
-                        <div id="task-list-five" class="task-list-items done"></div>
-                    </div>
+                <div class="tasks-client">
+                    <h5 class="task-header-client fw-semibold" id="client-header">รอลูกค้า (0)</h5>
+                    <div id="task-list-four" class="task-list-items"></div>
+                </div>
+
+                <div class="tasks-done">
+                    <h5 class="task-header-done fw-semibold" id="done-header">เรียบร้อย (0)</h5>
+                    <div id="task-list-five" class="task-list-items done"></div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
 <div class="modal fade" id="engagementModal" tabindex="-1" aria-labelledby="engagementModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -269,170 +268,179 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            let draggingCard = null;
-            const taskLists = document.querySelectorAll(".task-list-items");
-            let cardCounter = 1;
-            const cardData = [
-                {% for engagement in engagements %}
-                    {
-                        jobcode: "{{ engagement.job_code }}",
-                        category_type: "{{ engagement.type.name_th }}",
-                        reviewer: "{{ engagement.reviewer.first_name }} {{ engagement.reviewer.last_name }} ",
-                        approver: "{{ engagement.approver.first_name }} {{ engagement.approver.last_name }} ",
-                        user: "{{ engagement.administrator.first_name }} {{ engagement.administrator.last_name }}",
-                        date: "{{ engagement.create_at|date:'d/m/Y' }}",
-                    }{% if not forloop.last %},{% endif %}
-                {% endfor %}
-            ];
-
-            function saveCardPositions() {
-                let cardPositions = {};
-                taskLists.forEach((taskList) => {
-                    const taskListId = taskList.getAttribute("id");
-                    cardPositions[taskListId] = [];
-                    const cards = taskList.querySelectorAll(".card");
-                    cards.forEach((card) => {
-                        cardPositions[taskListId].push(card.getAttribute("id"));
-                    });
-                });
-                localStorage.setItem("cardPositions", JSON.stringify(cardPositions));
-            }
-
-            function loadCardPositions() {
-                const cardPositions = JSON.parse(localStorage.getItem("cardPositions"));
-                if (cardPositions === null) {
-                    return;
-                }
-                // Loop through each task list
-                Object.keys(cardPositions).forEach((taskListId) => {
-                    const taskList = document.querySelector(`#${taskListId}`);
-                    // Loop through each card ID in the task list and move the corresponding card element
-                    cardPositions[taskListId].forEach((cardId) => {
-                        const card = document.querySelector(`#${cardId}`);
-                        taskList.appendChild(card);
-                        if (taskList.classList.contains("done")) {
-                            card.querySelector(".card-title").style.textDecoration = "line-through";
-                        }
-                    });
-                });
-            }
-
-            cardData.forEach(card => {
-                const cardElement = document.createElement("div");
-                cardElement.className = "card mb-0";
-                cardElement.draggable = true;
-                cardElement.id = "card" + cardCounter;
-                cardCounter++;
-                cardElement.innerHTML = `
-                    <div class="card-body p-3">
-                        <div class="float-end">
-                            <a href="#" class="text-muted"><i class="fa-solid fa-message" style="color:#0085FF;"></i></a>
-                            <a href="#" class="text-muted" onclick="openEngagementModal('{{ engagement.client.code }}', '{{ engagement.client.company_name }}')">
-                                <i class="fa-solid fa-arrow-up-right-from-square" style="color:#0085FF;"></i>
-                            </a>
-
-
-                        </div>
-                        <br>
-                        <small class="mb-0 card-title"># ${card.jobcode}</small>
-                        <p class="mb-0 detail">
-                            <span>
-                                <i class="mdi mdi-briefcase-outline text-muted"></i>
-                                ผู้ตรวจทาน: ${card.reviewer}
-                            </span><br>
-                            <span>
-                                <i class="mdi mdi-briefcase-outline text-muted"></i>
-                                ประเภทงาน: ${card.category_type}
-                            </span><br>
-                            <span>
-                                <i class="mdi mdi-briefcase-outline text-muted"></i>
-                                ผู้อนุมัติ: ${card.approver}
-                            </span><br>
-                        </p>
-                        <p class="mb-0">
-                            <span class="align-middle detail">ผู้รับผิดชอบ: ${card.user}</span>
-                        </p>
-                        <div class="mt-2 dropdown float-end">
-                            <small class="float-end text-muted card-date">${card.date }</small>
-                        </div>
-                    </div>
-                `;
-                cardElement.addEventListener("dragstart", function(event) {
-                    draggingCard = event.target;
-                    event.dataTransfer.setData("text/plain", event.target.id);
-                    event.target.classList.add("dragging");
-                });
-                document.getElementById("task-list-one").appendChild(cardElement);
-            });
-
-            taskLists.forEach(taskList => {
-                taskList.addEventListener("dragover", function(event) {
-                    event.preventDefault();
+<script>
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+    
+    document.addEventListener("DOMContentLoaded", function() {
+        let draggingCard = null;
+        const taskLists = document.querySelectorAll(".task-list-items");
+        let cardCounter = 1;
+        const cardData = [
+            {% for engagement in engagements %}
+                {
+                    jobcode: "{{ engagement.job_code }}",
+                    category_type: "{{ engagement.type.name_th }}",
+                    reviewer: "{{ engagement.reviewer.first_name }} {{ engagement.reviewer.last_name }}",
+                    approver: "{{ engagement.approver.first_name }} {{ engagement.approver.last_name }}",
+                    user: "{{ engagement.administrator.first_name }} {{ engagement.administrator.last_name }}",
+                    date: "{{ engagement.create_at|date:'d/m/Y' }}"
+                }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+    
+        function saveCardPositions() {
+            let cardPositions = {};
+            taskLists.forEach((taskList) => {
+                const taskListId = taskList.getAttribute("id");
+                cardPositions[taskListId] = [];
+                const cards = taskList.querySelectorAll(".card");
+                cards.forEach((card) => {
+                    cardPositions[taskListId].push(card.getAttribute("id"));
                 });
             });
-
-            taskLists.forEach(taskList => {
-                taskList.addEventListener("drop", function(event) {
-                    event.preventDefault();
-                    const cardId = event.dataTransfer.getData("text/plain");
-                    const card = document.getElementById(cardId);
-                    const column = event.target.closest(".task-list-items");
-                    if (draggingCard !== null) {
-                        column.appendChild(draggingCard);
-                        draggingCard = null;
-                        if (column.classList.contains("done")) {
-                            card.querySelector(".card-title").style.textDecoration = "line-through";
-                        } else {
-                            card.querySelector(".card-title").style.textDecoration = "none";
-                        }
-                    }
-                    saveCardPositions();
-                    card.classList.remove("dragging");
-                    updateTaskCount();
-                });
-            });
-
-            document.addEventListener("dragend", function(event) {
-                if (draggingCard !== null) {
-                    draggingCard.classList.remove("dragging");
-                    draggingCard = null;
-                }
-            });
-
-            function updateTaskCount() {
-                const todoCount = document.getElementById("task-list-one").childElementCount;
-                const progressCount = document.getElementById("task-list-two").childElementCount;
-                const reviewCount = document.getElementById("task-list-three").childElementCount;
-                const clientCount = document.getElementById("task-list-four").childElementCount;
-                const doneCount = document.getElementById("task-list-five").childElementCount;
-                document.getElementById("todo-header").innerHTML = `เปิดงาน (${todoCount})`;
-                document.getElementById("progress-header").innerText = `กำลังดำเนินงาน (${progressCount})`;
-                document.getElementById("review-header").innerText = `รอตรวจสอบ (${reviewCount})`;
-                document.getElementById("client-header").innerText = `รอลูกค้า (${clientCount})`;
-                document.getElementById("done-header").innerHTML = `เรียบร้อย (${doneCount})`;
-            }
-
-            function init() {
-                loadCardPositions();
-                updateTaskCount();
-            }
-
-            init();
-        });
-
-        function openEngagementModal(clientCode, clientName) {
-            // Update the client code and client name in the modal
-            document.getElementById("clientCode").innerText = clientCode;
-            document.getElementById("clientName").innerText = clientName;
-            // Show the modal
-            $('#engagementModal').modal('show');
+            localStorage.setItem("cardPositions", JSON.stringify(cardPositions));
         }
-    </script>
+    
+        function loadCardPositions() {
+            const cardPositions = JSON.parse(localStorage.getItem("cardPositions"));
+            if (cardPositions === null) {
+                return;
+            }
+            // Loop through each task list
+            Object.keys(cardPositions).forEach((taskListId) => {
+                const taskList = document.querySelector(`#${taskListId}`);
+                // Loop through each card ID in the task list and move the corresponding card element
+                cardPositions[taskListId].forEach((cardId) => {
+                    const card = document.querySelector(`#${cardId}`);
+                    taskList.appendChild(card);
+                    if (taskList.classList.contains("done")) {
+                        card.querySelector(".card-title").style.textDecoration = "line-through";
+                    }
+                });
+            });
+        }
+    
+        cardData.forEach(card => {
+            const cardElement = document.createElement("div");
+            cardElement.className = "card mb-0";
+            cardElement.draggable = true;
+            cardElement.id = "card" + cardCounter;
+            cardCounter++;
+            cardElement.innerHTML = `
+                <div class="card-body p-3">
+                    <div class="float-end">
+                        <a href="#" class="text-muted"><i class="fa-solid fa-message" style="color:#0085FF;"></i></a>
+                        <a href="#" class="text-muted" onclick="openEngagementModal('{{ engagement.client.code }}', '{{ engagement.client.company_name }}')">
+                            <i class="fa-solid fa-arrow-up-right-from-square" style="color:#0085FF;"></i>
+                        </a>
+                    </div>
+                    <br>
+                    <small class="mb-0 card-title"># ${card.jobcode}</small>
+                    <p class="mb-0 detail">
+                        <span>
+                            <i class="mdi mdi-briefcase-outline text-muted"></i>
+                            ผู้ตรวจทาน: ${card.reviewer}
+                        </span><br>
+                        <span>
+                            <i class="mdi mdi-briefcase-outline text-muted"></i>
+                            ประเภทงาน: ${card.category_type}
+                        </span><br>
+                        <span>
+                            <i class="mdi mdi-briefcase-outline text-muted"></i>
+                            ผู้อนุมัติ: ${card.approver}
+                        </span><br>
+                    </p>
+                    <p class="mb-0">
+                        <span class="align-middle detail">ผู้รับผิดชอบ: ${card.user}</span>
+                    </p>
+                    <div class="mt-2 dropdown float-end">
+                        <small class="float-end text-muted card-date">${card.date }</small>
+                    </div>
+                </div>
+            `;
+            cardElement.addEventListener("dragstart", function(event) {
+                draggingCard = event.target;
+                event.dataTransfer.setData("text/plain", event.target.id);
+                event.target.classList.add("dragging");
+            });
+            document.getElementById("task-list-one").appendChild(cardElement);
+        });
+    
+        taskLists.forEach(taskList => {
+            taskList.addEventListener("dragover", function(event) {
+                event.preventDefault();
+            });
+        });
+    
+        taskLists.forEach(taskList => {
+            taskList.addEventListener("drop", function(event) {
+                event.preventDefault();
+                const csrftoken = getCookie('csrftoken'); // ดึง CSRF token จาก cookies
+                const cardId = event.dataTransfer.getData("text/plain");
+                const card = document.getElementById(cardId);
+                const column = event.target.closest(".task-list-items");
+                if (draggingCard !== null) {
+                    column.appendChild(draggingCard);
+                    draggingCard = null;
+                    if (column.classList.contains("done")) {
+                        card.querySelector(".card-title").style.textDecoration = "line-through";
+                    } else {
+                        card.querySelector(".card-title").style.textDecoration = "none";
+                    }
+                }
+                saveCardPositions();
+                card.classList.remove("dragging");
+                updateTaskCount();
+                // Send CSRF token to server
+                const formData = new FormData();
+                formData.append('csrftoken', csrftoken);
+                formData.append('cardId', cardId);
+                // Example of sending CSRF token via AJAX request
+                fetch('/your-server-endpoint', {
+                    method: 'POST',
+                    body: formData
+                }).then(response => {
+                    // Handle response from server
+                }).catch(error => {
+                    // Handle error
+                });
+            });
+        });
+    
+        document.addEventListener("dragend", function(event) {
+            if (draggingCard !== null) {
+                draggingCard.classList.remove("dragging");
+                draggingCard = null;
+            }
+        });
+    
+        function updateTaskCount() {
+            const todoCount = document.getElementById("task-list-one").childElementCount;
+            const progressCount = document.getElementById("task-list-two").childElementCount;
+            const reviewCount = document.getElementById("task-list-three").childElementCount;
+            const clientCount = document.getElementById("task-list-four").childElementCount;
+            const doneCount = document.getElementById("task-list-five").childElementCount;
+            document.getElementById("todo-header").innerHTML = `เปิดงาน (${todoCount})`;
+            document.getElementById("progress-header").innerText = `กำลังดำเนินงาน (${progressCount})`;
+            document.getElementById("review-header").innerText = `รอตรวจสอบ (${reviewCount})`;
+            document.getElementById("client-header").innerText = `รอลูกค้า (${clientCount})`;
+            document.getElementById("done-header").innerHTML = `เรียบร้อย (${doneCount})`;
+        }
+    
+        function init() {
+            loadCardPositions();
+            updateTaskCount();
+        }
+    
+        init();
+    });
+    
+</script>
+     
 {% endblock content %}

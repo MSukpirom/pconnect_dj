@@ -20,7 +20,7 @@
                     <a href="{% url 'taskcontrol:create_password' client_id=client.id %}">
                         <button type="button" class="btn btn-outline-primary"><i class="fa-solid fa-unlock-keyhole"></i> รหัสลูกค้า</button>
                     </a>
-                    <a href="{% url 'taskcontrol:create_file' client_id=client.id %}">
+                    <a href="{% url 'taskcontrol:file_client_create' client_id=client.id %}">
                         <button type="button" class="btn btn-outline-primary"><i class="fa-regular fa-file-pdf"></i> แนบไฟล์</button>
                     </a>
 

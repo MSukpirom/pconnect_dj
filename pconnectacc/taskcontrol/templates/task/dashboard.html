@@ -174,6 +174,10 @@
         font-weight: 600;
     }
 
+    th, tr, td{
+        font-size: 13.5px;
+    }
+
 </style>
 
 <div class="row">
@@ -194,7 +198,6 @@
             </div>
         </div>
     </div>
-
 
     <div class="col-3">
         <div class="card">
@@ -253,7 +256,7 @@
     <div class="col">
         <div class="card">
             <div class="card-body" style="position: relative;">
-                <h5>จำนวนงานต่อวัน</h5>
+                <h5>Engagements rate</h5>
                 <canvas id="engagementChartLine" style="width: 100%; height: 300px;"></canvas>
             </div>
         </div>
@@ -393,7 +396,7 @@
                             <div class="col-1"></div>
                             <div class="col">
                                 <input type="checkbox" name="per_month" id="per_month" class="form-check-input">
-                                <label for="" class="form-label">Show only the current month</label>
+                                <label for="" class="form-label">แสดงเฉพาะเดือนนี้</label>
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -424,18 +427,18 @@
                         </div>
                         <div class="row">
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                <button type="submit" id="btnSearch" class="btn btn-outline-dark"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
-                                <button type="reset" id="btnReset" class="btn btn-outline-dark">Reset</button>
+                                <button type="submit" id="btnSearch" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> กรองค้นหา</button>
+                                <button type="reset" id="btnReset" class="btn btn-light">ล้างข้อมูล</button>
                             </div>
                         </div>
                     </form>
                 </div>
 
                 <div class="card-body" id="result">
-                    <table id="engagement_table" class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Engagement</th>
+                    <table id="engagement_table" class="table table-hover table-bordered">
+                        <thead class="text-center">
+                            <tr class="table-light">
+                                <th>#</th>
                                 <th>ลูกค้า</th>
                                 <th>รอบ</th>
                                 <th>ผู้ดูแล</th>
@@ -458,6 +461,21 @@
 <script src="{% static 'assets/js/date.js' %}"></script>
 
 <script>
+    $(document).ready(function() {
+        $('#engagement_table').DataTable({
+            "language": {
+                "search": "ค้นหา",
+                "lengthMenu": "แสดง _MENU_ รายการ",
+                "info": "แสดง _START_ ถึง _END_ จากทั้งหมด _TOTAL_ รายการ",
+                "infoFiltered": "(กรองจากทั้งหมด _MAX_ รายการ)",
+                "paginate": {
+                    "previous": "ก่อนหน้า",
+                    "next": "ถัดไป"
+                }
+            }
+        });
+    });
+
     // ดึงข้อมูล JSON จาก Django view เพื่อสร้างกราฟแบบเส้น
     fetch('{% url 'taskcontrol:get_engagement_data' %}')
         .then(response => response.json())
@@ -543,22 +561,7 @@
         });
     }
 
-
     $(document).ready(function () {
-        $('#engagement_table').DataTable({
-            responsive: true,
-            "language": {
-                "search": "ค้นหา",
-                "lengthMenu": "แสดง _MENU_ รายการ",
-                "info": "แสดง _START_ ถึง _END_ จากทั้งหมด _TOTAL_ รายการ",
-                "infoFiltered": "(กรองจากทั้งหมด _MAX_ รายการ)",
-                "paginate": {
-                    "previous": "ก่อนหน้า",
-                    "next": "ถัดไป"
-                }
-            }
-        });
-
         function loadInitialData() {
             var data = $('#frmSearch').serialize(); // Serialize form data
             var currentDate = new Date(); // Current date
@@ -580,56 +583,50 @@
             });
         }
 
-        // Function to display results in the table
-        function displayResults(data, today, deadlineDays) {
+        // ฟังก์ชันสำหรับแสดงผลลัพธ์ในตาราง
+        function displayResults(data) {
             var resultContainer = $('#dataBody');
             resultContainer.empty();
 
+            // วน loop เพื่อแสดงข้อมูลในตาราง
             $.each(data, function(index, item) {
-                // Construct table row
                 var resultRow = $('<tr>');
-                resultRow.append($('<td>').text(item.job_code || ' '));
-                resultRow.append($('<td>').text(item.client__company_name || ' '));
-                // Format start_date_period if it's not null or undefined
-                var startDateText = item.start_date_period ? formatDate(item.start_date_period) : ' ';
-                resultRow.append($('<td>').text(startDateText));
-                resultRow.append($('<td>').text(item.administrator__first_name + ' ' + item.administrator__last_name || ' '));
-                resultRow.append($('<td>').text(item.type__name_th || ' '));
 
-                // Process deadlines
+                // แสดงข้อมูลในแต่ละคอลัมน์ของตาราง
+                resultRow.append($('<td>').text(item.job_code || '-'));
+                resultRow.append($('<td>').text(item.client__company_name || '-'));
+                resultRow.append($('<td>').text(formatDate(item.start_date_period) || '-'));
+                resultRow.append($('<td>').text(item.administrator__first_name + ' ' + item.administrator__last_name || '-'));
+                resultRow.append($('<td>').text(item.type__name_th || '-'));
+
+                // แสดงข้อมูล deadlines และ remaining days
                 var deadlines = "";
                 $.each(item.engagement_detail_deadlines, function(idx, deadline) {
-                    deadlines += formatDate(deadline.deadline);
+                    deadlines += formatDate(deadline.deadline) + ', ';
                 });
-                resultRow.append($('<td>').text(deadlines || ' '));
+                deadlines = deadlines.replace(/,\s*$/, "");
+                resultRow.append($('<td>').text(deadlines || '-'));
 
-                // Process remaining days
-                var remainingDaysText = '';
-                var remainingDaysCell = $('<td>');
+                var remainingDaysText = item.remaining_days ? (item.remaining_days === 0 ? 'ครบกำหนด' : (item.remaining_days < 1 ? item.remaining_days + ' วัน' : item.remaining_days + ' วัน')) : '-';
+                var remainingDaysCell = $('<td>').addClass('fw-semibold');
 
                 if (item.remaining_days === 0) {
-                    remainingDaysText = 'ครบกำหนด';
-                    remainingDaysCell.addClass('fw-semibold text-success');
+                    remainingDaysCell.addClass('text-success');
                 } else if (item.remaining_days < 1) {
-                    remainingDaysText = item.remaining_days + ' วัน';
-                    remainingDaysCell.addClass('fw-semibold text-danger');
-                } else {
-                    if (item.remaining_days < 7) {
-                        remainingDaysCell.addClass('fw-semibold text-warning');
-                    }
-                    remainingDaysText = item.remaining_days + ' วัน';
-                    remainingDaysCell.addClass('fw-semibold');
+                    remainingDaysCell.addClass('text-danger');
+                } else if (item.remaining_days < 7) {
+                    remainingDaysCell.addClass('text-warning');
                 }
 
-                remainingDaysCell.text(remainingDaysText || ' ');
+                remainingDaysCell.text(remainingDaysText);
                 resultRow.append(remainingDaysCell);
 
-                // Append the row to the table body
+                // เพิ่มแถวลงในตาราง
                 resultContainer.append(resultRow);
             });
         }
 
-        // Function to format date as "d/m/Y"
+        // ฟังก์ชันสำหรับการจัดรูปแบบวันที่
         function formatDate(dateString) {
             var date = new Date(dateString);
             var day = ('0' + date.getDate()).slice(-2);

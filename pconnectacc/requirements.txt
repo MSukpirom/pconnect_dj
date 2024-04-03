@@ -11,3 +11,5 @@ sqlparse==0.4.4
 typing_extensions==4.6.3
 tzdata==2023.3
 humanize==4.9.0
+crispy-bootstrap4==2024.1
+django-crispy-forms==2.1
