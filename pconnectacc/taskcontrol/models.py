@@ -260,7 +260,6 @@ class EngagementType(models.Model):
     update_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='engagement_type_update_by')
     update_at = models.DateTimeField(default=timezone.now)
 
-
     class Meta:
         db_table = 'engagement_type'
 
