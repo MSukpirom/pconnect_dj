@@ -27,8 +27,11 @@ DEBUG = os.getenv('DEBUG')
 # ALLOWED_HOSTS = ['*']
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(' ')
 
-# Application definition
+LOGIN_URL = '/task-control/login/'
 
+SESSION_COOKIE_AGE = 3600
+
+# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
