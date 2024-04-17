@@ -19547,7 +19547,7 @@ fieldset:disabled .btn {
 }
 
 .left-sidebar {
-    width: 220px;
+    width: 170px;
     background-color: #fff;
     position: absolute;
     -webkit-transition: 0.2s ease-in;
@@ -19558,7 +19558,7 @@ fieldset:disabled .btn {
 
 .left-sidebar .scroll-sidebar {
     overflow-y: auto;
-    padding: 0 30px;
+    padding: 0 15px;
     height: calc(100vh - 80px);
     border-radius: 7px
 }
@@ -19569,7 +19569,7 @@ fieldset:disabled .btn {
 
 .brand-logo {
     min-height: 70px;
-    padding: 0 30px;
+    padding: 0 15px;
     white-space: normal;
 }
 
@@ -19928,11 +19928,11 @@ fieldset:disabled .btn {
     }
 
     #main-wrapper[data-layout=vertical][data-header-position=fixed] .app-header {
-        width: calc(100% - 220px)
+        width: calc(100% - 170px)
     }
 
     #main-wrapper[data-layout=vertical][data-sidebartype=full] .body-wrapper {
-        margin-left: 220px
+        margin-left: 170px
     }
 }
 
@@ -19940,7 +19940,7 @@ fieldset:disabled .btn {
 
     #main-wrapper[data-layout=vertical][data-sidebartype=full] .left-sidebar,
     #main-wrapper[data-layout=vertical][data-sidebartype=mini-sidebar] .left-sidebar {
-        left: -220px
+        left: -170px
     }
 
     #main-wrapper[data-layout=vertical][data-sidebartype=full].show-sidebar .left-sidebar,
