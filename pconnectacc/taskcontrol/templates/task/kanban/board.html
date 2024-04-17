@@ -25,7 +25,7 @@
             margin-bottom: 10px;
             margin-top: 10px;
             background-color: #ffffff;
-            font-size: 14px;
+            font-size: 15px;
         }
 
         .engagement a {
@@ -103,7 +103,7 @@
             padding: 0 1rem 1rem 1rem;
             margin-bottom: 1.5rem;
             border-radius: 0.75rem;
-            color: #52616B;
+            color: #31363E;
         }
 
         .tasks-open {
@@ -136,53 +136,56 @@
 
         .title {
             font-size: 14px;
-            color: #52616B;
+            color: #31363E;
         }
 
         .detail {
-            font-size: 13px;
-            color: #52616B;
+            font-size: 12.5px;
+            color: #31363E;
         }
         
         .date {
             font-size: 9.5px;
-            color: #52616B;
-            text-align: start;
+            color: #31363E;
             margin-top: 0px;
-        }
-
-        .deadline-date {
-            font-size: 10px;
-            color: #ff5258;
-            text-align: start;
-            margin-top: 11px;
         }
 
         .done {
             text-decoration: line-through;
         }
-    
+
+        .badge-danger {
+            color: #cb2b2a;
+            font-size: 9px;
+            font-weight: 600;
+            background-color: #ffe0da;
+            border-radius: 8px;
+            margin-top: 11px;
+            padding: 2px;
+            width: fit-content;
+        }
+        
+        .icon {
+            font-size: 18px;
+        }
 
     </style>
 
     <div class="row">
         <div class="card">
             <div class="card-body">
-                <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                <ul class="nav nav-underline mb-3" id="pills-tab" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill"
-                            data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home"
-                            aria-selected="true">Board</button>
+                        <a class="nav-link active" id="pills-home-tab" href="#" role="tab" aria-controls="pills-home" aria-selected="true">บอร์ด</a>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill"
-                            data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile"
-                            aria-selected="false">Filter Datatable</button>
+                        <a class="nav-link" id="pills-profile-tab" href="{% url 'taskcontrol:search_filter_engagement_details' %}" role="tab" aria-controls="pills-profile" aria-selected="false">ค้นหาจากบอร์ด</a>
                     </li>
                 </ul>
 
-                <!--Kanban Board-->
+                <!--Board All-->
                 <div class="tab-content" id="pills-tabContent">
+                    <!--Kanban Board-->
                     <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab" tabindex="0">
                         <div class="row justify-content-end">
                             <div class="col-2 text-start">
@@ -204,21 +207,24 @@
                                         {% if engagement.status == 'OPENJOB' %}
                                             <div class="engagement" draggable="true" ondragstart="drag(event)" id="{{ engagement.id }}">
                                                 <input type="hidden" id="newStatusInput_{{ engagement.id }}" name="new_status" value="OPENJOB">
-                                                <div class="text-end">
-                                                    <i class="fas fa-edit" onclick="openUpdateNotesModal('{{ engagement.id }}', '{{ engagement.job_code }}', '{{ engagement.notes }}')"></i>
-                                                    <i class="fa-solid fa-arrow-up-right-from-square" style="color:#0085FF;" onclick="openEngagementModal('{{ engagement.job_code }}')"></i>
+                                                <div class="row">
+                                                    <div class="col-8 text-start">
+                                                        <div class="title fw-semibold text-start">{{ engagement.job_code }}</div>
+                                                    </div>
+                                                    <div class="col-4 text-end">
+                                                        <i class="fa-solid fa-ellipsis-vertical" onclick="openUpdateNotesModal('{{ engagement.id }}', '{{ engagement.job_code }}', '{{ engagement.notes }}')"></i>
+                                                        <i class="fa-solid fa-square-arrow-up-right" style="color:#0085FF; cursor: pointer;" onclick="openEngagementModal('{{ engagement.job_code }}')"></i>
+                                                    </div>
                                                 </div>
-                                                <div class="date">วันที่: {{ engagement.create_at|date:'d/m/Y' }}</div>
-                                                <div class="title fw-semibold"><i class="fa-solid fa-hashtag"></i> {{ engagement.job_code }}</div>
-                                                <div class="detail">{{ engagement.type.name_th }}</div>
-                                                <div class="detail">ผู้ตรวจทาน: {{ engagement.reviewer.first_name }} {{ engagement.reviewer.last_name }}</div>
-                                                <div class="detail">ผู้อนุมัติ: {{ engagement.approver.first_name }} {{ engagement.approver.last_name }}</div>
-                                                <div class="detail">ผู้รับผิดชอบ: {{ engagement.administrator.first_name }} {{ engagement.administrator.last_name }}</div>
-                                                
-                                                <div class="deadline-date ">เดดไลน์:
+                                                <div class="date text-end">วันที่: {{ engagement.create_at|date:'d/m/Y' }}</div>
+                                                <div class="detail"><i class="fa-solid fa-thumbtack" style="color: #f42a2a;"></i> {{ engagement.type.name_th }}</div>
+                                                <div class="detail"><i class="fa-regular fa-circle-user"></i> {{ engagement.administrator.first_name }} {{ engagement.administrator.last_name }}</div>
+                                                <div class="detail"><i class="fa-regular fa-circle-check"></i> {{ engagement.reviewer.first_name }} {{ engagement.reviewer.last_name }}</div>
+                                                <div class="detail"><i class="fa-solid fa-circle-check"></i> {{ engagement.approver.first_name }} {{ engagement.approver.last_name }}</div>
+                                                <div class="badge-danger text-end">
                                                     {% for detail in engagement_details %}
-                                                        {% if detail.engagement.id == engagement.id and detail.deadline == 'YOUR_FILTER_DATE' %}
-                                                            {{ detail.deadline|date:'d/m/Y' }} | 
+                                                        {% if detail.engagement.id == engagement.id %}
+                                                            <i class="fa-solid fa-clock"></i> {{ detail.deadline|date:'d/m/Y' }} <br>
                                                         {% endif %}
                                                     {% endfor %}
                                                 </div>
@@ -234,21 +240,24 @@
                                             <div class="engagement" draggable="true" ondragstart="drag(event)" id="{{ engagement.id }}">
                                                 <input type="hidden" id="newStatusInput_{{ engagement.id }}" name="new_status" value="IN_PROGRESS">
                                                 
-                                                <div class="text-end">
-                                                    <i class="fas fa-edit" onclick="openUpdateNotesModal('{{ engagement.id }}', '{{ engagement.job_code }}', '{{ engagement.notes }}')"></i>
-                                                    <i class="fa-solid fa-arrow-up-right-from-square" style="color:#0085FF;" onclick="openEngagementModal('{{ engagement.job_code }}')"></i>
+                                                <div class="row">
+                                                    <div class="col-8 text-start">
+                                                        <div class="title fw-semibold text-start">{{ engagement.job_code }}</div>
+                                                    </div>
+                                                    <div class="col-4 text-end">
+                                                        <i class="fa-solid fa-ellipsis-vertical" onclick="openUpdateNotesModal('{{ engagement.id }}', '{{ engagement.job_code }}', '{{ engagement.notes }}')"></i>
+                                                        <i class="fa-solid fa-square-arrow-up-right" style="color:#0085FF; cursor: pointer;" onclick="openEngagementModal('{{ engagement.job_code }}')"></i>
+                                                    </div>
                                                 </div>
-                                                <div class="date">วันที่: {{ engagement.create_at|date:'d/m/Y' }}</div>
-                                                <div class="title fw-semibold"><i class="fa-solid fa-hashtag"></i> {{ engagement.job_code }}</div>
-                                                <div class="detail">{{ engagement.type.name_th }}</div>
-                                                <div class="detail">ผู้ตรวจทาน: {{ engagement.reviewer.first_name }} {{ engagement.reviewer.last_name }}</div>
-                                                <div class="detail">ผู้อนุมัติ: {{ engagement.approver.first_name }} {{ engagement.approver.last_name }}</div>
-                                                <div class="detail">ผู้รับผิดชอบ: {{ engagement.administrator.first_name }} {{ engagement.administrator.last_name }}</div>
-                                                
-                                                <div class="deadline-date ">เดดไลน์:
+                                                <div class="date text-end">วันที่: {{ engagement.create_at|date:'d/m/Y' }}</div>
+                                                <div class="detail"><i class="fa-solid fa-thumbtack" style="color: #f42a2a;"></i> {{ engagement.type.name_th }}</div>
+                                                <div class="detail"><i class="fa-regular fa-circle-user"></i> {{ engagement.administrator.first_name }} {{ engagement.administrator.last_name }}</div>
+                                                <div class="detail"><i class="fa-regular fa-circle-check"></i> {{ engagement.reviewer.first_name }} {{ engagement.reviewer.last_name }}</div>
+                                                <div class="detail"><i class="fa-solid fa-circle-check"></i> {{ engagement.approver.first_name }} {{ engagement.approver.last_name }}</div>
+                                                <div class="badge-danger text-end">
                                                     {% for detail in engagement_details %}
                                                         {% if detail.engagement.id == engagement.id %}
-                                                            {{ detail.deadline|date:'d/m/Y' }} | 
+                                                            <i class="fa-solid fa-clock"></i> {{ detail.deadline|date:'d/m/Y' }} <br>
                                                         {% endif %}
                                                     {% endfor %}
                                                 </div>
@@ -261,24 +270,26 @@
                                     <h5 class="task-header-review fw-semibold" id="task-review-header">รอตรวจทาน</h5>
                                     {% for engagement in engagements %}
                                         {% if engagement.status == 'REVIEW' %}
-                                            
                                             <div class="engagement" draggable="true" ondragstart="drag(event)" id="{{ engagement.id }}">
                                                 <input type="hidden" id="newStatusInput_{{ engagement.id }}" name="new_status" value="REVIEW">
-                                                <div class="text-end">
-                                                    <i class="fas fa-edit" onclick="openUpdateNotesModal('{{ engagement.id }}', '{{ engagement.job_code }}', '{{ engagement.notes }}')"></i>
-                                                    <i class="fa-solid fa-arrow-up-right-from-square" style="color:#0085FF;" onclick="openEngagementModal('{{ engagement.job_code }}')"></i>
+                                                <div class="row">
+                                                    <div class="col-8 text-start">
+                                                        <div class="title fw-semibold text-start">{{ engagement.job_code }}</div>
+                                                    </div>
+                                                    <div class="col-4 text-end">
+                                                        <i class="fa-solid fa-ellipsis-vertical" onclick="openUpdateNotesModal('{{ engagement.id }}', '{{ engagement.job_code }}', '{{ engagement.notes }}')"></i>
+                                                        <i class="fa-solid fa-square-arrow-up-right" style="color:#0085FF; cursor: pointer;" onclick="openEngagementModal('{{ engagement.job_code }}')"></i>
+                                                    </div>
                                                 </div>
-                                                <div class="date">วันที่: {{ engagement.create_at|date:'d/m/Y' }}</div>
-                                                <div class="title fw-semibold"><i class="fa-solid fa-hashtag"></i> {{ engagement.job_code }}</div>
-                                                <div class="detail">{{ engagement.type.name_th }}</div>
-                                                <div class="detail">ผู้ตรวจทาน: {{ engagement.reviewer.first_name }} {{ engagement.reviewer.last_name }}</div>
-                                                <div class="detail">ผู้อนุมัติ: {{ engagement.approver.first_name }} {{ engagement.approver.last_name }}</div>
-                                                <div class="detail">ผู้รับผิดชอบ: {{ engagement.administrator.first_name }} {{ engagement.administrator.last_name }}</div>
-                                                
-                                                <div class="deadline-date ">เดดไลน์:
+                                                <div class="date text-end">วันที่: {{ engagement.create_at|date:'d/m/Y' }}</div>
+                                                <div class="detail"><i class="fa-solid fa-thumbtack" style="color: #f42a2a;"></i> {{ engagement.type.name_th }}</div>
+                                                <div class="detail"><i class="fa-regular fa-circle-user"></i> {{ engagement.administrator.first_name }} {{ engagement.administrator.last_name }}</div>
+                                                <div class="detail"><i class="fa-regular fa-circle-check"></i> {{ engagement.reviewer.first_name }} {{ engagement.reviewer.last_name }}</div>
+                                                <div class="detail"><i class="fa-solid fa-circle-check"></i> {{ engagement.approver.first_name }} {{ engagement.approver.last_name }}</div>
+                                                <div class="badge-danger text-end">
                                                     {% for detail in engagement_details %}
                                                         {% if detail.engagement.id == engagement.id %}
-                                                            {{ detail.deadline|date:'d/m/Y' }} | 
+                                                            <i class="fa-solid fa-clock"></i> {{ detail.deadline|date:'d/m/Y' }} <br>
                                                         {% endif %}
                                                     {% endfor %}
                                                 </div>
@@ -293,21 +304,24 @@
                                         {% if engagement.status == 'PENDINGCLIENT' %}
                                             <div class="engagement" draggable="true" ondragstart="drag(event)" id="{{ engagement.id }}">
                                                 <input type="hidden" id="newStatusInput_{{ engagement.id }}" name="new_status" value="PENDINGCLIENT">
-                                                <div class="text-end">
-                                                    <i class="fas fa-edit" onclick="openUpdateNotesModal('{{ engagement.id }}', '{{ engagement.job_code }}', '{{ engagement.notes }}')"></i>
-                                                    <i class="fa-solid fa-arrow-up-right-from-square" style="color:#0085FF;" onclick="openEngagementModal('{{ engagement.job_code }}')"></i>
-
+                                                <div class="row">
+                                                    <div class="col-8 text-start">
+                                                        <div class="title fw-semibold text-start">{{ engagement.job_code }}</div>
+                                                    </div>
+                                                    <div class="col-4 text-end">
+                                                        <i class="fa-solid fa-ellipsis-vertical" onclick="openUpdateNotesModal('{{ engagement.id }}', '{{ engagement.job_code }}', '{{ engagement.notes }}')"></i>
+                                                        <i class="fa-solid fa-square-arrow-up-right" style="color:#0085FF; cursor: pointer;" onclick="openEngagementModal('{{ engagement.job_code }}')"></i>
+                                                    </div>
                                                 </div>
-                                                <div class="date">วันที่: {{ engagement.create_at|date:'d/m/Y' }}</div>
-                                                <div class="title fw-semibold"><i class="fa-solid fa-hashtag"></i> {{ engagement.job_code }}</div>
-                                                <div class="detail">{{ engagement.type.name_th }}</div>
-                                                <div class="detail">ผู้ตรวจทาน: {{ engagement.reviewer.first_name }} {{ engagement.reviewer.last_name }}</div>
-                                                <div class="detail">ผู้อนุมัติ: {{ engagement.approver.first_name }} {{ engagement.approver.last_name }}</div>
-                                                <div class="detail">ผู้รับผิดชอบ: {{ engagement.administrator.first_name }} {{ engagement.administrator.last_name }}</div>
-                                                <div class="deadline-date ">เดดไลน์: 
+                                                <div class="date text-end">วันที่: {{ engagement.create_at|date:'d/m/Y' }}</div>
+                                                <div class="detail"><i class="fa-solid fa-thumbtack" style="color: #f42a2a;"></i> {{ engagement.type.name_th }}</div>
+                                                <div class="detail"><i class="fa-regular fa-circle-user"></i> {{ engagement.administrator.first_name }} {{ engagement.administrator.last_name }}</div>
+                                                <div class="detail"><i class="fa-regular fa-circle-check"></i> {{ engagement.reviewer.first_name }} {{ engagement.reviewer.last_name }}</div>
+                                                <div class="detail"><i class="fa-solid fa-circle-check"></i> {{ engagement.approver.first_name }} {{ engagement.approver.last_name }}</div>
+                                                <div class="badge-danger text-end">
                                                     {% for detail in engagement_details %}
                                                         {% if detail.engagement.id == engagement.id %}
-                                                            {{ detail.deadline|date:'d/m/Y' }} | 
+                                                            <i class="fa-solid fa-clock"></i> {{ detail.deadline|date:'d/m/Y' }} <br>
                                                         {% endif %}
                                                     {% endfor %}
                                                 </div>
@@ -322,22 +336,24 @@
                                         {% if engagement.status == 'DONE' %}
                                             <div class="engagement" draggable="true" ondragstart="drag(event)" id="{{ engagement.id }}">
                                                 <input type="hidden" id="newStatusInput_{{ engagement.id }}" name="new_status" value="DONE">
-                                                <div class="text-end">
-                                                    <i class="fas fa-edit" onclick="openUpdateNotesModal('{{ engagement.id }}', '{{ engagement.job_code }}', '{{ engagement.notes }}')"></i>
-                                                    <i class="fa-solid fa-arrow-up-right-from-square" style="color:#0085FF;" onclick="openEngagementModal('{{ engagement.job_code }}')"></i>
-
+                                                <div class="row">
+                                                    <div class="col-8 text-start">
+                                                        <div class="done title fw-semibold text-start">{{ engagement.job_code }}</div>
+                                                    </div>
+                                                    <div class="col-4 text-end">
+                                                        <i class="fa-solid fa-ellipsis-vertical" onclick="openUpdateNotesModal('{{ engagement.id }}', '{{ engagement.job_code }}', '{{ engagement.notes }}')"></i>
+                                                        <i class="fa-solid fa-square-arrow-up-right" style="color:#0085FF; cursor: pointer;" onclick="openEngagementModal('{{ engagement.job_code }}')"></i>
+                                                    </div>
                                                 </div>
-                                                <div class="date">วันที่: {{ engagement.create_at|date:'d/m/Y' }}</div>
-                                                <div class="title done fw-semibold"><i class="fa-solid fa-hashtag"></i> {{ engagement.job_code }}</div>
-                                                <div class="done detail">{{ engagement.type.name_th }}</div>
-                                                <div class="done detail">ผู้ตรวจทาน: {{ engagement.reviewer.first_name }} {{ engagement.reviewer.last_name }}</div>
-                                                <div class="done detail">ผู้อนุมัติ: {{ engagement.approver.first_name }} {{ engagement.approver.last_name }}</div>
-                                                <div class="done detail">ผู้รับผิดชอบ: {{ engagement.administrator.first_name }} {{ engagement.administrator.last_name }}</div>
-                                                
-                                                <div class="deadline-date ">เดดไลน์: 
+                                                <div class="done date text-end">วันที่: {{ engagement.create_at|date:'d/m/Y' }}</div>
+                                                <div class="done detail"><i class="fa-solid fa-thumbtack" style="color: #f42a2a;"></i> {{ engagement.type.name_th }}</div>
+                                                <div class="done detail"><i class="fa-regular fa-circle-user"></i> {{ engagement.administrator.first_name }} {{ engagement.administrator.last_name }}</div>
+                                                <div class="done detail"><i class="fa-regular fa-circle-check"></i> {{ engagement.reviewer.first_name }} {{ engagement.reviewer.last_name }}</div>
+                                                <div class="done detail"><i class="fa-solid fa-circle-check"></i> {{ engagement.approver.first_name }} {{ engagement.approver.last_name }}</div>
+                                                <div class="badge-danger text-end">
                                                     {% for detail in engagement_details %}
                                                         {% if detail.engagement.id == engagement.id %}
-                                                            {{ detail.deadline|date:'d/m/Y' }} | 
+                                                            <i class="fa-solid fa-clock"></i> {{ detail.deadline|date:'d/m/Y' }} <br>
                                                         {% endif %}
                                                     {% endfor %}
                                                 </div>
@@ -345,16 +361,15 @@
                                         {% endif %}
                                     {% endfor %}
                                 </div>
-                                
                             </div>
                         </div>
                     </div>
 
                     <!--Filter Datatable-->
                     <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab" tabindex="0">
-                        <form id="frmFilterSearch" method="GET" action="{% url 'taskcontrol:filter_engagement_details' %}">
+                        <form id="frmFilterSearch" method="GET" action="{% url 'taskcontrol:search_filter_engagement_details' %}">
                             <div class="row">
-                                <div class="col-6">
+                                <div class="col-6 mb-3">
                                     <label for="" class="form-label">ผู้ดูแล:</label>
                                     <select name="administrator_id" id="administrator_id" class="form-select">
                                         <option value selected disabled hidden>-- กรุณาเลือก --</option>
@@ -415,24 +430,23 @@
         </div>
     </div>
 
-    <!-- Modal EngagementDetail-->
-    <div class="modal fade" id="engagementModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+    <div class="modal fade" id="engagementModal" tabindex="-1" role="dialog" aria-labelledby="engagementModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title fw-semibold" id="engagementModalLabel"></h5>
+                    <h5 class="modal-title mt-3" id="engagementModalLabel"></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="engagementModalContent">
-                    <!-- ข้อมูล Engagement จะถูกแสดงที่นี่ -->
+                    <!-- Dynamic content will be inserted here -->
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
                 </div>
             </div>
         </div>
     </div>
-
+    
 
     <!-- Modal for updating engagement notes -->
     <div class="modal fade" id="updateNotesModal" tabindex="-1" role="dialog" aria-labelledby="updateNotesModalLabel"
@@ -512,48 +526,42 @@
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 200) {
-                        console.log('Engagement status updated successfully');
+                        console.log('อัปเดตสถานะเรียบร้อยแล้ว');
                         location.reload();
                     } else {
-                        console.error('Error updating engagement status:', xhr.responseText);
+                        console.error('เกิดข้อผิดพลาดในการอัปเดตสถานะ:', xhr.responseText);
                     }
                 }
             };
             xhr.send("engagement_id=" + engagementId + "&new_status=" + newStatus);
         }
 
-        // สร้างฟังก์ชัน JavaScript ที่รับ URL เป็นอาร์กิวเมนต์
         function getEngagementDetailsUrl() {
             return '{% url 'taskcontrol:get_engagement_details' %}';
         }
-
+        
         function openEngagementModal(jobCode) {
-            var engagementDetailsUrl = document.getElementById('engagementModal').getAttribute('data-engagement-details-url');
             $.ajax({
-                url: getEngagementDetailsUrl(),  // เรียกใช้ฟังก์ชันเพื่อรับ URL
+                url: getEngagementDetailsUrl(),
                 method: 'GET',
                 data: { job_code: jobCode },
                 success: function(response) {
-                    $('#engagementModalLabel').html('รายละเอียด Engagement #' + jobCode);
+                    $('#engagementModalLabel').html('Engagement #' + jobCode);
                     $('#engagementModalContent').html(response.modal_content);
                     $('#engagementModal').modal('show');
                 },
                 error: function(xhr, status, error) {
                     console.error('Error fetching engagement details:', error);
-                    // แสดงข้อความแจ้งเตือนหรือประกาศข้อผิดพลาดเมื่อเกิดข้อผิดพลาด
+                    // Handle error
                 }
             });
         }
-
+        
         // JavaScript function to open update notes modal
         function openUpdateNotesModal(engagementId, jobCode, notes) {
-            // Set engagement ID to the hidden input field in the modal form
             document.getElementById('engagementId').value = engagementId;
-            // Set job code in the label
             document.getElementById('newNotesLabel').textContent = "Engagement # " + jobCode;
-            // Set notes in the textarea
             document.getElementById('newNotes').value = notes;
-            // Show the modal
             $('#updateNotesModal').modal('show');
         }
 
@@ -594,11 +602,11 @@
             const clientCount = document.querySelectorAll("#column-in-progress[data-status='PENDINGCLIENT'] .engagement").length;
             const doneCount = document.querySelectorAll("#column-in-progress[data-status='DONE'] .engagement").length;
 
-            document.getElementById("task-open-header").innerHTML = `<i class="fa-regular fa-circle"></i> เปิดงาน (${openCount})`;
+            document.getElementById("task-open-header").innerHTML = `<i class="fa-solid fa-circle"></i> เปิดงาน (${openCount})`;
             document.getElementById("task-progress-header").innerHTML = `<i class="fa-solid fa-spinner"></i> กำลังดำเนินงาน (${progressCount})`;
-            document.getElementById("task-review-header").innerHTML = `<i class="fa-solid fa-magnifying-glass"></i> รอตรวจทาน (${reviewCount})`;
-            document.getElementById("task-client-header").innerHTML = `<i class="fa-regular fa-clock"></i> รอลูกค้า (${clientCount})`;
-            document.getElementById("task-done-header").innerHTML = `<i class="fa-regular fa-circle-check"></i> เรียบร้อย (${doneCount})`;
+            document.getElementById("task-review-header").innerHTML = `<i class="fa-solid fa-user-clock"></i> รอตรวจทาน (${reviewCount})`;
+            document.getElementById("task-client-header").innerHTML = `<i class="fa-solid fa-clock"></i> รอลูกค้า (${clientCount})`;
+            document.getElementById("task-done-header").innerHTML = `<i class="fa-solid fa-circle-check"></i> เรียบร้อย (${doneCount})`;
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -655,7 +663,7 @@
 
                 // AJAX request to load data
                 $.ajax({
-                    url: '{% url "taskcontrol:filter_engagement_details" %}',
+                    url: '{% url "taskcontrol:get_filter_engagement_details" %}',
                     type: 'GET',
                     data: data,
                     success: function(response) {
@@ -674,9 +682,5 @@
                 $('#frmFilterSearch')[0].reset();
             });
         });
-
-
-
-
     </script>
 {% endblock content %}

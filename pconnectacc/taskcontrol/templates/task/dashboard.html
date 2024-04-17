@@ -3,23 +3,111 @@
 {% block content %}
 
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+    .head-s {
+        font-size: 12px;
+        font-family: "Poppins", sans-serif;
+        font-weight: 500;
+    }
+
+    .head-number {
+        font-size: 36px;
+        font-family: "Poppins", sans-serif;
+        font-weight: 600;
+    }
+
+    .head-total{
+        font-size: 10px;
+        font-family: "Poppins", sans-serif;
+        font-weight: 500;
+        color: #b1b1b1;
+    }
+
+    .card-body {
+        padding: 15px;
+    }
+
+    .card-open-job {
+        color: #297ae3;
+        background-color: #dfebfa;
+        border-radius: 8px;
+        text-align: center;
+        padding: 15px;
+    }
+
+    .card-pending-client {
+        color: #dc3545;
+        background-color: #ffcfce;
+        border-radius: 8px;
+        text-align: center;
+        padding: 15px;
+    }
+
+    .card-done {
+        color: #00c894;
+        background-color: #d7f7ee;
+        border-radius: 8px;
+        text-align: center;
+        padding: 15px;
+    }
+
+    .total-open-job {
+        color: #297ae3;
+        background-color: #fff;
+        display: inline;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .total-pending-client {
+        color: #dc3545;
+        background-color: #fff;
+        display: inline;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .total-done {
+        color: #00c894;
+        background-color: #fff;
+        display: inline;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    
     .card-date {
         background-color: #FFFFFF;
         border-radius: 15px;
         box-shadow: 0px 0px 10px #efefef;
     }
 
+    .card {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .calendar {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
     .calendar-toolbar {
         display: flex;
-        justify-content: space-around;
+        justify-content: space-between;
         align-items: center;
-        padding-bottom: 10px;
+        margin-bottom: 15px;
     }
 
     .calendar-toolbar>.current-month {
-        font-size: 18px;
-        font-weight: bold;
-        color: #19181a;
+        font-size: 16px;
+        font-weight: 600;
     }
 
     .calendar-toolbar>[class$="month-btn"] {
@@ -27,49 +115,46 @@
         aspect-ratio: 1;
         text-align: center;
         line-height: 40px;
-        font-size: 14px;
-        color: #19181a;
-        background: #f8f7fa;
+        font-size: 10px;
+        background: #f6f6f6;
         border: none;
-        border-radius: 15px;
-    }
-
-    .weekdays,
-    .calendar-days {
-        display: flex;
-        flex-wrap: wrap;
-        padding-inline: 30px;
+        border-radius: 13px;
     }
 
     .weekdays {
-        padding-top: 30px;
-        margin-bottom: 5px;
-    }
-
-    .calendar-days {
-        padding-bottom: 12px;
-    }
-
-    .weekday-name,
-    [class$="-day"] {
-        width: 40px;
-        color: #19181a;
-        text-align: center;
-        line-height: 35px;
-        font-size: 0.8331rem;
+        display: flex;
+        justify-content: space-between;
     }
 
     .weekday-name {
-        color: #19181a;
+        width: calc(100% / 7);
+        padding: 8px 0;
+        text-align: center;
+        font-size: 12px;
         font-weight: 700;
-        font-size: 14px;
     }
 
+    .calendar-days {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 8px;
+        font-size: 13px;
+        text-align: center;
+    }
+
+    .day {
+        text-align: center;
+        line-height: 25px;
+        font-size: 12px;
+        border: 1px solid #ccc;
+        border-radius: 13px;
+    }
+    
     .current-day {
         background-color: #fa6b6b;
         color: #f8f7fa;
-        border-radius: 15px;
-        font-weight: 700;
+        border-radius: 12px;
+        font-weight: 600;
         transition: 0.5s;
         cursor: pointer;
     }
@@ -82,7 +167,7 @@
     .calendar-toolbar>[class$="month-btn"]:hover,
     .month-day:hover,
     .btn-date:hover {
-        border-radius: 15px;
+        border-radius: 13px;
         background-color: #f8f7fa;
         color: #fa6b6b;
         transition: 0.1s;
@@ -93,15 +178,9 @@
     .calendar-toolbar>[class$="month-btn"]:focus,
     .month-day:focus,
     .btn-date:focus {
-        border-radius: 15px;
+        border-radius: 13px;
         background-color: #fa6b6b;
         color: #f8f7fa;
-    }
-
-    .goto-buttons {
-        padding-block: 25px;
-        display: flex;
-        justify-content: space-evenly;
     }
 
     .btn-date {
@@ -109,17 +188,10 @@
         border: none;
         border-radius: 15px;
         padding: 8px 14px;
-        color: #19181a;
         font-weight: 500;
         font-size: 0.9rem;
         margin-right: 1px;
         box-shadow: 0px 0px 0px #efefef;
-    }
-    .selected-day {
-        background-color: rgb(112, 71, 235);
-        color: #f8f7fa;
-        border-radius: 50%;
-        font-weight: 700;
     }
 
     /* ให้ตัว container ที่ครอบองค์ประกอบทั้งหมดมี display: flex */
@@ -131,22 +203,23 @@
     /* ให้ chart-container เป็นส่วนหนึ่งของ container และมี flex-grow: 1 เพื่อให้ยืดตามพื้นที่ที่เหลือ */
     .chart-container {
         position: relative;
-        width: 320px;
-        height: 320px;
+        width: 180px;
+        height: 180px;
     }
-
 
     .legend {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        padding: 60px;
     }
 
     .legend-item {
         display: flex;
         align-items: center;
         margin-bottom: 5px;
+        margin-left: 20px;
+        font-size: 12px;
+        font-weight: 500;
     }
 
     .legend-item .icon {
@@ -166,168 +239,320 @@
     #centerText {
         position: absolute;
         top: 50%;
-        left: 50%;
+        left: 55%;
         transform: translate(-50%, -50%);
-        font-size: 16px;
-        color: #393E46;
+        font-size: 14px;
         font-family: "Bai Jamjuree", sans-serif;
         font-weight: 600;
     }
 
-    th, tr, td{
+    .count-client {
+        padding: 15px;
+        color: #5d87ff;
+        background: #ffffff;
+    }
+
+    .count-engagement {
+        padding: 15px;
+        color: #5d87ff;
+        background: #ffffff;
+    }
+
+    .count-open-job {
+        padding: 15px;
+        color: #fe5f3b;
+        background: #ffffff;
+    }
+
+    .count-pending-client {
+        padding: 15px;
+        color: #ffa237;
+        background: #ffffff;
+    }
+
+    .count-done {
+        padding: 15px;
+        color: #53c536;
+        background: #ffffff;
+    }
+
+    .flex-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    .icon {
+        color: #ffffff;
+        border-radius: 50%;
+        padding: 8px;
+    }
+
+    th,
+    td {
+        padding: 8px;
         font-size: 13.5px;
     }
 
+    th {
+        background-color: #f5f7f9;
+        font-size: 12px;
+        border-radius: 1px;
+    }
+    
+    .engagement-table {
+        display: none;
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 15px;
+    }
+    .status-wrapper {
+        display: flex;
+        align-items: center;
+    }
+    
+    .status-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        flex-wrap: nowrap;
+    }
+    
+    .all-status {
+        margin-right: 10px;
+    }
+    
+    .toggle-btn {
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+        outline: none;
+    }
+    
+    .toggle-btn i {
+        font-size: 14px;
+        color: #333;
+        transition: transform 0.3s ease;
+    }
+    
+    .toggle-btn.active i {
+        transform: rotate(180deg);
+    }
+    
+    .engagement-table {
+        display: table;
+        font-size: 13px;
+    }
+
+    .badge-deadline {
+        font-size: 12px;
+    }
+
+    .badge-period {
+        font-size: 12px;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 8px;
+        font-size: 12.5px;
+        font-weight: 600;
+    }
+    
+    .status-open {
+        border-radius: 8px;
+        color: #0051a0;
+        background-color: #cbe5ff;
+    }
+    
+    .status-in-progress {
+        border-radius: 8px;
+        color: #5b2891;
+        background-color: #ead6ff;
+    }
+    
+    .status-review {
+        border-radius: 8px;
+        color: #954800;
+        background-color: #fff1c6;
+    }
+    
+    .status-pending-client {
+        border-radius: 8px;
+        color: #a10f0a;
+        background-color: #ffcfce;
+    }
+    
+    .status-done {
+        border-radius: 8px;
+        color: #054627;
+        background-color: #d0f4b2;
+    }
+
+    .due{
+        font-size: 13px;
+        font-weight: 600;
+        color: #5eb643;
+    }
+
+    .overdue{
+        font-size: 13px;
+        font-weight: 600;
+        color: #ff4261;
+    }
+
+    .normal{
+        font-size: 13px;
+        font-weight: 600;
+        color: #263339;
+    }
+    
+    .warning-date{
+        font-size: 13px;
+        font-weight: 600;
+        color: #ffaf11;
+    }
 </style>
-
+<!--Row 1-->
 <div class="row">
     <div class="col-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col">
-                        <h5>Clients</h5>
-                        <h2>{{ total_clients }} <span style="font-size: 15px;">ราย</span></h2>
+        <div class="card count-client">
+            <div class="row">
+                <div class="flex-container">
+                    <div class="text-start">
+                        <span class="head-s">Clients</span>
                     </div>
-                    <div class="col-auto mr-auto">
-                        <div class="bg-primary rounded-circle text-light d-flex justify-content-center align-items-center" style="width: 50px; height: 50px;">
-                            <i class="fas fa-users" style="font-size: 20px;"></i>
-                        </div>
+                    <div class="text-end">
+                        <i class="fa-solid fa-user-large icon" style="background-color: #5d87ff;"></i>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col mt-0">
-                        <h5>Engagements</h5>
-                        <h2>{{ total_engagements }} <span style="font-size: 15px;">รายการ</span></h2>
-                    </div>
-                    <div class="col-auto mr-auto">
-                        <div class="bg-primary rounded-circle text-light d-flex justify-content-center align-items-center" style="width: 50px; height: 50px;">
-                            <i class="fa-solid fa-box-archive"></i>
-                        </div>
-                    </div>
-                </div>
+                <span class="head-number">{{ total_clients }}</span>
+                <span class="head-total">Total Clients</span>
             </div>
         </div>
     </div>
     <div class="col-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col mt-0">
-                        <h5>Open Jobs</h5>
-                        <h2>{{ open_job_engagement }} <span style="font-size: 15px;">งาน</span></h2>
+        <div class="card count-engagement">
+            <div class="row">
+                <div class="flex-container">
+                    <div class="text-start">
+                        <span class="head-s">Engagements</span>
                     </div>
-                    <div class="col-auto mr-auto">
-                        <div class="bg-warning rounded-circle text-light d-flex justify-content-center align-items-center" style="width: 50px; height: 50px;">
-                            <i class="fa-solid fa-star"></i>
-                        </div>
+                    <div class="text-end">
+                        <i class="fa-solid fa-box-archive icon" style="background-color: #5d87ff;"></i>
                     </div>
                 </div>
+                <span class="head-number">{{ total_engagements }}</span>
+                <span class="head-total">Total Engagements</span>
             </div>
         </div>
     </div>
-    <div class="col-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col mt-0">
-                        <h5>Completed</h5>
-                        <h2>{{ done_job_engagement }} <span style="font-size: 15px;">งาน</span></h2>
+    <div class="col-2">
+        <div class="card count-open-job">
+            <div class="row">
+                <div class="flex-container">
+                    <div class="text-start">
+                        <span class="head-s">Open </span>
                     </div>
-                    <div class="col-auto mr-auto">
-                        <div class="bg-success rounded-circle text-light d-flex justify-content-center align-items-center" style="width: 50px; height: 50px;">
-                            <i class="fa-solid fa-star"></i>
-                        </div>
+                    <div class="text-end">
+                        <i class="fa-solid fa-star icon" style="background-color: #fe5f3b;"></i>
                     </div>
                 </div>
+                <span class="head-number">{{ open_job_engagement }}</span>
+                <span class="head-total">Total</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-2">
+        <div class="card count-pending-client">
+            <div class="row">
+                <div class="flex-container">
+                    <div class="text-start">
+                        <span class="head-s">Pending Clients</span>
+                    </div>
+                    <div class="text-end">
+                        <i class="fa-solid fa-clock icon" style="background-color: #ffa237;"></i>
+                    </div>
+                </div>
+                <span class="head-number">{{ client_job_engagement }}</span>
+                <span class="head-total">Total</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-2">
+        <div class="card count-done">
+            <div class="row">
+                <div class="flex-container">
+                    <div class="text-start">
+                        <span class="head-s">Completed</span>
+                    </div>
+                    <div class="text-end">
+                        <i class="fa-solid fa-box-archive icon" style="background-color: #53c536;"></i>
+                    </div>
+                </div>
+                <span class="head-number">{{ done_job_engagement }}</span>
+                <span class="head-total">Total</span>
             </div>
         </div>
     </div>
 </div>
 
+<!--Row 2-->
 <div class="row">
-    <div class="col">
+    <div class="col-9">
         <div class="card">
-            <div class="card-body" style="position: relative;">
-                <h5>Engagements rate</h5>
-                <canvas id="engagementChartLine" style="width: 100%; height: 300px;"></canvas>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-8">
-        <div class="card">
-            <div class="card-body mb-3">
-                <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+            <div class="card-body">
+                <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill"
+                        <button class="nav-link active head-s" id="pills-home-tab" data-bs-toggle="pill"
                             data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home"
                             aria-selected="true">Engagements</button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill"
+                        <button class="nav-link head-s" id="pills-profile-tab" data-bs-toggle="pill"
                             data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile"
-                            aria-selected="false">Accounting</button>
+                            aria-selected="false">Accounts</button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill"
-                            data-bs-target="#pills-contact" type="button" role="tab" aria-controls="pills-contact"
-                            aria-selected="false">Tax</button>
+                        <button class="nav-link head-s" id="pills-profile-tab" data-bs-toggle="pill"
+                            data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile"
+                            aria-selected="false">Taxes</button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill"
-                            data-bs-target="#pills-contact" type="button" role="tab" aria-controls="pills-contact"
-                            aria-selected="false">Payroll</button>
+                        <button class="nav-link head-s" id="pills-profile-tab" data-bs-toggle="pill"
+                            data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile"
+                            aria-selected="false">Payrolls</button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill"
-                            data-bs-target="#pills-contact" type="button" role="tab" aria-controls="pills-contact"
-                            aria-selected="false">Report</button>
+                        <button class="nav-link head-s" id="pills-profile-tab" data-bs-toggle="pill"
+                            data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile"
+                            aria-selected="false">Reports</button>
                     </li>
                 </ul>
                 <div class="tab-content" id="pills-tabContent">
                     <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab" tabindex="0">
-                        <h5 style="margin-bottom: 20px;">สรุปงาน</h5>
                         <div class="container">
                             <div class="chart-container">
                                 <canvas id="doughnutChart"></canvas>
                                 <div id="centerText">Total</div>
                             </div>
                             <div class="legend">
-                                <div id="open_job_count" class="legend-item"></div>
-                                <div id="in_progress_count" class="legend-item"></div>
-                                <div id="review_count" class="legend-item"></div>
-                                <div id="pending_client_count" class="legend-item"></div>
-                                <div id="done_count" class="legend-item"></div>
-                                <div id="total_counts" class="legend-item"></div>
+                                <span id="open_job_count" class="legend-item"></span>
+                                <span id="in_progress_count" class="legend-item"></span>
+                                <span id="review_count" class="legend-item"></span>
+                                <span id="pending_client_count" class="legend-item"></span>
+                                <span id="done_count" class="legend-item"></span>
+                                <span id="total_counts" class="legend-item"></span>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab" tabindex="0">
-                        <div style="display: flex;">
-                            <canvas id="accountingChart" style="width: 33%;"></canvas>
-                            <canvas id="documentFollowChart" style="width: 33%;"></canvas>
-                            <canvas id="documentStorageChart" style="width: 33%;"></canvas>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab"
-                        tabindex="0">go
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-4">
+    <div class="col-3">
         <div class="card">
             <div class="card-body">
                 <div class="calendar-toolbar">
@@ -351,105 +576,83 @@
                     </div>
                     <div class="calendar-days"></div>
                 </div>
-                <div class="goto-buttons">
-                    <button type="button" class="btn btn-date today">Today</button>
-                </div>
             </div>
         </div>
     </div>
 </div>
 
+<!--Row 3-->
 <div class="row">
     <div class="col">
         <div class="card">
             <div class="card-body">
-                <div class="row">
-                    <form id="frmSearch" method="GET" action="{% url 'taskcontrol:search_datatable' %}">
-                        <div class="row mb-3">
-                            <div class="col-1">
-                                <label for="" class="form-label">ชื่อบริษัท :</label>
-                            </div>
-                            <div class="col">
-                                <select name="client_id" id="client_id" class="form-select">
-                                    <option value selected disabled hidden>-- กรุณาเลือก --</option>
-                                    {% for client in clients %}
-                                        <option value="{{ client.id }}">{{ client.company_name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
+                <form id="frmSearch" method="GET" action="{% url 'taskcontrol:get_filter_dashboard' %}">
+                    <div class="row mb-3">
+                        <div class="col-4">
+                            <label for="" class="form-label">ชื่อบริษัท :</label>
+                            <select name="client_id" id="client_id" class="form-select">
+                                <option value selected disabled hidden>-- กรุณาเลือก --</option>
+                                {% for client in clients %}
+                                <option value="{{ client.id }}">{{ client.company_name }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
-                        <div class="row mb-3">
-                            <div class="col-1">
-                                <label for="" class="form-label">รอบบัญชี :</label>
-                            </div>
-                            <div class="col-5">
-                                <input type="checkbox" name="" id="" class="form-check-input">
-                                <label for="" class="form-label">จากวันที่</label> 
-                                <input type="date" class="form-control" name="start_date_period" value="{{ start_date_period }}">
-                            </div>
-                            <div class="col">
-                                <label for="" class="form-label">ถึงวันที่</label>
-                                <input type="date" class="form-control" name="to_date_period" value="{{ to_date_period }}">
-                            </div>
+                        <div class="col-4">
+                            <label for="" class="form-label">หมวดหมู่ :</label>
+                            <select name="category_id" id="category_id" class="form-select">
+                                <option value selected disabled hidden>-- กรุณาเลือก --</option>
+                                {% for ca in engagement_category %}
+                                <option value="{{ ca.id }}">{{ ca.name_th }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
-                        <div class="row mb-3">
-                            <div class="col-1"></div>
-                            <div class="col">
-                                <input type="checkbox" name="per_month" id="per_month" class="form-check-input">
-                                <label for="" class="form-label">แสดงเฉพาะเดือนนี้</label>
-                            </div>
+                        <div class="col-4">
+                            <label for="" class="form-label">ประเภทงาน :</label>
+                            <select name="engagement_type_id" id="engagement_type_id" class="form-select">
+                                <option value selected disabled hidden>-- กรุณาเลือก --</option>
+                                {% for t in engagement_types %}
+                                <option value="{{ t.id }}">{{ t.name_th }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <label for="" class="form-label">หมวดหมู่ :</label>
-                                <select name="category_id" id="category_id" class="form-select">
-                                    <option value selected disabled hidden>-- กรุณาเลือก --</option>
-                                    {% for ca in category %}
-                                        <option value="{{ ca.id }}">{{ ca.name_th }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-6">
-                                <label for="" class="form-label">ประเภทงาน :</label>
-                                <select name="type_id" id="type_id" class="form-select">
-                                    <option value selected disabled hidden>-- กรุณาเลือก --</option>
-                                    {% for t in type %}
-                                        <option value="{{ t.id }}">{{ t.name_th }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-1">
+                            <label for="" class="form-label">รอบบัญชี :</label>
                         </div>
-                        <div class="row">
-                            <div class="col">
-                                <input type="checkbox" name="deadline_days" id="deadline_days" class="form-check-input">
-                                <label for="deadline_days" class="form-label">ใกล้ถึงเดดไลน์</label>
-                            </div>
+                        <div class="col-3">
+                            <input type="date" class="form-control" name="start_date_period"
+                                value="{{ start_date_period }}">
                         </div>
-                        <div class="row">
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                <button type="submit" id="btnSearch" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> กรองค้นหา</button>
-                                <button type="reset" id="btnReset" class="btn btn-light">ล้างข้อมูล</button>
-                            </div>
+                        <div class="col-4">
+                            <input type="date" class="form-control" name="end_date_period"
+                                value="{{ end_date_period }}">
                         </div>
-                    </form>
-                </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-1"></div>
+                        <div class="col">
+                            <input type="checkbox" name="per_month" id="per_month" class="form-check-input"
+                                {% if per_month %}checked{% endif %}>
+                            <label for="" class="form-label">เฉพาะเดือนปัจจุบัน</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <input type="checkbox" name="deadline_days" id="deadline_days" class="form-check-input">
+                            <label for="deadline_days" class="form-label">ใกล้ถึงกำหนดเดดไลน์</label>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" id="btnSearch" class="btn btn-primary"><i
+                                    class="fa-solid fa-magnifying-glass"></i> กรองค้นหา</button>
+                            <button type="reset" id="btnReset" class="btn btn-light">ล้างข้อมูล</button>
+                        </div>
+                    </div>
+                </form>
 
-                <div class="card-body" id="result">
-                    <table id="engagement_table" class="table table-hover table-bordered">
-                        <thead class="text-center">
-                            <tr class="table-light">
-                                <th>#</th>
-                                <th>ลูกค้า</th>
-                                <th>รอบ</th>
-                                <th>ผู้ดูแล</th>
-                                <th>งาน</th>
-                                <th>เดดไลน์</th>
-                                <th>เหลือเวลา</th>
-                            </tr>
-                        </thead>
-                        <tbody class="table-group-divider" id="dataBody">
-                        </tbody>
-                    </table>
+                <div id="engagementData">
                 </div>
             </div>
         </div>
@@ -474,187 +677,185 @@
                 }
             }
         });
-    });
-
-    // ดึงข้อมูล JSON จาก Django view เพื่อสร้างกราฟแบบเส้น
-    fetch('{% url 'taskcontrol:get_engagement_data' %}')
-        .then(response => response.json())
-        .then(data => {
-            const ctx = document.getElementById('engagementChartLine').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
+    
+        // สร้างกราฟวงกลมเมื่อเอกสารพร้อม
+        fetch('{% url 'taskcontrol:get_engagement_summary' %}')
+            .then(response => response.json())
+            .then(data => {
+                createDoughnutChart(data.labels, data.percentages, data.total_percentage);
+    
+                // แสดงข้อมูลสรุปงาน
+                document.getElementById('open_job_count').innerHTML = `<span class="icon" style="background-color: #ff6384;"></span> เปิดงาน: ${data.counts[0].toFixed(0)} รายการ (${data.percentages[0].toFixed(2)}%)`;
+                document.getElementById('in_progress_count').innerHTML = `<span class="icon" style="background-color: #36a2eb;"></span> กำลังดำเนินการ: ${data.counts[1].toFixed(0)} รายการ (${data.percentages[1].toFixed(2)}%)`;
+                document.getElementById('review_count').innerHTML = `<span class="icon" style="background-color: #ffce56;"></span> รอตรวจทาน: ${data.counts[2].toFixed(0)} รายการ (${data.percentages[2].toFixed(2)}%)`;
+                document.getElementById('pending_client_count').innerHTML = `<span class="icon" style="background-color: #4bc0c0;"></span> รอลูกค้า: ${data.counts[3].toFixed(0)} รายการ (${data.percentages[3].toFixed(2)}%)`;
+                document.getElementById('done_count').innerHTML = `<span class="icon" style="background-color: #cb99ff;"></span> เรียบร้อย: ${data.counts[4].toFixed(0)} รายการ (${data.percentages[4].toFixed(2)}%)`;
+                document.getElementById('total_counts').innerText = `ทั้งหมด: ${data.total_counts} รายการ (${data.total_percentage.toFixed(2)}%)`;
+    
+                // แสดงข้อความรวมเปอร์เซ็นต์ทั้งหมด
+                var totalPercentage = data.percentages.reduce((a, b) => a + b, 0).toFixed(2);
+                document.getElementById('centerText').innerText = 'ทั้งหมด ' + totalPercentage + '%';
+            });
+    
+        // ฟังก์ชันสำหรับสร้างกราฟวงกลม
+        function createDoughnutChart(labels, percentages, totalPercentage) {
+            var ctx = document.getElementById('doughnutChart').getContext('2d');
+            var myDoughnutChart = new Chart(ctx, {
+                type: 'doughnut',
                 data: {
-                    labels: data.dates,
                     datasets: [{
-                        label: 'Counts',
-                        backgroundColor: 'rgba(54, 162, 235)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1.5,
-                        tension: 0,
-                        data: data.engagement_counts
-                    }]
+                        data: percentages,
+                        backgroundColor: ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#cb99ff']
+                    }],
                 },
                 options: {
-                    scales: {
-                        x: {
-                            type: 'time',
-                            position: 'bottom',
-                            time: {
-                                unit: 'day'
-                            },
-                            scaleLabel: {
-                                display: true,
-                                labelString: 'Date'
-                            }
-                        },
-                        y: {
-                            type: 'linear',
-                            position: 'left',
-                            scaleLabel: {
-                                display: true,
-                                labelString: 'Engagement Counts'
-                            }
-                        }
-                    }
+                    responsive: true,
+                    cutoutPercentage: 50,
+                    title: {
+                        display: true,
+                        text: 'สรุปงาน'
+                    },
+                    plugins: {}
                 }
             });
-        });
-
-    fetch('{% url 'taskcontrol:get_engagement_summary' %}')
-        .then(response => response.json())
-        .then(data => {
-            createDoughnutChart(data.labels, data.percentages, data.total_percentage);
-
-            document.getElementById('open_job_count').innerHTML = `<span class="icon" style="background-color: #ff6384;"></span> เปิดงาน: ${data.counts[0].toFixed(0)} รายการ (${data.percentages[0].toFixed(2)}%)`;
-            document.getElementById('in_progress_count').innerHTML = `<span class="icon" style="background-color: #36a2eb;"></span> กำลังดำเนินการ: ${data.counts[1].toFixed(0)} รายการ (${data.percentages[1].toFixed(2)}%)`;
-            document.getElementById('review_count').innerHTML = `<span class="icon" style="background-color: #ffce56;"></span> รอตรวจทาน: ${data.counts[2].toFixed(0)} รายการ (${data.percentages[2].toFixed(2)}%)`;
-            document.getElementById('pending_client_count').innerHTML = `<span class="icon" style="background-color: #4bc0c0;"></span> รอลูกค้า: ${data.counts[3].toFixed(0)} รายการ (${data.percentages[3].toFixed(2)}%)`;
-            document.getElementById('done_count').innerHTML = `<span class="icon" style="background-color: #cb99ff;"></span> เรียบร้อย: ${data.counts[4].toFixed(0)} รายการ (${data.percentages[4].toFixed(2)}%)`;
-            document.getElementById('total_counts').innerText = `ทั้งหมด: ${data.total_counts} รายการ (${data.total_percentage.toFixed(2)}%)`;
-
-            var totalPercentage = data.percentages.reduce((a, b) => a + b, 0).toFixed(2);
-            document.getElementById('centerText').innerText = 'ทั้งหมด ' + totalPercentage + '%';
-        });
-
-    // ฟังก์ชันสำหรับสร้างกราฟวงกลม
-    function createDoughnutChart(labels, percentages, totalPercentage) {
-        var ctx = document.getElementById('doughnutChart').getContext('2d');
-        var myDoughnutChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                datasets: [{
-                    data: percentages,
-                    backgroundColor: ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#cb99ff']
-                }],
-            },
-            options: {
-                responsive: true,
-                cutoutPercentage: 50,
-                title: {
-                    display: true,
-                    text: 'สรุปงาน'
-                },
-                plugins: {
-                    
-                },
-            }
-        });
-    }
-
-    $(document).ready(function () {
+        }
+    
+        // โหลดข้อมูลเริ่มต้นเมื่อเอกสารพร้อม
         function loadInitialData() {
-            var data = $('#frmSearch').serialize(); // Serialize form data
-            var currentDate = new Date(); // Current date
-            var perMonth = $('#per_month').prop('checked'); // Value of per_month checkbox
-            var deadlineDays = $('#deadline_days').prop('checked');
-
-            // AJAX request to load data
+            var data = $('#frmSearch').serialize(); // แปลงข้อมูลฟอร์มเป็นรูปแบบ query string
+            var currentDate = new Date(); // วันที่ปัจจุบัน
+            var perMonth = $('#per_month').prop('checked'); // ค่าของเช็คบ็อกเพื่อเลือกเฉพาะเดือนปัจจุบัน
+            var deadlineDays = $('#deadline_days').prop('checked'); // ค่าของเช็คบ็อกเพื่อเลือกเฉพาะงานที่ใกล้ถึงกำหนด
+    
+            // ข้อความสำหรับส่งผ่าน AJAX
             $.ajax({
-                url: '{% url "taskcontrol:search_datatable" %}',
+                url: '{% url "taskcontrol:get_filter_dashboard" %}',
                 type: 'GET',
                 data: data,
                 dataType: 'json',
                 success: function(response) {
-                    displayResults(response, currentDate, deadlineDays); // Display results
+                    displayEngagements(response); // แสดงผลลัพธ์
                 },
                 error: function(xhr, status, error) {
                     console.error(xhr.responseText);
                 }
             });
         }
-
+    
         // ฟังก์ชันสำหรับแสดงผลลัพธ์ในตาราง
-        function displayResults(data) {
-            var resultContainer = $('#dataBody');
-            resultContainer.empty();
-
-            // วน loop เพื่อแสดงข้อมูลในตาราง
-            $.each(data, function(index, item) {
-                var resultRow = $('<tr>');
-
-                // แสดงข้อมูลในแต่ละคอลัมน์ของตาราง
-                resultRow.append($('<td>').text(item.job_code || '-'));
-                resultRow.append($('<td>').text(item.client__company_name || '-'));
-                resultRow.append($('<td>').text(formatDate(item.start_date_period) || '-'));
-                resultRow.append($('<td>').text(item.administrator__first_name + ' ' + item.administrator__last_name || '-'));
-                resultRow.append($('<td>').text(item.type__name_th || '-'));
-
-                // แสดงข้อมูล deadlines และ remaining days
-                var deadlines = "";
-                $.each(item.engagement_detail_deadlines, function(idx, deadline) {
-                    deadlines += formatDate(deadline.deadline) + ', ';
+        function displayEngagements(data) {
+            var engagements = data.engagements;
+            var engagementDataDiv = document.getElementById('engagementData');
+            engagementDataDiv.innerHTML = '';
+    
+            if (engagements && engagements.length > 0) {
+                var tableHTML = `
+                    <table class="engagement_table">
+                        <thead>
+                            <tr>
+                                <th style="width: 6.25%;">#</th>
+                                <th style="width: 18.75%;">ลูกค้า</th>
+                                <th style="width: 12.5%;">รอบบัญชี</th>
+                                <th style="width: 12.5%;">ประเภทงาน</th>
+                                <th style="width: 12.5%;">ผู้รับผิดชอบ</th>
+                                <th style="width: 12.5%;">เดดไลน์</th>
+                                <th style="width: 12.5%;">เหลือเวลา</th>
+                                <th style="width: 12.5%;">สถานะ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+    
+                engagements.forEach(function(engagement, index) {
+                    var statusText, badgeClass;
+                    switch (engagement.status) {
+                        case 'OPENJOB':
+                            statusText = 'เปิดงาน';
+                            badgeClass = 'status-open';
+                            break;
+                        case 'IN_PROGRESS':
+                            statusText = 'กำลังดำเนินการ';
+                            badgeClass = 'status-in-progress';
+                            break;
+                        case 'PENDINGCLIENT':
+                            statusText = 'รอลูกค้า';
+                            badgeClass = 'status-pending-client';
+                            break;
+                        case 'REVIEW':
+                            statusText = 'รอตรวจทาน';
+                            badgeClass = 'status-review';
+                            break;
+                        case 'DONE':
+                            statusText = 'เรียบร้อย';
+                            badgeClass = 'status-done';
+                            break;
+                        default:
+                            statusText = engagement.status;
+                            badgeClass = '';
+                    }
+    
+                    tableHTML += `
+                        <tr>
+                            <td class="fw-semibold" style="font-size: 13px; width: 10%;">${engagement.job_code}</td>
+                            <td>${engagement.client}</td>
+                            <td class="badge-period">${engagement.start_date_period}</td>
+                            <td>${engagement.type}</td>
+                            <td>${engagement.administrator}</td>
+                            <td class="badge-deadline">${engagement.deadline}</td>
+                            <td>${getRemainingDaysText(engagement.remaining_days)}</td>
+                            <td>
+                                <span class="badge ${badgeClass}">
+                                    ${statusText}
+                                </span>
+                            </td>
+                        </tr>
+                    `;
                 });
-                deadlines = deadlines.replace(/,\s*$/, "");
-                resultRow.append($('<td>').text(deadlines || '-'));
-
-                var remainingDaysText = item.remaining_days ? (item.remaining_days === 0 ? 'ครบกำหนด' : (item.remaining_days < 1 ? item.remaining_days + ' วัน' : item.remaining_days + ' วัน')) : '-';
-                var remainingDaysCell = $('<td>').addClass('fw-semibold');
-
-                if (item.remaining_days === 0) {
-                    remainingDaysCell.addClass('text-success');
-                } else if (item.remaining_days < 1) {
-                    remainingDaysCell.addClass('text-danger');
-                } else if (item.remaining_days < 7) {
-                    remainingDaysCell.addClass('text-warning');
-                }
-
-                remainingDaysCell.text(remainingDaysText);
-                resultRow.append(remainingDaysCell);
-
-                // เพิ่มแถวลงในตาราง
-                resultContainer.append(resultRow);
-            });
+    
+                tableHTML += `
+                        </tbody>
+                    </table>
+                `;
+    
+                engagementDataDiv.innerHTML = tableHTML;
+            } else {
+                engagementDataDiv.textContent = 'ไม่พบข้อมูล.';
+            }
         }
-
-        // ฟังก์ชันสำหรับการจัดรูปแบบวันที่
-        function formatDate(dateString) {
-            var date = new Date(dateString);
-            var day = ('0' + date.getDate()).slice(-2);
-            var month = ('0' + (date.getMonth() + 1)).slice(-2);
-            var year = date.getFullYear();
-            return day + '/' + month + '/' + year;
-        }
-
-        // Load initial data when document is ready
+    
+        // โหลดข้อมูลเมื่อเอกสารพร้อม
         loadInitialData();
 
-        // Event listener for form submission
+        // Function to get remaining days text
+        function getRemainingDaysText(remainingDays) {
+            if (remainingDays === 0) {
+                return '<span class="due">ครบกำหนด</span>';
+            } else if (remainingDays < 1) {
+                return `<span class="overdue">เกิน ${remainingDays} วัน</span>`;
+            } else if (remainingDays < 7) {
+                return `<span class="warning-date">${remainingDays} วัน (ใกล้กำหนด)</span>`;
+            } else {
+                return `<span class="normal">${remainingDays} วัน </span>`;
+            }
+        }
+    
+        // อัปเดตข้อมูลเมื่อฟอร์มถูกส่ง
         $('#frmSearch').submit(function(event) {
             event.preventDefault();
             loadInitialData();
         });
-
-        // Event listener for reset button
+    
+        // รีเซ็ตฟอร์มเมื่อปุ่มรีเซ็ตถูกคลิก
         $('#btnReset').click(function() {
             $('#frmSearch')[0].reset();
             loadInitialData();
         });
-
-        // Event listener for checkbox changes
+    
+        // อัปเดตข้อมูลเมื่อเช็คบ็อกเปลี่ยนแปลง
         $('#per_month, #deadline_days').change(function() {
             loadInitialData();
         });
     });
-
+    
 </script>
 {% endblock content %}

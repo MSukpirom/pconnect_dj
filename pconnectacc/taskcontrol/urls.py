@@ -22,9 +22,10 @@ urlpatterns = [
 
     path('dashboard/', dashboard, name='dashboard'),
     path('get_engagement_data/', get_engagement_data, name='get_engagement_data'),
-    path('search_datatable/', search_datatable, name='search_datatable'),
+    # path('search_datatable/', search_datatable, name='search_datatable'),
     path('get_engagement_summary/', get_engagement_summary, name='get_engagement_summary'),
     path('get_engagement_accounting/', get_engagement_accounting, name='get_engagement_accounting'),
+    path('get_filter_dashboard/', get_filter_dashboard, name='get_filter_dashboard'),
 
     path('client/list/', client_list, name='client_list'),
     path('client/create/', client_create, name='client_create'),
@@ -61,19 +62,20 @@ urlpatterns = [
     path('file_engagement/file_client_download_file/<int:file_id>/', file_engagement_file_client_download_file, name='file_engagement_file_client_download_file'),
     path('file_engagement/file_client_download_image/<int:image_id>/', file_engagement_file_client_download_image, name='file_engagement_file_client_download_image'),
 
-    path('user_management/', user_management, name='user_management'),
+    # path('user_management/', user_management, name='user_management'),
 
-    path('setting/', setting, name='setting'),
-    path('setting/category/', category, name='category'),
-    path('setting/category/create/', create_category, name='create_category'),
-    path('setting/category/create_type', create_type, name='create_type'),
+    path('category/', category, name='category'),
+    path('category/create/', create_category, name='create_category'),
+    path('category/delete/<int:category_id>/', delete_category, name='delete_category'),
+    path('category/type/create', create_type, name='create_type'),
 
     path('kanban_board/', kanban_board, name='kanban_board'),
     path('update_engagement_status/', update_engagement_status, name='update_engagement_status'),
     path('update_notes/', update_engagement_notes, name='update_engagement_notes'),
     path('get_engagement_details/', get_engagement_details, name='get_engagement_details'),
-    path('filter_engagement_details/', filter_engagement_details, name='filter_engagement_details'),
-    
+    path('search_filter_engagement_details/', search_filter_engagement_details, name='search_filter_engagement_details'),
+    path('get_filter_engagement_details/', get_filter_engagement_details, name='get_filter_engagement_details'),
+
 ]
 
 if settings.DEBUG:

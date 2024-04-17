@@ -3,13 +3,12 @@
 <style>
     tr.group,
     tr.group:hover {
-    background-color: #E1F2FB !important;
-        
+    background-color: #e4edf4;
         td {
-            font-weight: bold !important;
-            text-align: left !important;
+            font-weight: bold;
         }
     }
+
 </style>
 
 <div class="row">
@@ -24,12 +23,17 @@
                     </a>
                 </div>
                 <div class="col-md-8 text-end">
-                    <a href="{% url 'taskcontrol:file_engagement_create' engagement_id=engagement.id %}" class="btn btn-outline-primary">
-                        <i class="fa-solid fa-paperclip"></i> แนบเอกสาร
-                    </a>
+                    <div class="btn-group">
+                        <a href="#" class="btn btn-outline-primary">
+                            <i class="fa-solid fa-file-pen"></i> งาน
+                        </a>
+                        <a href="{% url 'taskcontrol:file_engagement_create' engagement_id=engagement.id %}" class="btn btn-outline-primary">
+                            <i class="fa-solid fa-paperclip"></i> แนบเอกสาร
+                        </a>
+                    </div>
                 </div>
             </div>
-            <div class="h4 pb-2 mb-4 text-primary fw-semibold border-bottom border-primary">งาน <i class="fa-solid fa-hashtag"></i> {{ engagement.job_code }}</div>
+            <div class="h5 pb-2 mb-4 text-primary fw-semibold border-bottom border-primary">งาน <i class="fa-solid fa-hashtag"></i> {{ engagement.job_code }}</div>
             <form method="post" action="{% url 'taskcontrol:engagement_detail_create' engagement_id=engagement.id %}">
                 {% csrf_token %}
                 <div class="row mb-3">

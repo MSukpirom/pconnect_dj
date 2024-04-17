@@ -1,5 +1,21 @@
 {% extends 'task/index.html' %} {% block content %}
 {% load humanize %}
+
+<style>
+    .status-open{
+        color: #fff;
+        font-weight: 600;
+        background-color: #61c35e;
+        border-radius: 8px;
+    }
+    .status-close{
+        color: #fff;
+        font-weight: 600;
+        background-color: #ff5258;
+        border-radius: 8px;
+    }
+</style>
+
 <div class="row">
     <div class="card w-100">
         <div class="card-body">
@@ -7,7 +23,7 @@
                 <div class="col-md-4">
                     <a href="{% url 'taskcontrol:client_list'%}">
                         <button type="button" class="btn btn-outline-dark">
-                            <i class="fa-solid fa-circle-chevron-left fa-lg"></i> กลับหน้าข้อมูลลูกค้า
+                            <i class="fa-solid fa-circle-chevron-left fa-lg"></i> ย้อนกลับ
                         </button>
                     </a>
                 </div>
@@ -26,16 +42,18 @@
                 </div>
             </div>
             
-            <h4 class="fw-semibold mb-3">ข้อมูลของ {{client.company_name}}
-                <span class="badge {% if client.status %}bg-primary{% else %}bg-danger{% endif %}">
+            <h4 class="fw-semibold mb-3">
+                <a class="text-end" href="{% url 'taskcontrol:client_update' client_id=client.id %}">
+                    <i class="fa-solid fa-pen-to-square" style="color: #FFC300;"></i>
+                </a>
+                ข้อมูลของ {{client.company_name}}
+                <span class="badge {% if client.status %}status-open{% else %}status-close{% endif %}">
                     {% if client.status %}เปิด{% else %}ปิด{% endif %}
                 </span>
+                
             </h4>
             <div class="col-md-12">
-                <div class="h5 pb-2 mb-4 text-primary fw-semibold border-bottom border-primary text-start">ลูกค้า
-                    <a class="text-end" href="{% url 'taskcontrol:client_update' client_id=client.id %}">
-                        <i class="fa-solid fa-pen-to-square" style="color: #FFC300;"></i>
-                    </a>
+                <div class="mb-4 fw-semibold border-bottom border-dark">
                 </div>
             </div>
             <div class="row">
@@ -107,7 +125,7 @@
                 </div>
             </div>
 
-            <div class="h5 pb-2 mb-4 text-primary fw-semibold border-bottom border-primary">จดทะเบียน</div>
+            <div class="h5 pb-2 mb-4 text-primary fw-semibold border-bottom border-primary"><i class="fa-regular fa-paste"></i> จดทะเบียน</div>
             <div class="row">
                 <div class="col-md-3">
                     <p><strong>จดทะเบียนบริษัท :</strong> </p>

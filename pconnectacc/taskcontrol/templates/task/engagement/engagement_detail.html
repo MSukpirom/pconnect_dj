@@ -10,6 +10,36 @@
             text-align: left !important;
         }
     }
+    .status-open{
+        color: #054627;
+        font-weight: 500;
+        background-color: #d0f4b2;
+        border-radius: 8px;
+    }
+    .status-in-progress{
+        color: #5b2891;
+        font-weight: 500;
+        background-color: #ead6ff;
+        border-radius: 8px;
+    }
+    .status-review{
+        color: #954800;
+        font-weight: 500;
+        background-color: #fff1c6;
+        border-radius: 8px;
+    }
+    .status-pend-client{
+        color: #bb4900;
+        font-weight: 500;
+        background-color: #ffdfbc;
+        border-radius: 8px;
+    }
+    .status-close{
+        color: #a10f0a;
+        font-weight: 500;
+        background-color: #ffcfce;
+        border-radius: 8px;
+    }
 </style>
 <div class="row">
     <div class="card w-100">
@@ -18,14 +48,14 @@
                 <div class="col-md-4">
                     <a href="{% url 'taskcontrol:engagement_list'%}">
                         <button type="button" class="btn btn-outline-dark">
-                            <i class="fa-solid fa-circle-chevron-left fa-lg"></i> กลับหน้า Engagement
+                            <i class="fa-solid fa-circle-chevron-left fa-lg"></i> ย้อนกลับ
                         </button>
                     </a>
                 </div>
                 <div class="col-md-8 text-end">
                     <div class="btn-group">
                         <a href="{% url 'taskcontrol:engagement_detail_create' engagement_id=engagements.id %}" class="btn btn-outline-primary">
-                            <i class="fa-solid fa-clipboard-list"></i> งาน
+                            <i class="fa-solid fa-file-pen"></i> งาน
                         </a>
                         <a href="{% url 'taskcontrol:file_engagement_create' engagement_id=engagements.id %}" class="btn btn-outline-primary">
                             <i class="fa-solid fa-paperclip"></i> แนบเอกสาร
@@ -34,19 +64,41 @@
                 </div>
             </div>
             <div class="d-flex align-items-center">
-                <h4 class="fw-semibold mb-3">ข้อมูลของ {{ engagements.client.company_name }}</h4>
-                {% if engagements.status == "OPENJOB" %}
-                    <i class="fa-solid fa-circle-check fa-lg" style="color: #5FD068; margin-left: 5px;"></i>
-                {% elif engagements.status %}
-                    <i class="fa-solid fa-circle-xmark fa-lg" style="color: #ff4d4d; margin-left: 5px;"></i>
-                {% endif %}
+                <h4 class="fw-semibold mb-3">
+                    <a href="#" onclick="openUpdateModal()">
+                        <i class="fa-solid fa-pen-to-square" style="color: #FFC300;"></i>
+                    </a> 
+                    {{ engagements.job_code }} &nbsp;
+                    <span class="badge
+                        {% if engagements.status == "OPENJOB" %}
+                            status-open
+                        {% elif engagements.status == "IN_PROGRESS" %}
+                            status-in-progress
+                        {% elif engagements.status == "REVIEW" %}
+                            status-review
+                        {% elif engagements.status == "PENDINGCLIENT" %}
+                            status-pend-client
+                        {% else %}
+                            status-close
+                        {% endif %}
+                    ">
+                        {% if engagements.status == "OPENJOB" %}
+                            เปิดงาน
+                        {% elif engagements.status == "IN_PROGRESS" %}
+                            กำลังดำเนินงาน
+                        {% elif engagements.status == "REVIEW" %}
+                            รอตรวจทาน
+                        {% elif engagements.status == "PENDINGCLIENT" %}
+                            รอลูกค้า
+                        {% else %}
+                            ปิดงาน
+                        {% endif %}
+                    </span>
+                </h4>
             </div>
+            
             <div class="h5 pb-2 mb-4 text-primary fw-semibold border-bottom border-primary text-start">
-                <i class="fa-solid fa-hashtag"></i> {{ engagements.job_code }} &nbsp;
-                <a href="#" onclick="openUpdateModal()">
-                    <i class="fa-solid fa-pen-to-square" style="color: #FFC300;"></i>
-                </a>
-                
+                ข้อมูลของ {{ engagements.client.company_name }}
             </div>
 
             <!-- Modal UpdateFormEngagement-->
@@ -57,7 +109,7 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <div class="h5 pb-2 mb-4 text-warning fw-semibold border-bottom border-warning" id="updateModalLabel">แก้ไข Engagement # {{ engagements.job_code }}</div>
+                            <div class="h5 pb-2 mb-4 text-warning fw-semibold border-bottom border-warning" id="updateModalLabel"><i class="fa-solid fa-pen-to-square" style="color: #FFC300;"></i> Engagement # {{ engagements.job_code }}</div>
                             <form id="updateForm" method="post" action="{% url 'taskcontrol:engagement_update' engagement_id=engagements.id %}">
                                 {% csrf_token %}
                                 <div class="row mb-3">
@@ -75,9 +127,9 @@
                                     <div class="col-md-2">
                                         <div class="content-end">
                                             <div class="form-check form-switch">
-                                                <input class="form-check-input" type="checkbox" id="inputstatus" name="status" {% if engagements.status == "OPENJOB" %} checked {% endif %}>
-                                                <label for="inputstatus" id="statusLabel" class="form-check-label fw-semibold">
-                                                    {% if engagements.status == "OPENJOB" %}
+                                                <input class="form-check-input" type="checkbox" id="inputstatus" name="status" {% if engagements.status == "OPENJOB" or engagements.status == "IN_PROGRESS" or engagements.status == "REVIEW" or engagements.status == "PENDINGCLIENT" %} checked {% endif %}>
+                                                <label class="form-check-label fw-semibold" for="inputstatus">
+                                                    {% if engagements.status == "OPENJOB" or engagements.status == "IN_PROGRESS" or engagements.status == "REVIEW" or engagements.status == "PENDINGCLIENT" %}
                                                         เปิดงาน
                                                     {% else %}
                                                         ปิดงาน
@@ -86,6 +138,7 @@
                                             </div>
                                         </div>
                                     </div>
+                                    
                                 </div>
 
                                 <div class="row">
@@ -315,10 +368,5 @@
             }
         }
     };
-    
-    
-
-
 </script>
-
 {% endblock content %}

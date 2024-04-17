@@ -8,15 +8,20 @@
                         <button type="button" class="btn btn-outline-dark">
                             <i class="fa-solid fa-circle-chevron-left fa-lg"></i> ย้อนกลับ
                         </button>
-                    </a>                    
-                </div>
-                <div class="col-md-8 text-end">
-                    <a href="{% url 'taskcontrol:engagement_detail_create' engagement_id=engagement.id %}" class="btn btn-outline-primary">
-                        <i class="fa-solid fa-clipboard-list"></i> งาน
                     </a>
                 </div>
+                <div class="col-md-8 text-end">
+                    <div class="btn-group">
+                        <a href="{% url 'taskcontrol:engagement_detail_create' engagement_id=engagement.id %}" class="btn btn-outline-primary">
+                            <i class="fa-solid fa-file-pen"></i> งาน
+                        </a>
+                        <a href="#" class="btn btn-outline-primary">
+                            <i class="fa-solid fa-paperclip"></i> แนบเอกสาร
+                        </a>
+                    </div>
+                </div>
             </div>
-            <div class="h4 pb-2 mb-4 text-primary fw-semibold border-bottom border-primary">แนบเอกสาร <i class="fa-solid fa-hashtag"></i> {{ engagement.job_code }}</div>
+            <div class="h5 pb-2 mb-4 text-primary fw-semibold border-bottom border-primary">แนบเอกสาร <i class="fa-solid fa-hashtag"></i> {{ engagement.job_code }}</div>
             <form method="post" enctype="multipart/form-data" action="{% url 'taskcontrol:file_engagement_create' engagement_id=engagement.id %}">
                 {% csrf_token %}
                 <div class="row mb-3">
@@ -37,7 +42,7 @@
                         <span style="font-size: 0.85rem; color: tomato;">ไฟล์รูปภาพ</span>
                     </div>
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <button type="submit" class="btn btn-primary">อัปโหลด  <i class="fa-solid fa-upload"></i></button>
+                        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-circle-up"></i> อัปโหลด</button>
                     </div>
                 </div>
             </form>

@@ -1,0 +1,200 @@
+{% extends 'task/index.html' %}
+{% block content %}
+
+<style>
+     table {
+          width: 100%;
+          border-collapse: collapse;
+     }
+
+     th,
+     td {
+          border: 1px solid #ddd;
+          padding: 8px;
+          text-align: left;
+     }
+
+     th {
+          background-color: #f2f2f2;
+     }
+     .today {
+          font-weight: 500;
+          color: #526D82;
+          background-color: #DDE6ED;
+          border-radius: 8px;
+     }
+</style>
+<div class="row">
+     <div class="card w-100">
+          <div class="card-body">
+               <ul class="nav nav-underline mb-3" id="pills-tab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                         <a class="nav-link" id="pills-home-tab" href="{% url 'taskcontrol:kanban_board' %}" role="tab"
+                              aria-controls="pills-home" aria-selected="true">บอร์ด</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                         <a class="nav-link active" id="pills-profile-tab" href="#" role="tab"
+                              aria-controls="pills-profile" aria-selected="false">ค้นหาจากบอร์ด</a>
+                    </li>
+               </ul>
+               <div class="mb-3 text-end">
+                    <span class="badge today">วันที่: {{ today|date:"d/m/Y" }}</span>
+               </div>
+               <div class="row mb-3">
+                    <form id="filterForm" method="GET">
+                         {% csrf_token %}
+                         <div class="row mb-3">
+                              <div class="col-6">
+                                   <label for="administrator_id" class="form-label">ผู้ดูแล:</label>
+                                   <select name="administrator_id" id="administrator_id" class="form-select">
+                                        <option value="" selected disabled hidden>-- กรุณาเลือก --</option>
+                                        {% for admin in administrators %}
+                                        <option value="{{ admin.id }}">{{ admin.first_name }} {{ admin.last_name }}</option>
+                                        {% endfor %}
+                                   </select>
+                              </div>
+                              <div class="col-6">
+                                   <label for="engagement_type_id" class="form-label">ประเภทงาน:</label>
+                                   <select name="engagement_type_id" id="engagement_type_id" class="form-select">
+                                        <option value="" selected disabled hidden>-- กรุณาเลือก --</option>
+                                        {% for type in engagement_types %}
+                                        <option value="{{ type.id }}">{{ type.name_th }}</option>
+                                        {% endfor %}
+                                   </select>
+                              </div>
+                         </div>
+                         <div class="row mb-3">
+                              <div class="col">
+                                   <input type="checkbox" name="near_deadline" id="near_deadline" class="form-check-input">
+                                   <label for="near_deadline" class="form-label">งานที่ใกล้เดดไลน์</label>
+                              </div>
+                              <div class="col">
+                                   <input type="checkbox" name="per_month" id="per_month" class="form-check-input">
+                                   <label for="per_month" class="form-label">รอบบัญชีเดือนปัจจุบัน</label>
+                              </div>
+                         </div>
+                         <div class="mb-3">
+                              <button type="submit" class="btn btn-primary">กรองข้อมูล</button>
+                              <button type="button" class="btn btn-secondary" onclick="clearFilter()">ล้างข้อมูล</button>
+                         </div>
+                    </form>
+               </div>
+               <div id="engagementData" class="muuri-container">
+                    <table id="engagementDataTable">
+                         <thead>
+                              <tr>
+                                   <th>#</th>
+                                   <th>ประเภทงาน</th>
+                                   <th>ผู้ตรวจทาน</th>
+                                   <th>ผู้อนุมัติ</th>
+                                   <th>ผู้รับผิดชอบ</th>
+                                   <th>เดดไลน์</th>
+                                   <th>สถานะ</th>
+                              </tr>
+                         </thead>
+                         <tbody>
+                              {% for engagement in engagements %}
+                              {% for detail in engagement.engagementdetail_set.all %}
+                              <tr>
+                                   <td>{{ engagement.job_code }}</td>
+                                   <td>{{ detail.engagement_type.name_th }}</td>
+                                   <td>{{ engagement.reviewer.first_name }}</td>
+                                   <td>{{ engagement.approver.first_name }}</td>
+                                   <td>{{ engagement.administrator.first_name }}</td>
+                                   <td>{{ detail.deadline|date:"d/m/Y" }}</td>
+                                   <td>{{ engagement.status }}</td>
+                              </tr>
+                              {% endfor %}
+                              {% endfor %}
+                         </tbody>
+                    </table>
+               </div>
+          </div>
+     </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/muuri/0.9.3/muuri.min.js"></script>
+
+<script>
+     document.getElementById('filterForm').addEventListener('submit', function(event) {
+          event.preventDefault();
+     
+          var formData = new FormData(this);
+          var searchParams = new URLSearchParams(formData).toString();
+     
+          var url = '{% url "taskcontrol:get_filter_engagement_details" %}?' + searchParams;
+          
+          fetch(url)
+               .then(response => {
+               if (!response.ok) {
+                    throw new Error('การตอบสนองของเครือข่ายไม่โอเค');
+               }
+               return response.json();
+               })
+               .then(data => {
+               displayEngagements(data);
+               })
+               .catch(error => {
+               console.error('เกิดข้อผิดพลาดกับ Engagements:', error);
+               });
+     });
+
+     function displayEngagements(data) {
+          var engagements = data.engagements;
+          var engagementDataDiv = document.getElementById('engagementData');
+          engagementDataDiv.innerHTML = '';
+      
+          if (engagements && engagements.length > 0) {
+              var tableHTML = `
+                  <table>
+                      <thead>
+                          <tr>
+                              <th>#</th>
+                              <th>ประเภทงาน</th>
+                              <th>ผู้ตรวจทาน</th>
+                              <th>ผู้อนุมัติ</th>
+                              <th>ผู้รับผิดชอบ</th>
+                              <th>เดดไลน์</th>
+                              <th>สถานะ</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+              `;
+      
+              engagements.forEach(function (engagement) {
+                  tableHTML += `
+                      <tr>
+                          <td>${engagement.job_code}</td>
+                          <td>${engagement.type}</td>
+                          <td>${engagement.reviewer}</td>
+                          <td>${engagement.approver}</td>
+                          <td>${engagement.administrator}</td>
+                          <td>${engagement.deadline}</td>
+                          <td>${engagement.status}</td>
+                      </tr>
+                  `;
+              });
+      
+              tableHTML += `
+                      </tbody>
+                  </table>
+              `;
+      
+              engagementDataDiv.innerHTML = tableHTML;
+          } else {
+              engagementDataDiv.textContent = 'ไม่พบข้อมูล.';
+          }
+     }
+
+     function clearFilter() {
+          document.getElementById("administrator_id").value = "";
+          document.getElementById("engagement_type_id").value = "";
+          document.getElementById("near_deadline").checked = false;
+          document.getElementById("per_month").checked = false;
+      
+          window.location.reload();
+     }
+</script>
+
+
+{% endblock content %}

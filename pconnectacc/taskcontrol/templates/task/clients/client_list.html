@@ -2,6 +2,21 @@
 {% block content %}
 {% load humanize %}
 
+<style>
+    .status-open{
+        color: #fff;
+        font-weight: 600;
+        background-color: #61c35e;
+        border-radius: 8px;
+    }
+    .status-close{
+        color: #fff;
+        font-weight: 600;
+        background-color: #ff5258;
+        border-radius: 8px;
+    }
+</style>
+
 <div class="row">
     <div class="card w-100">
         <div class="card-body mb-5">
@@ -41,7 +56,7 @@
                             <td><a href="{% url 'taskcontrol:client_detail' c.id %}">{{ c.company_name }}</a></td>
                             <td>{{ c.tax_id }}</td>
                             <td class="text-center">
-                                <span class="badge {% if c.status %}bg-primary{% else %}bg-danger{% endif %}">
+                                <span class="badge {% if c.status %}status-open{% else %}status-close{% endif %}">
                                     {% if c.status %}เปิด{% else %}ปิด{% endif %}
                                 </span>
                             </td>

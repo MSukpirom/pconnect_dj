@@ -41,7 +41,15 @@
 
 </head>
 
-
+{% comment %} <style>
+    body {
+        background-image: url("{% static 'assets/images/backgrounds/background.png' %}");
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        margin: 0;
+    }
+</style> {% endcomment %}
 
 <style>
     body {
@@ -51,6 +59,7 @@
         background-attachment: fixed;
         margin: 0;
     }
+
 </style>
 
 <body>
@@ -59,7 +68,7 @@
             <div>
                 <div class="brand-logo d-flex align-items-center justify-content-between">
                     <i class="fa-brands fa-connectdevelop fa-xl" style="color: #327af5;"></i>
-                    <h5 style="margin: 0;">Account <br> Tasks Controller</h5>
+                    <h6 style="margin: 0;">Account <br> Tasks Controller</h6>
                     <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
                         <i class="fa-solid fa-xmark fa-xl"></i>
                     </div>
@@ -97,21 +106,21 @@
                             <span class="hide-menu">Setting</span>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="{% url 'taskcontrol:setting' %}" aria-expanded="false">
+                            <a class="sidebar-link" href="{% url 'taskcontrol:category' %}" aria-expanded="false">
                                 <span>
-                                    <i class="fa-solid fa-gears"></i>
+                                    <i class="fa-solid fa-layer-group"></i>
                                 </span>
-                                <span class="hide-menu">Setting</span>
+                                <span class="hide-menu">Categories</span>
                             </a>
                         </li>
-                        <li class="sidebar-item">
+                        {% comment %} <li class="sidebar-item">
                             <a class="sidebar-link" href="#" aria-expanded="false">
                                 <span>
                                     <i class="fa-solid fa-user-gear"></i>
                                 </span>
                                 <span class="hide-menu">User Manager</span>
                             </a>
-                        </li>
+                        </li> {% endcomment %}
                     </ul>
                 </nav>
             </div>
@@ -127,7 +136,7 @@
                             </a>
                         </li>
                     </ul>
-                    <i class="fa-solid fa-seedling" style="color: #1ebe30;"></i>&nbsp;&nbsp;<span class="fw-semibold">ยินดีต้อนรับ, คุณ{{ user.first_name }}</span>
+                    <i class="fa-solid fa-seedling" style="color: #1ebe30;"></i>&nbsp;&nbsp;<span class="fw-semibold">ยินดีต้อนรับ, คุณ {{ user.first_name }} {{ user.last_name }}</span>
                     <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
                         
                         <li class="nav-item">
