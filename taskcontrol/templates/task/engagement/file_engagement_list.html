@@ -1,0 +1,348 @@
+{% extends 'task/index.html' %} {% block content %}
+<style>
+    .card {
+        margin-top: 1rem;
+    }
+
+    .card, .card-body {
+        box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+        background-color: #eaf4ff;
+        border-radius: 20px;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .mx-auto {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .pl-0 {
+        padding-left: 0;
+    }
+
+    .mt-3 {
+        margin-top: 2rem;
+    }
+
+    .d-none {
+        display: none;
+    }
+
+    .form-step {
+        box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+        border-radius: 20px;
+        margin-top: 1rem;
+        padding: 2rem;
+        background-color: #fff;
+    }
+
+    ul.form-stepper {
+        counter-reset: section;
+        margin-bottom: 1.5rem;
+    }
+
+    ul.form-stepper .form-stepper-circle {
+        position: relative;
+    }
+
+    ul.form-stepper .form-stepper-circle span {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translateY(-50%) translateX(-50%);
+    }
+
+    .form-stepper-horizontal {
+        position: relative;
+        display: flex;
+        justify-content: space-around;
+    }
+
+    ul.form-stepper>li:not(:last-of-type) {
+        margin-bottom: 0.625rem;
+        transition: margin-bottom 0.4s;
+    }
+
+    .form-stepper-horizontal>li:not(:last-of-type) {
+        margin-bottom: 0 !important;
+    }
+
+    .form-stepper-horizontal li {
+        position: relative;
+        display: flex;
+        flex: 1;
+        align-items: baseline;
+        flex-wrap: nowrap;
+        transition: 0.5s;
+    }
+
+    .form-stepper-horizontal li:not(:last-child):after {
+        position: relative;
+        flex: 1;
+        height: 1px;
+        content: "";
+        top: 32%;
+    }
+
+    .form-stepper-horizontal li:after {
+        background-color: #5d87ff;
+    }
+
+    .form-stepper-horizontal li.form-stepper-completed:after {
+        background-color: #0277ff;
+    }
+
+    .form-stepper-horizontal li:last-child {
+        flex: unset;
+    }
+
+    ul.form-stepper li a .form-stepper-circle {
+        display: inline-block;
+        margin-right: 0;
+        line-height: 1.7rem;
+        text-align: center;
+        background: rgba(0, 0, 0, 0.38);
+        border-radius: 50%;
+    }
+
+    .form-stepper .form-stepper-active .form-stepper-circle {
+        background-color: #0277ff !important;
+    }
+
+    .form-stepper .form-stepper-active .label {
+        color: #0277ff !important;
+    }
+
+    .form-stepper .form-stepper-active .form-stepper-circle:hover {
+        background-color: #0277ff !important;
+    }
+
+    .form-stepper .form-stepper-unfinished .form-stepper-circle {
+        background-color: #f5f5f5;
+
+    }
+
+    .form-stepper .form-stepper-completed .form-stepper-circle {
+        background-color: #0277ff !important;
+    }
+
+    .form-stepper .form-stepper-completed .label {
+        color: #0277ff !important;
+    }
+
+    .form-stepper .form-stepper-completed .form-stepper-circle:hover {
+        background-color: #0277ff !important;
+    }
+
+    .form-stepper .label {
+        font-size: 14.5px;
+        font-weight: 500;
+        margin-top: 0.5rem;
+    }
+
+    .form-stepper a {
+        cursor: default;
+    }
+
+    .number-lable {
+        color: #333944;
+        font-size: 12.5px;
+        font-weight: 600;
+    }
+
+    .number-step {
+        color: #205aff;
+        font-weight: 700;
+        font-size: 18px;
+    }
+
+    .text-muted {
+        --bs-text-opacity: 1;
+        color: #205aff !important;
+    }
+
+    .form-check-input:checked {
+        font-size: 16px;
+    }
+
+    th {
+        font-size: 14px;
+    }
+
+    td {
+        font-size: 14.5px;
+    }
+
+</style>
+
+<div class="card">
+    <div class="card-body">
+        <ul class="form-stepper form-stepper-horizontal text-center mx-auto pl-0 ">
+            <!-- Step 1 -->
+            <li class="form-stepper-unfinished text-center form-stepper-list">
+                <a class="mx-2">
+                    <span class="number-step"><i class="fi fi-sr-add-document"></i></span>
+                    <div class="number-lable">Engagement</div>
+                    <span class="form-stepper-circle text-muted">
+                        <span><i class="fa-solid fa-circle-check fa-lg"></i></span>
+                    </span>
+                </a>
+            </li>
+            <!-- Step 2 -->
+            <li class="form-stepper-unfinished text-center form-stepper-list">
+                <a class="mx-2">
+                    <span class="number-step"><i class="fi fi-sr-document"></i></span>
+                    <div class="number-lable">รายละเอียดงาน</div>
+                    <span class="form-stepper-circle text-muted">
+                        <span><i class="fa-solid fa-circle-check fa-lg"></i></span>
+                    </span>
+                </a>
+            </li>
+            <!-- Step 3 -->
+            <li class="form-stepper-unfinished text-center form-stepper-list">
+                <a class="mx-2">
+                    <span class="number-step"><i class="fi fi-br-clip"></i></span>
+                    <div class="number-lable">แนบไฟล์</div>
+                    <span class="form-stepper-circle text-muted">
+                        <span><i class="fa-regular fa-circle-dot fa-lg"></i></span>
+                    </span>
+                </a>
+            </li>
+        </ul>
+
+        <section class="form-step mb-3">
+            <div class="mt-1">
+                <h5 class="pb-2 mb-4 text-primary fw-semibold border-bottom border-primary">
+                    <i class="fi fi-br-clip" style="color: #61c35e;"></i> 
+                    <span> เพิ่มไฟล์แนบ  </span>
+                    <span style="color: #2A3547;"><i class="fi fi-br-hastag"></i> 
+                        {{ engagement.job_code }}
+                    </span>
+                </h5>
+                <form method="post" enctype="multipart/form-data" action="{% url 'taskcontrol:file_engagement_create' engagement_id=engagement.id %}">
+                    {% csrf_token %}
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label for="c_description" class="form-label">คำอธิบาย :</label>
+                            <input type="text" name="c_description" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="c_file" class="form-label">ไฟล์ :</label>
+                            <input type="file" name="c_file" class="form-control" accept=".pdf, .doc, .docx, .txt">
+                            <span style="font-size: 0.85rem; color: tomato;">ไฟล์ .pdf, .doc, .docx, .txt</span>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="c_image" class="form-label">รูปภาพ :</label>
+                            <input type="file" name="c_image" class="form-control" accept="image/*">
+                            <span style="font-size: 0.85rem; color: tomato;">ไฟล์รูปภาพ</span>
+                        </div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-outline-primary">อัปโหลด <i class="fi fi-sr-cloud-upload-alt"></i></button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="table-responsive mb-4">
+                    <table id="file-engagement-table" class="table">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-center" style="width: 5%;">#</th>
+                                <th class="text-start" style="width: 30%;">คำอธิบาย</th>
+                                <th class="text-start" style="width: 50%;">ชื่อไฟล์</th>
+                                <th class="text-center" style="width: 5%;">ไฟล์</th>
+                                <th class="text-center" style="width: 5%;">รูปภาพ</th>
+                                <th class="text-center" style="width: 5%;"><i class="fa-solid fa-gears"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for file in files %}
+                                <tr>
+                                    <td class="text-center">{{ forloop.counter }}</td>
+                                    <td>{{ file.description }}</td>
+                                    <td>{{ file.file_engagement }} | {{ file.image_engagement }}</td>
+                                    <td class="text-center">
+                                        {% if file.file_engagement %}
+                                            <a href="{% url 'taskcontrol:file_engagement_file_client_download_file' file_id=file.id %}" download target="_blank"> 
+                                                <i class="fi fi-br-download"></i>
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if file.image_engagement %}
+                                            <a href="{% url 'taskcontrol:file_engagement_file_client_download_image' image_id=file.id %}" download target="_blank">
+                                                <i class="fi fi-br-download"></i>
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="{% url 'taskcontrol:file_engagement_delete' file_id=file.id %}" class="btn btn-outline-danger btn-sm delete-file" data-file-id="{{ file.id }}">
+                                            <i class="fa-regular fa-trash-can"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{% url 'taskcontrol:engagement_job_create' engagement_id=engagement.id %}" class="btn btn-outline-dark"><i class="fa-solid fa-circle-arrow-left"></i> ย้อนกลับ</a>
+                <a href="{% url 'taskcontrol:engagement_detail' engagement_id=engagement.id %}" class="btn btn-primary"><i class="fa-solid fa-circle-check"></i> บันทึกข้อมูล</a>
+            </div>
+        </section>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        const dataTable = $("#file-engagement-table").DataTable({
+             "language": {
+                  "search": "ค้นหา",
+                  "lengthMenu": "แสดง _MENU_ รายการ",
+                  "info": "แสดง _START_ ถึง _END_ จากทั้งหมด _TOTAL_ รายการ",
+                  "paginate": {
+                       "previous": "ก่อนหน้า",
+                       "next": "ถัดไป"
+                  }
+             }
+        });
+    });
+
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    $(document).ready(function() {
+        $(".delete-file").on("click", function() {
+            var fileId = $(this).data("file-id");
+            var deleteFileUrl = "{% url 'taskcontrol:file_engagement_delete' file_id=0 %}".replace("0", fileId);
+    
+            if (confirm("ต้องการลบไฟล์นี้?")) {
+                $.ajax({
+                    type: 'POST',
+                    url: deleteFileUrl,
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                    },
+                    success: function() {
+                        location.reload();
+                        alert("ลบไฟล์สำเร็จ");
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(xhr.responseText);
+                        alert("เกิดข้อผิดพลาดในการลบไฟล์");
+                    }
+                });
+            }
+        });
+    });
+    
+</script>
+{% endblock content %}

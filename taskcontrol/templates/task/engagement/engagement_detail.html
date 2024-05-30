@@ -1,0 +1,379 @@
+{% extends 'task/index.html' %} {% block content %}
+{% load humanize %}
+<style>
+    .card {
+        margin-top: 0.25rem;
+    }
+    .card, .card-body {
+        box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+        background-color: #ffffff;
+        border-radius: 20px;
+    }
+    tr.group,
+    tr.group:hover {
+    background-color: #E1F2FB !important;
+        
+        td {
+            font-weight: bold !important;
+            text-align: left !important;
+        }
+    }
+    .status-open{
+        color: #054627;
+        font-weight: 500;
+        background-color: #d0f4b2;
+        border-radius: 8px;
+    }
+    .status-in-progress{
+        color: #5b2891;
+        font-weight: 500;
+        background-color: #ead6ff;
+        border-radius: 8px;
+    }
+    .status-review{
+        color: #954800;
+        font-weight: 500;
+        background-color: #fff1c6;
+        border-radius: 8px;
+    }
+    .status-pend-client{
+        color: #bb4900;
+        font-weight: 500;
+        background-color: #ffdfbc;
+        border-radius: 8px;
+    }
+    .status-close{
+        color: #a10f0a;
+        font-weight: 500;
+        background-color: #ffcfce;
+        border-radius: 8px;
+    }
+
+    .back-button {
+        box-sizing: border-box;
+        border: 1px solid #2a3547;
+        border-radius: 20px;
+        color: #2a3547;
+        padding: 0.5em 1em;
+        background: #fff;
+        transition: background 0.2s, color 0.2s; /* Combine transitions */
+        font-weight: bold;
+    }
+    
+    .back-button:hover {
+        color: #fff;
+        background: #2a3547;
+    }
+</style>
+
+<div class="row">
+    <div class="card">
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-sm-2">
+                    <a class="btn back-button" href="{% url 'taskcontrol:engagement_list'%}">
+                        <i class="fa-solid fa-circle-arrow-left"></i>
+                        <span>ย้อนกลับ</span>
+                    </a>
+                </div>
+            </div>
+            
+            <h5 class="text-primary fw-semibold mb-3">
+                <a data-bs-toggle="modal" href="#updateModal{{ engagement.id }}">
+                    <i class="fa-solid fa-pen-to-square" style="color: #ffc300;"></i>
+                </a>
+                <span>Engagement </span>
+                <span style="color: #2A3547;"><i class="fi fi-br-hastag"></i> 
+                    {{ engagement.job_code }}
+                </span>
+                <span class="badge
+                    {% if engagement.status == 'OPENJOB' %}status-open{% endif %}
+                    {% if engagement.status == 'IN_PROGRESS' %}status-in-progress{% endif %}
+                    {% if engagement.status == 'REVIEW' %}status-review{% endif %}
+                    {% if engagement.status == 'PENDINGCLIENT' %}status-pend-client{% endif %}
+                    {% if engagement.status == 'DONE' %}status-done{% endif %}
+                ">
+                    {% if engagement.status == 'OPENJOB' %}เปิดงาน{% endif %}
+                    {% if engagement.status == 'IN_PROGRESS' %}กำลังดำเนินงาน{% endif %}
+                    {% if engagement.status == 'REVIEW' %}รอตรวจทาน{% endif %}
+                    {% if engagement.status == 'PENDINGCLIENT' %}รอลูกค้า{% endif %}
+                    {% if engagement.status == 'DONE' %}เสร็จสิ้น{% endif %}
+                </span>
+            </h5>
+            <div class="row mb-3">
+                <div class="col-md-2">
+                    <span class="fw-semibold">รหัสลูกค้า :</span>
+                </div>
+                <div class="col-md-2">
+                    {{ engagement.client.company_name }} ({{ engagement.client.code }}) 
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-2">
+                    <span class="fw-semibold">ค่าบริการ (บาท) :</span>
+                </div>
+                <div class="col-md-2">
+                    {{ engagement.service_fee|intcomma }}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-2">
+                    <span class="fw-semibold">วันที่เริ่มบริการ :</span>
+                </div>
+                <div class="col-md-4">
+                    {% if engagement.start_date_service|date:"d/m/Y" %}{{ engagement.start_date_service|date:"d/m/Y" }}{% else %}-{% endif %}
+                </div>
+                <div class="col-md-2">
+                    <span class="fw-semibold">วันที่สิ้นสุดบริการ :</span>
+                </div>
+                <div class="col-md-4">
+                    {% if engagement.end_date_service|date:"d/m/Y" %}{{ engagement.end_date_service|date:"d/m/Y" }}{% else %}-{% endif %}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-2">
+                    <span class="fw-semibold">รอบที่เริ่มให้บริการ :</span>
+                </div>
+                <div class="col-md-4">
+                    {% if engagement.start_date_period|date:"d/m/Y" %}{{ engagement.start_date_period|date:"d/m/Y" }}{% else %}-{% endif %}
+                </div>
+                <div class="col-md-2">
+                    <span class="fw-semibold">รอบที่สิ้นสุดให้บริการ :</span>
+                </div>
+                <div class="col-md-4">
+                    {% if engagement.end_date_period|date:"d/m/Y" %}{{ engagement.end_date_period|date:"d/m/Y" }}{% else %}-{% endif %}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-2">
+                    <span class="fw-semibold">ผู้รับผิดชอบ :</span>
+                </div>
+                <div class="col-md-4">
+                    {% if engagement.administrator.first_name and engagement.administrator.last_name %}
+                        {{ engagement.administrator.first_name }} {{ engagement.administrator.last_name }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-2">
+                    <span class="fw-semibold">ผู้ตรวจทาน :</span>
+                </div>
+                <div class="col-md-4">
+                    {% if engagement.reviewer.first_name and engagement.reviewer.last_name %}
+                        {{ engagement.reviewer.first_name }} {{ engagement.reviewer.last_name }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row mb-5">
+                <div class="col-md-2">
+                    <span class="fw-semibold">ผู้อนุมัติ :</span>
+                </div>
+                <div class="col-md-4">
+                    {% if engagement.approver.first_name and engagement.approver.last_name %}
+                        {{ engagement.approver.first_name }} {{ engagement.approver.last_name }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </div>
+            </div>
+
+            <h5 class="pb-2 mb-4 text-primary fw-semibold border-bottom border-primary">
+                <i class="fi fi-sr-comment-info" style="color: #343a40;"></i>
+                <span>รายละเอียดงาน</span>
+            </h5>
+            <div class="table-responsive mb-4">
+                <table id="engagement-job-table" class="table">
+                    <thead class="table-light" style="text-align: center;">
+                        <tr>
+                            <th style="width: 1%;">#</th>
+                            <th>หมวดงาน</th>
+                            <th>ประเภทงาน</th>
+                            <th><i class="fi fi-br-calendar-lines-pen"></i></th>
+                            <th><i class="fi fi-sr-calendar-clock" style="color: tomato;"></i></th>
+                            <th><i class="fi fi-sr-alarm-clock" style="color: #ffb012;"></i></th>
+                            <th>เริ่มต้น - สิ้นสุด</th>
+                            <th>ผู้ตรวจทาน</th>
+                            <th>ผู้อนุมัติ</th>
+                            <th style="width: 1%;"><i class="fa-solid fa-gears"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for detail in engagement_detail_job %}
+                            <tr>
+                                <td class="text-center">{{ forloop.counter }}</td>
+                                <td>{{ detail.engagement_category.name_th }}</td>
+                                <td>{{ detail.engagement_type.name_th }}</td>
+                                <td>{{ detail.type }}</td>
+                                <td class="text-center">{{ detail.deadline|date:"d/m/Y" }}</td>
+                                <td>{{ detail.notification }} วัน</td>
+                                <td class="text-center">{{ detail.start_date|date:"d/m/Y" }} - {{ detail.end_date|date:"d/m/Y" }}</td>
+                                <td class="text-center">
+                                    {% if detail.review_by %}
+                                    {{ detail.engagement.reviewer.first_name }}
+                                    {{ detail.engagement.reviewer.last_name }}
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if detail.approved_by %}
+                                    {{ detail.engagement.approver.first_name }}
+                                    {{ detail.engagement.approver.last_name }}
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <button class="btn btn-outline-danger btn-sm delete-job-btn" data-job-id="{{ detail.id }}">
+                                        <i class="fa-regular fa-trash-can"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <input type="hidden" id="delete-job-url" value="{% url 'taskcontrol:engagement_job_delete' engagement_job_id=0 %}">
+        </div>
+    </div>
+</div>
+
+<!--Modal Edit Client-->
+<div class="modal fade" id="updateModal{{ engagement.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h1 class="modal-title fs-5 pb-2 mb-3 text-primary fw-semibold border-bottom border-warning">
+                    <i class="fi fi-sr-comment-alt-edit" style="color: #ffc300;"></i> 
+                    แก้ไข Engagement
+                    <span style="color: #2A3547;"><i class="fi fi-br-hastag"></i> 
+                        {{ engagement.job_code }}
+                    </span>
+                </h1>
+                <form method="post" action="#">
+                    {% csrf_token %}
+                    <!--Client-->
+                    <div class="mb-4">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="" class="form-label fw-semibold">รหัสลูกค้า :</label>
+                                <select name="" id="" class="selectpicker" data-live-search="true">
+                                    <option value="" selected disabled hidden>- กรุณาเลือก -</option>
+                                    {% for client in client_list %}
+                                        <option value="{{ client.id }}" {% if client.id == engagement.client.id %} selected {% endif %}>
+                                            {{ client.company_name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3"></div>
+                            <div class="col-md-3">
+                                <label for="" class="form-label fw-semibold">ค่าบริการ (บาท) :</label>
+                                <input type="number" name="" id="" class="form-control" value="{{ engagement.service_fee }}" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="" class="form-label fw-semibold">วันที่เริ่มบริการ :</label>
+                                <input type="" name="" id="" class="form-control" value="{{ engagement.start_date_service|date:'d/m/Y' }}" />
+                            </div>
+                            <div class="col-md-6">
+                                <label for="" class="form-label fw-semibold">วันที่สิ้นสุดบริการ :</label>
+                                <input type="" name="" id="" class="form-control" value="{{ engagement.end_date_service|date:'d/m/Y' }}" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="" class="form-label fw-semibold">รอบที่เริ่มให้บริการ :</label>
+                                <input type="" name="" id="" class="form-control" value="{{ engagement.start_date_period|date:'d/m/Y' }}" />
+                            </div>
+                            <div class="col-md-6">
+                                <label for="end_date_period" class="form-label fw-semibold me-2">รอบที่สิ้นสุดให้บริการ <span style="color: tomato;">หรือ</span></label>
+                                <input type="checkbox" class="form-check-input me-1" id="no_end_date_checkbox" name="no_end_date_checkbox" 
+                                    {% if engagement.end_date_period_infinity %}checked{% endif %} onchange="toggleDateInput()">
+                                <label class="form-label fw-semibold" for="no_end_date_checkbox">ไม่มีกำหนด :</label>
+                                <input type="date" id="date_end_period" class="form-control" name="end_date_period" value="{{ engagement.end_date_period|date:'Y-m-d' }}">
+                            </div>
+                            
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="" class="form-label fw-semibold">ผู้รับผิดชอบ :</label>
+                                <input type="" name="" id="" class="form-control" value="{{ engagement.administrator.first_name }} {{ engagement.administrator.last_name }}" />
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="" class="form-label fw-semibold">ผู้ตรวจทาน :</label>
+                                <input type="" name="" id="" class="form-control" value="{{ engagement.reviewer.first_name }} {{ engagement.reviewer.last_name }}" />
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="" class="form-label fw-semibold">ผู้อนุมัติ :</label>
+                                <input type="" name="" id="" class="form-control" value="{{ engagement.approver.first_name }} {{ engagement.approver.last_name }}" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+                        <button type="submit" class="btn btn-danger"><i class="fa-solid fa-pen-to-square"></i>  แก้ไขข้อมูล</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+         const dataTable = $("#engagement-job-table").DataTable({
+              "language": {
+                   "search": "ค้นหา",
+                   "lengthMenu": "แสดง _MENU_ รายการ",
+                   "info": "แสดง _START_ ถึง _END_ จากทั้งหมด _TOTAL_ รายการ",
+                   "paginate": {
+                        "previous": "ก่อนหน้า",
+                        "next": "ถัดไป"
+                   }
+              }
+         });
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+        $('.selectpicker').selectpicker();
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+        toggleDateInput(); // Initial check on page load
+    });
+
+    function toggleDateInput() {
+        var noEndDateCheckbox = document.getElementById('no_end_date_checkbox');
+        var dateEndPeriodInput = document.getElementById('date_end_period');
+
+        if (noEndDateCheckbox.checked) {
+            dateEndPeriodInput.disabled = true;
+        } else {
+            dateEndPeriodInput.disabled = false;
+        }
+    }
+</script>
+
+{% endblock content %}
