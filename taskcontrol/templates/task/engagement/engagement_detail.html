@@ -104,7 +104,7 @@
                 <div class="col-md-2">
                     <span class="fw-semibold">รหัสลูกค้า :</span>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-10">
                     {{ engagement.client.company_name }} ({{ engagement.client.code }}) 
                 </div>
             </div>
@@ -112,7 +112,7 @@
                 <div class="col-md-2">
                     <span class="fw-semibold">ค่าบริการ (บาท) :</span>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-10">
                     {{ engagement.service_fee|intcomma }}
                 </div>
             </div>
@@ -148,7 +148,7 @@
                 <div class="col-md-2">
                     <span class="fw-semibold">ผู้รับผิดชอบ :</span>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-10">
                     {% if engagement.administrator.first_name and engagement.administrator.last_name %}
                         {{ engagement.administrator.first_name }} {{ engagement.administrator.last_name }}
                     {% else %}
@@ -160,7 +160,7 @@
                 <div class="col-md-2">
                     <span class="fw-semibold">ผู้ตรวจทาน :</span>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-10">
                     {% if engagement.reviewer.first_name and engagement.reviewer.last_name %}
                         {{ engagement.reviewer.first_name }} {{ engagement.reviewer.last_name }}
                     {% else %}
@@ -172,7 +172,7 @@
                 <div class="col-md-2">
                     <span class="fw-semibold">ผู้อนุมัติ :</span>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-10">
                     {% if engagement.approver.first_name and engagement.approver.last_name %}
                         {{ engagement.approver.first_name }} {{ engagement.approver.last_name }}
                     {% else %}
@@ -242,7 +242,7 @@
     </div>
 </div>
 
-<!--Modal Edit Client-->
+<!--Modal Update Engagement-->
 <div class="modal fade" id="updateModal{{ engagement.id }}" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -257,14 +257,14 @@
                         {{ engagement.job_code }}
                     </span>
                 </h1>
-                <form method="post" action="#">
+                <form method="post" action="{% url 'taskcontrol:engagement_update' engagement_id=engagement.id %}">
                     {% csrf_token %}
                     <!--Client-->
                     <div class="mb-4">
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="" class="form-label fw-semibold">รหัสลูกค้า :</label>
-                                <select name="" id="" class="selectpicker" data-live-search="true">
+                                <select name="client_id" id="" class="form-control selectpicker" data-live-search="true">
                                     <option value="" selected disabled hidden>- กรุณาเลือก -</option>
                                     {% for client in client_list %}
                                         <option value="{{ client.id }}" {% if client.id == engagement.client.id %} selected {% endif %}>
@@ -276,32 +276,33 @@
                             <div class="col-md-3"></div>
                             <div class="col-md-3">
                                 <label for="" class="form-label fw-semibold">ค่าบริการ (บาท) :</label>
-                                <input type="number" name="" id="" class="form-control" value="{{ engagement.service_fee }}" />
+                                <input type="number" name="update_service_fee" id="" class="form-control" value="{{ engagement.service_fee }}" />
                             </div>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="" class="form-label fw-semibold">วันที่เริ่มบริการ :</label>
-                                <input type="" name="" id="" class="form-control" value="{{ engagement.start_date_service|date:'d/m/Y' }}" />
+                                <input type="date" name="update_start_date_service" id="" class="form-control" value="{{ engagement.service_fee|default:0 }}" />
                             </div>
                             <div class="col-md-6">
                                 <label for="" class="form-label fw-semibold">วันที่สิ้นสุดบริการ :</label>
-                                <input type="" name="" id="" class="form-control" value="{{ engagement.end_date_service|date:'d/m/Y' }}" />
+                                <input type="date" name="update_end_date_service" id="" class="form-control" value="{{ engagement.end_date_service|date:'d/m/Y' }}" />
                             </div>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="" class="form-label fw-semibold">รอบที่เริ่มให้บริการ :</label>
-                                <input type="" name="" id="" class="form-control" value="{{ engagement.start_date_period|date:'d/m/Y' }}" />
+                                <input type="date" name="update_start_date_period" id="" class="form-control" value="{{ engagement.start_date_period|date:'d/m/Y' }}" />
                             </div>
                             <div class="col-md-6">
                                 <label for="end_date_period" class="form-label fw-semibold me-2">รอบที่สิ้นสุดให้บริการ <span style="color: tomato;">หรือ</span></label>
-                                <input type="checkbox" class="form-check-input me-1" id="no_end_date_checkbox" name="no_end_date_checkbox" 
+                                <input type="checkbox" class="form-check-input me-1" id="no_end_date_checkbox" name="update_end_date_period_infinity" 
                                     {% if engagement.end_date_period_infinity %}checked{% endif %} onchange="toggleDateInput()">
                                 <label class="form-label fw-semibold" for="no_end_date_checkbox">ไม่มีกำหนด :</label>
-                                <input type="date" id="date_end_period" class="form-control" name="end_date_period" value="{{ engagement.end_date_period|date:'Y-m-d' }}">
+                                <input type="date" id="update_end_date_period" class="form-control" name="update_end_date_period" value="{% if engagement.end_date_period %}{{ engagement.end_date_period|date:'Y-m-d' }}{% endif %}">
+
                             </div>
                             
                         </div>
@@ -309,19 +310,41 @@
                         <div class="row mb-3">
                             <div class="col-md-4">
                                 <label for="" class="form-label fw-semibold">ผู้รับผิดชอบ :</label>
-                                <input type="" name="" id="" class="form-control" value="{{ engagement.administrator.first_name }} {{ engagement.administrator.last_name }}" />
+                                <select name="update_admin" id="update_admin" class="form-select">
+                                    <option value="" selected disabled hidden>- กรุณาเลือก -</option>
+                                    {% for admin in administrators %}
+                                        <option value="{{ admin.id }}" {% if admin.id == engagement.administrator.id %} selected {% endif %}>
+                                            {{ admin.first_name }} {{ admin.last_name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-4">
                                 <label for="" class="form-label fw-semibold">ผู้ตรวจทาน :</label>
-                                <input type="" name="" id="" class="form-control" value="{{ engagement.reviewer.first_name }} {{ engagement.reviewer.last_name }}" />
+                                <select name="update_reviewer" id="update_reviewer" class="form-select">
+                                    <option value="" selected disabled hidden>- กรุณาเลือก -</option>
+                                    {% for reviewer in reviewers %}
+                                        <option value="{{ reviewer.id }}" {% if reviewer.id == engagement.reviewer.id %} selected {% endif %}>
+                                            {{ reviewer.first_name }} {{ reviewer.last_name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
                             </div>
+                            
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-4">
                                 <label for="" class="form-label fw-semibold">ผู้อนุมัติ :</label>
-                                <input type="" name="" id="" class="form-control" value="{{ engagement.approver.first_name }} {{ engagement.approver.last_name }}" />
+                                <select name="update_approver" id="update_approver" class="form-select">
+                                    <option value="" selected disabled hidden>- กรุณาเลือก -</option>
+                                    {% for approver in approvers %}
+                                        <option value="{{ approver.id }}" {% if approver.id == engagement.approver.id %} selected {% endif %}>
+                                            {{ approver.first_name }} {{ approver.last_name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -366,7 +389,7 @@
 
     function toggleDateInput() {
         var noEndDateCheckbox = document.getElementById('no_end_date_checkbox');
-        var dateEndPeriodInput = document.getElementById('date_end_period');
+        var dateEndPeriodInput = document.getElementById('update_end_date_period');
 
         if (noEndDateCheckbox.checked) {
             dateEndPeriodInput.disabled = true;
@@ -375,5 +398,6 @@
         }
     }
 </script>
+
 
 {% endblock content %}

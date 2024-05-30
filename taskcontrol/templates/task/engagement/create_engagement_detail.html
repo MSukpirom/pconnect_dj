@@ -186,14 +186,6 @@
 
 </style>
 
-{% if messages %}
-<div class="mt-3">
-    {% for message in messages %}
-        <div class="alert alert-success">{{ message }}</div>
-    {% endfor %}
-</div>
-{% endif %}
-
 <div class="card">
     <div class="card-body">
         <ul class="form-stepper form-stepper-horizontal text-center mx-auto pl-0 ">
@@ -320,7 +312,7 @@
                     </div>
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-4">
                         <button type="reset" class="btn btn-light">ล้างข้อมูล</button>
-                        <button type="button" id="submitJobBtn" class="btn btn-outline-primary"><i class="fa-solid fa-plus"></i> เพิ่มงานใหม่</button>
+                        <button type="button" id="submitJobBtn" class="btn btn-primary"><i class="fa-solid fa-plus"></i> เพิ่มงานใหม่</button>
                     </div>
                 </form>
 

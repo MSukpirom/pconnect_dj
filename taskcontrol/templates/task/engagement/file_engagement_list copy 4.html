@@ -1,0 +1,57 @@
+{% extends 'task/index.html' %}
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h1>Files for {{ engagement.job_code }}</h1>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label for="e_file">File:</label>
+            <input type="file" name="e_file" id="e_file"><br>
+    
+            <label for="e_description">Description:</label>
+            <input type="text" name="e_description" id="e_description" class="form-control"><br>
+    
+            <label for="e_image">Image:</label>
+            <input type="file" name="e_image" id="e_image"><br>
+    
+            <button type="submit">Upload</button>
+        </form>
+    
+        <h2>Uploaded Files</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>File</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for file in files %}
+                <tr>
+                    <td>{{ file.description }}</td>
+
+                    <td>
+                        {% if file.file_engagement %}
+                        <a href="{% url 'taskcontrol:file_engagement_file_client_download_file' file_id=file.id %}" download
+                            target="_blank">
+                            <i class="fa-solid fa-download fa-lg"></i>
+                        </a>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if file.image_engagement %}
+                        <a href="{% url 'taskcontrol:file_engagement_file_client_download_image' image_id=file.id %}" download
+                            target="_blank">
+                            <i class="fa-solid fa-download fa-lg"></i>
+                        </a>  {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock content %}

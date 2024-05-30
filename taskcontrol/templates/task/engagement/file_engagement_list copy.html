@@ -222,30 +222,31 @@
                         {{ engagement.job_code }}
                     </span>
                 </h5>
-                <form method="post" enctype="multipart/form-data" action="{% url 'taskcontrol:file_engagement_create' engagement_id=engagement.id %}">
+                <form id="uploadForm" method="post" action="{% url 'taskcontrol:file_engagement_create' engagement_id=engagement.id %}">
                     {% csrf_token %}
                     <div class="row mb-3">
                         <div class="col-md-12">
                             <label for="c_description" class="form-label">คำอธิบาย :</label>
-                            <input type="text" name="c_description" class="form-control" required>
+                            <input type="text" name="c_description" id="c_description" class="form-control" required>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="c_file" class="form-label">ไฟล์ :</label>
-                            <input type="file" name="c_file" class="form-control" accept=".pdf, .doc, .docx, .txt">
+                            <input type="file" name="c_file" id="c_file" class="form-control" accept=".pdf, .doc, .docx, .txt" required>
                             <span style="font-size: 0.85rem; color: tomato;">ไฟล์ .pdf, .doc, .docx, .txt</span>
                         </div>
                         <div class="col-md-6">
                             <label for="c_image" class="form-label">รูปภาพ :</label>
-                            <input type="file" name="c_image" class="form-control" accept="image/*">
+                            <input type="file" name="c_image" id="c_image" class="form-control" accept="image/*" required>
                             <span style="font-size: 0.85rem; color: tomato;">ไฟล์รูปภาพ</span>
                         </div>
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <button type="submit" class="btn btn-outline-primary">อัปโหลด <i class="fi fi-sr-cloud-upload-alt"></i></button>
+                            <button type="button" id="uploadBtn" class="btn btn-outline-primary">อัปโหลด <i class="fi fi-sr-cloud-upload-alt"></i></button>
                         </div>
                     </div>
                 </form>
+                
 
                 <div class="table-responsive mb-4">
                     <table id="file-engagement-table" class="table">
@@ -300,49 +301,66 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function () {
-        const dataTable = $("#file-engagement-table").DataTable({
-             "language": {
-                  "search": "ค้นหา",
-                  "lengthMenu": "แสดง _MENU_ รายการ",
-                  "info": "แสดง _START_ ถึง _END_ จากทั้งหมด _TOTAL_ รายการ",
-                  "paginate": {
-                       "previous": "ก่อนหน้า",
-                       "next": "ถัดไป"
-                  }
-             }
-        });
-    });
+        // Function to handle form submission and table update
+        function handleFormSubmission() {
+            // Submit the form when the upload button is clicked
+            $('#uploadBtn').click(function () {
+                $('#uploadForm').submit();
+            });
 
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-    }
-
-    $(document).ready(function() {
-        $(".delete-file").on("click", function() {
-            var fileId = $(this).data("file-id");
-            var deleteFileUrl = "{% url 'taskcontrol:file_engagement_delete' file_id=0 %}".replace("0", fileId);
-    
-            if (confirm("ต้องการลบไฟล์นี้?")) {
+            // Update table after form submission
+            $('#uploadForm').submit(function (e) {
+                e.preventDefault();
+                var formData = new FormData(this);
                 $.ajax({
                     type: 'POST',
-                    url: deleteFileUrl,
-                    data: {
-                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                    url: $(this).attr('action'),
+                    data: formData,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    success: function (data) {
+                        $('#file-engagement-table tbody').html(data);
                     },
-                    success: function() {
-                        location.reload();
-                        alert("ลบไฟล์สำเร็จ");
-                    },
-                    error: function(xhr, status, error) {
+                    error: function (xhr, status, error) {
                         console.error(xhr.responseText);
-                        alert("เกิดข้อผิดพลาดในการลบไฟล์");
+                        alert("เกิดข้อผิดพลาดในการอัปโหลดไฟล์");
                     }
                 });
-            }
-        });
+            });
+        }
+
+        // Function to handle file deletion
+        function handleFileDeletion() {
+            $(".delete-file").on("click", function () {
+                var fileId = $(this).data("file-id");
+                var deleteFileUrl = "{% url 'taskcontrol:file_engagement_delete' file_id=0 %}".replace("0", fileId);
+
+                if (confirm("ต้องการลบไฟล์นี้?")) {
+                    $.ajax({
+                        type: 'POST',
+                        url: deleteFileUrl,
+                        data: {
+                            csrfmiddlewaretoken: '{{ csrf_token }}',
+                        },
+                        success: function () {
+                            location.reload();
+                            alert("ลบไฟล์สำเร็จ");
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(xhr.responseText);
+                            alert("เกิดข้อผิดพลาดในการลบไฟล์");
+                        }
+                    });
+                }
+            });
+        }
+
+        // Call functions to handle form submission and file deletion
+        handleFormSubmission();
+        handleFileDeletion();
     });
-    
 </script>
+
+
 {% endblock content %}

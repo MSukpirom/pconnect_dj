@@ -63,11 +63,11 @@ urlpatterns = [
     path('engagement/detail_job/create/<int:engagement_id>/', engagement_job_create, name='engagement_job_create'),
     path('engagement/detail_job/delete/<int:engagement_job_id>/', engagement_job_delete, name='engagement_job_delete'),
 
-    path('file_engagement/list/<int:engagement_id>/', file_engagement_list, name='file_engagement_list'),
-    path('file_engagement/create/<int:engagement_id>/', file_engagement_create, name='file_engagement_create'),
-    path('file_engagement/delete/<int:file_id>/', file_engagement_delete, name='file_engagement_delete'),
-    path('file_engagement/file_client_download_file/<int:file_id>/', file_engagement_file_client_download_file, name='file_engagement_file_client_download_file'),
-    path('file_engagement/file_client_download_image/<int:image_id>/', file_engagement_file_client_download_image, name='file_engagement_file_client_download_image'),
+    path('engagement/file_list/<int:engagement_id>/', file_engagement_list, name='file_engagement_list'),
+    path('engagement/file_create/<int:engagement_id>/', file_engagement_create, name='file_engagement_create'),
+    path('engagement/file_delete/<int:file_id>/', file_engagement_delete, name='file_engagement_delete'),
+    path('engagement/file_client_download_file/<int:file_id>/', download_file_engagement, name='download_file_engagement'),
+    path('engagement/file_client_download_image/<int:image_id>/', download_image_engagement, name='download_image_engagement'),
 
     path('manage_category/', manage_category, name='manage_category'),
     path('manage_category/update/<int:category_id>/', update_category, name='update_category'),

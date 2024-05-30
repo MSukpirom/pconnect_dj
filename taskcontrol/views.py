@@ -513,7 +513,6 @@ def update_password(request, password_id):
         'password': password,
     })
 
-
 #TODO Password Deleted
 @login_required
 def delete_password(request, password_id):
@@ -559,7 +558,7 @@ def file_client_create(request, client_id):
 @require_POST
 def file_client_delete(request, file_id):
     client_file = get_object_or_404(FileManage, id=file_id)
-    client_id = client_file.client.id  # Save the client ID before deleting the file
+    client_id = client_file.client.id
 
     client_file.delete()
     return JsonResponse({'success': True, 'client_id': client_id})
@@ -629,27 +628,29 @@ def record_engagement(request, engagement_id):
         'client_all':client_all,
     })
 
+# TODO GetDataForEngagement
+def get_engagement_type(request):
+    category_id = request.POST.get('category_id')
+    engagement_type = EngagementType.objects.filter(category=category_id).values('id', 'name_th')
+    return JsonResponse(list(engagement_type), safe=False)
+
 # TODO Engagement Detail
 @login_required
 def engagement_detail(request,engagement_id):
     engagement = get_object_or_404(Engagement, id=engagement_id)
     engagement_detail_job = EngagementDetail.objects.filter(engagement_id=engagement_id).all()
-    client_list = Client.objects.values('id','code','company_name')
+    client_list = Client.objects.exclude(status=False).values('id', 'code', 'company_name').order_by('code')
+    administrators = get_user_model().objects.filter(is_staff=True)
     reviewers = get_user_model().objects.filter(is_superuser=True)
     approvers = get_user_model().objects.filter(is_superuser=True)
     return render(request,'task/engagement/engagement_detail.html', {
         'engagement': engagement,
         'engagement_detail_job':engagement_detail_job,
         'client_list':client_list,
+        'administrators':administrators,
         'reviewers':reviewers,
         'approvers':approvers
     })
-
-# TODO GetDataForEngagement
-def get_engagement_type(request):
-    category_id = request.POST.get('category_id')
-    engagement_type = EngagementType.objects.filter(category=category_id).values('id', 'name_th')
-    return JsonResponse(list(engagement_type), safe=False)
 
 # TODO Engagement Create
 @login_required
@@ -664,7 +665,7 @@ def engagement_create(request):
     if request.method == 'POST':
         client_id = request.POST.get('client')
         job_code = request.POST.get('job_code')
-        service_fee = request.POST.get('service_fee')
+        service_fee = request.POST.get('service_fee', 0)
         start_date_service = request.POST.get('start_date_service')
         end_date_service = request.POST.get('end_date_service')
         start_date_period = request.POST.get('start_date_period')
@@ -729,70 +730,89 @@ def engagement_create(request):
         'administrator': administrator
     })
 
+# TODO Engagement Detail
+@login_required
+def engagement_detail(request, engagement_id):
+    engagement = get_object_or_404(Engagement, id=engagement_id)
+    engagement_detail_job = EngagementDetail.objects.filter(engagement_id=engagement_id).all()
+    client_list = Client.objects.exclude(status='0').values('id', 'code', 'company_name').order_by('company_name')
+    admin = get_user_model().objects.filter(is_staff=True)
+    reviewers = get_user_model().objects.filter(is_superuser=True)
+    approvers = get_user_model().objects.filter(is_superuser=True)
+    return render(request, 'task/engagement/engagement_detail.html', {
+        'engagement': engagement,
+        'engagement_detail_job': engagement_detail_job,
+        'client_list': client_list,
+        'admin': admin,
+        'reviewers': reviewers,
+        'approvers': approvers
+    })
+
 # TODO Engagement Update
 @login_required
 def engagement_update(request, engagement_id):
     engagement = get_object_or_404(Engagement, id=engagement_id)
-    clients = Client.objects.values('id', 'code', 'company_name')
-    engagements = Engagement.objects.all()
+    clients = Client.objects.exclude(status='0').values('id', 'code', 'company_name').order_by('code')
     reviewers = get_user_model().objects.filter(is_superuser=True)
     approvers = get_user_model().objects.filter(is_superuser=True)
-
+    administrators = get_user_model().objects.filter(is_staff=True)
     user = request.user
 
     if request.method == 'POST':
-        existing_engagement = get_object_or_404(Engagement, id=engagement_id)
+        update_service_fee = request.POST.get('update_service_fee')
+        update_start_date_service = request.POST.get('update_start_date_service')
+        update_end_date_service = request.POST.get('update_end_date_service')
+        update_start_date_period = request.POST.get('update_start_date_period')
+        update_end_date_period = request.POST.get('update_end_date_period', '')
+        update_end_date_period_infinity = request.POST.get('update_end_date_period_infinity') == 'on'
+        update_admin_id = request.POST.get('update_admin', '')
+        update_approver_id = request.POST.get('update_approver', '')
+        update_reviewer_id = request.POST.get('update_reviewer', '')
 
-        client_id = request.POST.get('client')
-        client_instance = None
+        sdate_service = parse_date(update_start_date_service)
+        edate_service = parse_date(update_end_date_service)
+        sdate_period = parse_date(update_start_date_period)
+        edate_period = parse_date(update_end_date_period)
 
-        if client_id:
-            client_instance = get_object_or_404(Client, id=client_id)
-            existing_engagement.client = client_instance
+        client_id = request.POST.get('client_id')
+        client_instance = get_object_or_404(Client, id=client_id)
 
-        e_start_date_service = request.POST.get('start_date_service')
-        e_end_date_service = request.POST.get('end_date_service')
-        e_start_date_period = request.POST.get('start_date_period')
-        e_end_date_period = request.POST.get('end_date_period')
+        admin_instance = None
+        approver_instance = None
+        reviewer_instance = None
 
-        status = request.POST.get('status')
-        existing_engagement.status = status
+        if update_admin_id:
+            admin_instance = get_object_or_404(get_user_model(), id=update_admin_id)
 
-        approver_id = request.POST.get('approver')
-        reviewer_id = request.POST.get('reviewer')
+        if update_approver_id:
+            approver_instance = get_object_or_404(get_user_model(), id=update_approver_id)
 
-        if status == 'on':
-            existing_engagement.status = 'OPENJOB'
-        else:
-            existing_engagement.status = 'DONE'
+        if update_reviewer_id:
+            reviewer_instance = get_object_or_404(get_user_model(), id=update_reviewer_id)
 
-        start_date_service = parse_date(e_start_date_service)
-        end_date_service = parse_date(e_end_date_service)
-        start_date_period = parse_date(e_start_date_period)
-        end_date_period = parse_date(e_end_date_period)
+        # Update engagement details
+        engagement.client = client_instance
+        engagement.service_fee = update_service_fee
+        engagement.start_date_service = sdate_service
+        engagement.end_date_service = edate_service
+        engagement.start_date_period = sdate_period
+        engagement.end_date_period = edate_period
+        engagement.end_date_period_infinity = update_end_date_period_infinity
+        engagement.administrator = admin_instance
+        engagement.approver = approver_instance
+        engagement.reviewer = reviewer_instance
+        engagement.save()
 
-        approver_instance = get_object_or_404(get_user_model(), id=approver_id)
-        reviewer_instance = get_object_or_404(get_user_model(), id=reviewer_id)
+        messages.success(request, 'Engagement has been updated successfully.')
+        return redirect('taskcontrol:engagement_detail', engagement_id=engagement.id)
 
-        existing_engagement.client = client_instance
-        existing_engagement.start_date_service = start_date_service
-        existing_engagement.end_date_service = end_date_service
-        existing_engagement.start_date_period = start_date_period
-        existing_engagement.end_date_period = end_date_period
-        existing_engagement.approver = approver_instance
-        existing_engagement.reviewer = reviewer_instance
-        existing_engagement.update_by = user
-        existing_engagement.update_at = timezone.now()
-        existing_engagement.save()
-
-        return redirect('taskcontrol:engagement_detail', engagement_id=existing_engagement.id)
-
-    return render(request, 'task/engagement/update.html', {
-        'clients': clients,
+    return render(request, 'task/engagement/engagement_detail.html', {
         'engagement': engagement,
-        'engagements': engagements,
+        'clients': clients,
+        'user': user,
         'reviewers': reviewers,
-        'approvers': approvers
+        'approvers': approvers,
+        'administrators': administrators
     })
 
 # TODO Engagement Deleted
@@ -803,13 +823,14 @@ def engagement_delete(request, engagement_id):
     messages.success(request, 'ลบรายการนี้เรียบร้อย.')
     return redirect("taskcontrol:engagement_list")
 
-#TODO EngagementlJob
+#TODO Engagement Job
 @login_required
 def engagement_job(request):
     engagement_detail_lists = EngagementDetail.objects.all()
     return render(request,'task/engagement/create_engagement_detail.html', {'engagement_detail_lists': engagement_detail_lists})
 
-#TODO EngagementJob Create
+#TODO EngagementJob Create 1/2
+@login_required
 def engagement_job_create(request, engagement_id):
     engagement = get_object_or_404(Engagement, id=engagement_id)
     categories = EngagementCategory.objects.all()
@@ -877,6 +898,7 @@ def engagement_job_create(request, engagement_id):
         'engagement': engagement,
     })
 
+#TODO EngagementJob Create 2/2
 def create_engagement_detail(engagement, category_id, type_id, type_name, deadline, notification,
                              start_date, end_date, review_by, approved_by, user):
     # Get or create engagement category and type instances
@@ -900,124 +922,58 @@ def create_engagement_detail(engagement, category_id, type_id, type_name, deadli
     )
     return engagement_detail
 
-
-# def engagement_job_create(request, engagement_id):
-#     engagement = get_object_or_404(Engagement, id=engagement_id)
-#     categories = EngagementCategory.objects.all()
-#     types = EngagementType.objects.all()
-#     reviewers = get_user_model().objects.filter(is_superuser=True)
-#     approvers = get_user_model().objects.filter(is_superuser=True)
-
-#     if request.method == 'POST':
-#         category_id = request.POST.get('engagement_category_id')
-#         type_id = request.POST.get('engagement_type_id')
-#         type_name = request.POST.get('type')
-#         deadline = request.POST.get('deadline')
-#         notification = request.POST.get('notification')
-#         start_date = request.POST.get('start_date')
-#         end_date = request.POST.get('end_date')
-#         review_by = request.POST.get('review_by')
-#         approved_by = request.POST.get('approved_by')
-
-#         job_start_date = datetime.strptime(start_date, '%Y-%m-%d')
-#         job_end_date = datetime.strptime(end_date, '%Y-%m-%d')
-
-#         review_by = review_by == 'on'
-#         approved_by = approved_by == 'on'
-
-#         engagement_category_instance = get_object_or_404(EngagementCategory, id=category_id)
-#         engagement_type_instance = get_object_or_404(EngagementType, id=type_id)
-
-#         engagement.category = engagement_category_instance
-#         engagement.type = engagement_type_instance
-#         engagement.save()  # Save the engagement after modifying it
-
-#         # Create and save the EngagementDetail
-#         engagement_detail = EngagementDetail.objects.create(
-#             engagement=engagement,
-#             engagement_category=engagement_category_instance,
-#             engagement_type=engagement_type_instance,
-#             type=type_name,
-#             deadline=deadline,
-#             notification=notification,
-#             start_date=job_start_date,
-#             end_date=job_end_date,
-#             review_by=review_by,
-#             approved_by=approved_by,
-#             create_by=request.user,
-#             create_at=timezone.now(),
-#         )
-
-#         success_message = 'บันทึกข้อมูลลูกค้าเรียบร้อยแล้ว'
-#         messages.success(request, success_message)
-
-#         return redirect('taskcontrol:engagement_job_create', engagement_id=engagement_id)  # Redirect with engagement_id
-    
-#     engagement_detail_lists = EngagementDetail.objects.filter(engagement=engagement)
-
-#     return render(request, 'task/engagement/create_engagement_detail.html', {
-#         'categories': categories,
-#         'types': types,
-#         'reviewers': reviewers,
-#         'approvers': approvers,
-#         'engagement_detail_lists': engagement_detail_lists,
-#         'engagement': engagement,
-#     })
-
-#TODO EngagementJob Deleted
+#TODO EngagementJob Delete
 @login_required
 def engagement_job_delete(request, engagement_job_id):
     engagement_job = get_object_or_404(EngagementDetail, pk=engagement_job_id)
     engagement_job.delete()
     return JsonResponse({'message': 'Engagement Detail Job deleted successfully'})
 
-#TODO FileEngagement
+#TODO File Engagement
 @login_required
 def file_engagement_list(request, engagement_id):
     engagement = get_object_or_404(Engagement, id=engagement_id)
-    files = FileManage.objects.filter(engagement=engagement)
-    context = {'engagement': engagement, 'files': files, 'engagement_id': engagement_id}
-    return render(request, 'task/engagement/file_engagement_list.html', context)
+    engagement_files = FileManage.objects.filter(engagement=engagement).all()
+    return render(request, 'task/engagement/engagement_file.html', {'engagement': engagement, 'engagement_files': engagement_files})
 
-#TODO FileEngagement Cretae
+#TODO File Engagement Create
 @login_required
 def file_engagement_create(request, engagement_id):
     engagement = get_object_or_404(Engagement, id=engagement_id)
-    files = FileManage.objects.filter(engagement=engagement)
+    engagement_files = FileManage.objects.filter(engagement=engagement)
 
     if request.method == 'POST':
-        c_file = request.FILES.get('c_file')
-        c_description = request.POST.get('c_description')
-        c_image = request.FILES.get('c_image')
+        engagement_file = request.FILES.get('engagement_file')
+        engagement_description = request.POST.get('engagement_description')
+        engagement_image = request.FILES.get('engagement_image')
 
         user = request.user
-
-        file = FileManage(
-            file_engagement=c_file,
-            description=c_description,
-            image_engagement=c_image,
+        engagement_file = FileManage(
+            file_engagement=engagement_file,
+            description=engagement_description,
+            image_engagement=engagement_image,
             engagement=engagement,
             create_by=user,
         )
-        file.save()
-        return redirect('taskcontrol:file_engagement_list', engagement_id=engagement.id)
-    
-    return render(request, 'task/engagement/file_engagement_list.html', {'engagement': engagement, 'files': files})
+        engagement_file.save()
+        return redirect('taskcontrol:file_engagement_create', engagement_id=engagement.id)
 
-#TODO FileEngagement Deleted
+    return render(request, 'task/engagement/engagement_file.html', {'engagement': engagement, 'engagement_files': engagement_files})
+
+#TODO File Engagement Delete
 @login_required
+@require_POST
 def file_engagement_delete(request, file_id):
-    file_to_delete = get_object_or_404(FileManage, id=file_id)
+    engagement_file = get_object_or_404(FileManage, id=file_id)
+    engagement_id = engagement_file.engagement.id
 
-    if request.user != file_to_delete.create_by:
-        return redirect('taskcontrol:file_engagement_list', engagement_id=file_to_delete.engagement.id)
+    engagement_file.delete()
+    return JsonResponse({'success': True, 'engagement_id': engagement_id})
 
-    file_to_delete.delete()
-    return redirect('taskcontrol:file_engagement_list', engagement_id=file_to_delete.engagement.id)
 
-#TODO FileEngagement Download File&Image
+#TODO File Engagement Download File&Image
 @login_required
-def file_engagement_file_client_download_file(request, file_id):
+def download_file_engagement(request, file_id):
     try:
         file_instance = FileManage.objects.get(pk=file_id)
         file_path = file_instance.file_engagement.path
@@ -1034,7 +990,7 @@ def file_engagement_file_client_download_file(request, file_id):
         raise Http404("Failed to download file")
 
 @login_required
-def file_engagement_file_client_download_image(request, image_id):
+def download_image_engagement(request, image_id):
     try:
         image_instance = FileManage.objects.get(pk=image_id)
         image_path = image_instance.image_engagement.path
