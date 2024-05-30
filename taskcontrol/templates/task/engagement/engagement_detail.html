@@ -78,6 +78,7 @@
                 </div>
             </div>
             
+            <!--#TODO Engagement-->
             <h5 class="text-primary fw-semibold mb-3">
                 <a data-bs-toggle="modal" href="#updateModal{{ engagement.id }}">
                     <i class="fa-solid fa-pen-to-square" style="color: #ffc300;"></i>
@@ -141,7 +142,13 @@
                     <span class="fw-semibold">รอบที่สิ้นสุดให้บริการ :</span>
                 </div>
                 <div class="col-md-4">
-                    {% if engagement.end_date_period|date:"d/m/Y" %}{{ engagement.end_date_period|date:"d/m/Y" }}{% else %}-{% endif %}
+                    {% if engagement.end_date_period %}
+                        {{ engagement.end_date_period|date:"d/m/Y" }}
+                    {% elif engagement.end_date_period_infinity %}
+                        ไม่มีกำหนด
+                    {% else %}
+                        -
+                    {% endif %}
                 </div>
             </div>
             <div class="row mb-3">
@@ -181,10 +188,18 @@
                 </div>
             </div>
 
-            <h5 class="pb-2 mb-4 text-primary fw-semibold border-bottom border-primary">
+            <!--#TODO Jobs in Engagement-->
+            <h5 class="pb-2 mb-3 text-primary fw-semibold border-bottom border-primary">
                 <i class="fi fi-sr-comment-info" style="color: #343a40;"></i>
                 <span>รายละเอียดงาน</span>
             </h5>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-3">
+                <a data-bs-toggle="modal" href="#createJobModal{{ engagement.id }}" class="btn btn-success">
+                    <i class="fi fi-sr-multiple"></i>
+                    <span>เพิ่มงานใหม่</span>
+                </a>
+            </div>
+            
             <div class="table-responsive mb-4">
                 <table id="engagement-job-table" class="table">
                     <thead class="table-light" style="text-align: center;">
@@ -202,7 +217,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for detail in engagement_detail_job %}
+                        {% for detail in engagement_detail_lists %}
                             <tr>
                                 <td class="text-center">{{ forloop.counter }}</td>
                                 <td>{{ detail.engagement_category.name_th }}</td>
@@ -238,6 +253,7 @@
                 </table>
             </div>
             <input type="hidden" id="delete-job-url" value="{% url 'taskcontrol:engagement_job_delete' engagement_job_id=0 %}">
+
         </div>
     </div>
 </div>
@@ -283,18 +299,18 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="" class="form-label fw-semibold">วันที่เริ่มบริการ :</label>
-                                <input type="date" name="update_start_date_service" id="" class="form-control" value="{{ engagement.service_fee|default:0 }}" />
+                                <input type="date" name="update_start_date_service" id="" class="form-control" value="{{ engagement.start_date_service|date:'Y-m-d' }}" />
                             </div>
                             <div class="col-md-6">
                                 <label for="" class="form-label fw-semibold">วันที่สิ้นสุดบริการ :</label>
-                                <input type="date" name="update_end_date_service" id="" class="form-control" value="{{ engagement.end_date_service|date:'d/m/Y' }}" />
+                                <input type="date" name="update_end_date_service" id="" class="form-control" value="{{ engagement.end_date_service|date:'Y-m-d' }}" />
                             </div>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="" class="form-label fw-semibold">รอบที่เริ่มให้บริการ :</label>
-                                <input type="date" name="update_start_date_period" id="" class="form-control" value="{{ engagement.start_date_period|date:'d/m/Y' }}" />
+                                <input type="date" name="update_start_date_period" id="" class="form-control" value="{{ engagement.start_date_period|date:'Y-m-d' }}" />
                             </div>
                             <div class="col-md-6">
                                 <label for="end_date_period" class="form-label fw-semibold me-2">รอบที่สิ้นสุดให้บริการ <span style="color: tomato;">หรือ</span></label>
@@ -302,9 +318,7 @@
                                     {% if engagement.end_date_period_infinity %}checked{% endif %} onchange="toggleDateInput()">
                                 <label class="form-label fw-semibold" for="no_end_date_checkbox">ไม่มีกำหนด :</label>
                                 <input type="date" id="update_end_date_period" class="form-control" name="update_end_date_period" value="{% if engagement.end_date_period %}{{ engagement.end_date_period|date:'Y-m-d' }}{% endif %}">
-
                             </div>
-                            
                         </div>
 
                         <div class="row mb-3">
@@ -359,6 +373,111 @@
     </div>
 </div>
 
+<!--Modal Add Jobs-->
+<div class="modal fade" id="createJobModal{{ engagement.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h1 class="modal-title fs-5 pb-2 mb-3 text-primary fw-semibold border-bottom border-warning">
+                    <i class="fi fi-sr-comment-alt-edit" style="color: #ffc300;"></i> 
+                    เพิ่มงานใหม่
+                    <span style="color: #2A3547;"><i class="fi fi-br-hastag"></i> 
+                        {{ engagement.job_code }}
+                    </span>
+                </h1>
+                <form method="post" id="createJobForm">
+                    {% csrf_token %}
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="engagement_category_id" class="form-label">หมวดงาน :</label>
+                                <select class="form-select" id="engagement_category_id" name="engagement_category_id" required onchange="loadEngagementType()">
+                                    <option value="" selected disabled hidden>- กรุณาเลือก -</option>
+                                    {% for category in categories %}
+                                        <option value="{{ category.id }}">{{ category.name_th }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="engagement_type_id" class="form-label">ประเภทงาน :</label>
+                                <select class="form-select" id="engagement_type_id" name="engagement_type_id" required disabled>
+                                    <option value="" selected disabled hidden>- กรุณาเลือก -</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="type" class="form-label"><i class="fi fi-br-calendar-lines-pen"></i> ประเภท :</label>
+                            <select class="form-select" name="type" id="type" required>
+                                <option value="" selected disabled hidden>- กรุณาเลือก -</option>
+                                <option value="ครั้งเดียว">ครั้งเดียว</option>
+                                <option value="รายเดือน">รายเดือน</option>
+                                <option value="รายปี">รายปี</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="deadline" class="form-label"><i class="fi fi-sr-calendar-clock" style="color: tomato;"></i> เดดไลน์ :</label>
+                            <input type="date" class="form-control" id="deadline" name="deadline" required>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="notification" class="form-label"><i class="fi fi-sr-alarm-clock" style="color: #ffb012;"></i> แจ้งเตือน :</label>
+                            <select class="form-select" name="notification" id="notification" required>
+                                <option value="" selected disabled hidden>- กรุณาเลือก -</option>
+                                <option value="0">ไม่ต้องแจ้งเตือน</option>
+                                <option value="3">3 วัน</option>
+                                <option value="5">5 วัน</option>
+                                <option value="7">7 วัน</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="start_date" class="form-label"><i class="fi fi-br-calendar-day"></i> เริ่มต้น :</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date" required>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="end_date" class="form-label"><i class="fi fi-br-calendar-day"></i> สิ้นสุด :</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="review_by" name="review_by" {% if engagement.reviewer %}checked{% endif %}>
+                                <label class="form-label" for="review_by">ผู้ตรวจทาน : 
+                                    <span class="text-decoration-underline" style="color: #5d87ff;">
+                                        {{ engagement.reviewer.first_name }}
+                                        {{ engagement.reviewer.last_name }}
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="approved_by" id="approved_by" {% if engagement.approver %}checked{% endif %}>
+                                <label class="form-label" for="approved_by">ผู้อนุมัติ : 
+                                    <span class="text-decoration-underline" style="color: #5d87ff;">
+                                        {{ engagement.approver.first_name }}
+                                        {{ engagement.approver.last_name }}
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-4">
+                        <button type="reset" class="btn btn-light">ล้างข้อมูล</button>
+                        <button type="button" id="submitJobBtn" class="btn btn-primary"><i class="fa-solid fa-plus"></i> เพิ่มงานใหม่</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function () {
@@ -399,5 +518,114 @@
     }
 </script>
 
+<!--Jobs-->
+<script>
+    function loadEngagementType() {
+        var categorySelect = $("#engagement_category_id");
+        var typeSelect = $("#engagement_type_id");
+        var categoryId = categorySelect.val();
+    
+        if (categoryId !== "") {
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+    
+            $.ajax({
+                url: '{% url "taskcontrol:get_engagement_type" %}',
+                type: 'POST',
+                headers: { "X-CSRFToken": csrftoken },
+                data: { category_id: categoryId },
+                success: function(data) {
+                    typeSelect.empty().append('<option value="" selected disabled hidden>- กรุณาเลือก -</option>');
+                    data.forEach(function(type) {
+                        typeSelect.append('<option value="' + type.id + '">' + type.name_th + '</option>');
+                    });
+                    typeSelect.prop('disabled', false); // เปิดใช้งาน dropdown ของประเภทงาน
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    console.error('Error:', errorThrown);
+                }
+            });
+        } else {
+            // หากยังไม่ได้เลือกหมวดงาน ให้เซ็ต dropdown ของประเภทงานเป็นค่าว่างและปิดใช้งาน
+            typeSelect.empty().append('<option value="" selected disabled hidden>- กรุณาเลือกหมวดงานก่อน -</option>');
+            typeSelect.prop('disabled', true); // ปิดใช้งาน dropdown ของประเภทงาน
+        }
+    }
+    
+    
+
+    $(document).ready(function () {
+        // เมื่อมีการส่งฟอร์มเพิ่มงาน
+        $("#createJobForm").on("submit", function (event) {
+            event.preventDefault();
+    
+            var data = $(this).serialize();
+    
+            $.ajax({
+                type: "POST",
+                url: "{% url 'taskcontrol:engagement_job_create' engagement.id %}",
+                data: data,
+                success: function (response) {
+                    console.log(response);
+                    window.location.reload();
+                },
+                error: function (xhr, status, error) {
+                    console.error(xhr.responseText);
+                }
+            });
+        });
+    
+        // เมื่อกดปุ่มส่งงาน
+        $('#submitJobBtn').on('click', function () {
+            var csrftoken = $('input[name="csrfmiddlewaretoken"]').val();
+            $.ajax({
+                url: $('#createJobForm').attr('action'),
+                type: 'POST',
+                data: $('#createJobForm').serialize(),
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                },
+                success: function (response) {
+                    // เคลียร์ข้อมูลในฟอร์ม
+                    $('#createJobForm')[0].reset();
+                    window.location.reload();
+    
+                },
+                error: function (xhr, errmsg, err) {
+                    console.error(xhr.responseText);
+                }
+            });
+        });
+    
+        // เมื่อคลิกที่ปุ่มลบงาน
+        $(".delete-job-btn").on("click", function() {
+            var jobId = $(this).data("job-id");
+            if (confirm("ต้องการลบรายการงานนี้?")) {
+                var deleteUrl = $('#delete-job-url').val();
+                if (deleteUrl) {
+                    // สร้าง URL สำหรับการลบ
+                    var url = deleteUrl.replace("0", jobId);
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: {
+                            csrfmiddlewaretoken: '{{ csrf_token }}',
+                        },
+                        success: function() {
+                            // ลบแถวของงานที่ถูกลบออกจากตาราง
+                            $('[data-job-id="' + jobId + '"]').closest("tr").remove();
+                            window.location.reload();
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(xhr.responseText);
+                        }
+                    });
+                } else {
+                    console.error("Delete URL is missing or invalid.");
+                }
+            }
+        });
+    });
+    
+</script>
 
 {% endblock content %}

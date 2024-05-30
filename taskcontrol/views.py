@@ -638,15 +638,19 @@ def get_engagement_type(request):
 @login_required
 def engagement_detail(request,engagement_id):
     engagement = get_object_or_404(Engagement, id=engagement_id)
-    engagement_detail_job = EngagementDetail.objects.filter(engagement_id=engagement_id).all()
+    engagement_detail_lists = EngagementDetail.objects.filter(engagement=engagement).all()
     client_list = Client.objects.exclude(status=False).values('id', 'code', 'company_name').order_by('code')
+    categories = EngagementCategory.objects.all()
+    types = EngagementType.objects.all
     administrators = get_user_model().objects.filter(is_staff=True)
     reviewers = get_user_model().objects.filter(is_superuser=True)
     approvers = get_user_model().objects.filter(is_superuser=True)
     return render(request,'task/engagement/engagement_detail.html', {
         'engagement': engagement,
-        'engagement_detail_job':engagement_detail_job,
+        'engagement_detail_lists':engagement_detail_lists,
         'client_list':client_list,
+        'categories':categories,
+        'types':types,
         'administrators':administrators,
         'reviewers':reviewers,
         'approvers':approvers
@@ -728,24 +732,6 @@ def engagement_create(request):
         'reviewers': reviewers,
         'approvers': approvers,
         'administrator': administrator
-    })
-
-# TODO Engagement Detail
-@login_required
-def engagement_detail(request, engagement_id):
-    engagement = get_object_or_404(Engagement, id=engagement_id)
-    engagement_detail_job = EngagementDetail.objects.filter(engagement_id=engagement_id).all()
-    client_list = Client.objects.exclude(status='0').values('id', 'code', 'company_name').order_by('company_name')
-    admin = get_user_model().objects.filter(is_staff=True)
-    reviewers = get_user_model().objects.filter(is_superuser=True)
-    approvers = get_user_model().objects.filter(is_superuser=True)
-    return render(request, 'task/engagement/engagement_detail.html', {
-        'engagement': engagement,
-        'engagement_detail_job': engagement_detail_job,
-        'client_list': client_list,
-        'admin': admin,
-        'reviewers': reviewers,
-        'approvers': approvers
     })
 
 # TODO Engagement Update
@@ -885,7 +871,7 @@ def engagement_job_create(request, engagement_id):
         success_message = 'บันทึกข้อมูลลูกค้าเรียบร้อยแล้ว'
         messages.success(request, success_message)
 
-        return redirect('taskcontrol:engagement_job_create', engagement_id=engagement_id)
+        return redirect('taskcontrol:engagement_detail', engagement_id=engagement_id)
 
     engagement_detail_lists = EngagementDetail.objects.filter(engagement=engagement)
     

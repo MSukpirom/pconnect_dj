@@ -55,7 +55,7 @@ urlpatterns = [
     path('engagement/list/', engagement_list, name='engagement_list'),
     path('engagement/create/', engagement_create, name='engagement_create'),
     path('engagement/<int:engagement_id>/', record_engagement, name='record_engagement'),
-    path('engagement/detail/<int:engagement_id>', engagement_detail, name='engagement_detail'),
+    path('engagement/detail/<int:engagement_id>/', engagement_detail, name='engagement_detail'),
     path('engagement/update/<int:engagement_id>/', engagement_update, name='engagement_update'),
     path('engagement/delete/<int:engagement_id>/', engagement_delete, name='engagement_delete'),
 
