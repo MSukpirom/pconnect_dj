@@ -17,12 +17,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = os.getenv('django-insecure-zkntbe%k(eex3xvk7f^3i9i3ogw7_*(&t41upv5y_n-w5&res5')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG')
+DEBUG = os.getenv('True')
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(' ')
+ALLOWED_HOSTS = ['*']
 
 LOGIN_URL = '/task-control/login/'
 
@@ -82,13 +82,13 @@ WSGI_APPLICATION = 'pconnectacc.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': os.getenv('DB_ENGINE'),
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASS'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
-    }
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'demodb',
+        'USER': 'connectacc',
+        'PASSWORD': 'C0nnect@cc',
+        'HOST': '46.137.234.75',
+        'PORT': '3306',
+    },
 }
 
 # Password validation
