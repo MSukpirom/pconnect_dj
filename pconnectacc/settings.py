@@ -1,17 +1,17 @@
 import os
 from pathlib import Path
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 
-# load_dotenv()
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+# BASE_DIR = Path(__file__).resolve().parent.parent
 
-# BASE_DIR = os.path.dirname(
-#     os.path.dirname(
-#         os.path.abspath(__file__)
-#     )
-# )
+BASE_DIR = os.path.dirname(
+    os.path.dirname(
+        os.path.abspath(__file__)
+    )
+)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -127,7 +127,7 @@ TIME_ZONE = 'Asia/Bangkok'
 
 USE_I18N = True
 
-USE_TZ = False
+USE_TZ = True
 
 # Static files (CSS, JavaScript, images)
 STATIC_URL = '/static/'
