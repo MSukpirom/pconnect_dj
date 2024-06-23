@@ -1,0 +1,341 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.7/css/dataTables.bootstrap5.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/searchpanes/2.3.1/css/searchPanes.bootstrap5.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/select/2.0.2/css/select.bootstrap5.css">
+{% extends 'task/index.html' %}
+{% block content %}
+<style>
+    th {
+        font-size: 13px;
+    }
+
+    td {
+        font-size: 13.5px;
+    }
+
+    .all-job {
+        color: #062a91;
+        font-size: 12px;
+        font-weight: 500;
+        background-color: #d1ddff;
+        border-radius: 8px;
+
+    }
+
+    .open-job-all {
+        color: #054627;
+        font-size: 12px;
+        font-weight: 500;
+        background-color: #d0f4b2;
+        border-radius: 8px;
+    }
+
+    .close-job-all {
+        color: #a10f0a;
+        font-size: 12px;
+        font-weight: 500;
+        background-color: #ffcfce;
+        border-radius: 8px;
+    }
+
+    .status-open{
+        color: #054627;
+        font-weight: 500;
+        background-color: #d0f4b2;
+        border-radius: 8px;
+        font-size: 11px;
+    }
+    .status-in-progress{
+        color: #5b2891;
+        font-weight: 500;
+        background-color: #ead6ff;
+        border-radius: 8px;
+        font-size: 11px;
+    }
+    .status-review{
+        color: #954800;
+        font-weight: 500;
+        background-color: #fff1c6;
+        border-radius: 8px;
+        font-size: 11px;
+    }
+    .status-pend-client{
+        color: #bb4900;
+        font-weight: 500;
+        background-color: #ffdfbc;
+        border-radius: 8px;
+        font-size: 11px;
+    }
+    .status-done{
+        color: #a10f0a;
+        font-weight: 500;
+        background-color: #ffcfce;
+        border-radius: 11px;
+        font-size: 11px;
+    }
+
+    .tags-jods{
+        color: #495057;
+        font-weight: 500;
+        background-color: #e0e1e2;
+        border-radius: 12px;
+        margin-bottom: 5px;
+        font-size: 11px;
+    }
+
+    div.dtsp-topRow {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        border: 2px solid rgba(0, 0, 0, 0);
+        border-radius: 3px;
+        justify-content: space-around;
+        align-content: flex-start;
+        align-items: center;
+    }
+
+    div.dtsp-panesContainer div.dtsp-searchPanes div.dtsp-searchPane {
+        flex-grow: 1;
+        flex-shrink: 0;
+        font-size: 0.8em;
+        margin-top: 1px !important;
+    }
+
+    div.dtsp-panesContainer div.dtsp-searchPane div.dt-container {
+        border: 1.5px #c0d4ff solid;
+        border-radius: 4px;
+    }
+
+    div.dtsp-searchPane div.dt-container div.dt-scroll-body div.dtsp-nameCont span.dtsp-name,
+    div.dtsp-searchPane div.dt-container div.dataTables_scrollBody div.dtsp-nameCont span.dtsp-name,
+    div.dtsp-searchPane div.dataTables_wrapper div.dt-scroll-body div.dtsp-nameCont span.dtsp-name,
+    div.dtsp-searchPane div.dataTables_wrapper div.dataTables_scrollBody div.dtsp-nameCont span.dtsp-name {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        display: inline-block;
+        vertical-align: middle;
+        white-space: nowrap;
+        flex-grow: 1;
+        text-align: left;
+        font-size: 0.87em;
+    }
+
+    div.dtsp-searchPane div.dt-container div.dt-scroll-body div.dtsp-nameCont{
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-content: flex-start;
+        align-items: baseline;
+    }
+
+    div.dtsp-searchPane div.dt-container div.dt-scroll-body table tr > td {
+        padding: 3px 5px;
+    }
+
+    table.table.dataTable > tbody > tr.selected > * {
+        box-shadow: inset 0 0 0 9999px #ecf2ff;
+        color: #294aa9;
+    }
+    .bg-secondary {
+        background-color: #c7d6ff !important;
+        color: #062a91;
+        font-weight: 500;
+    }
+
+    div.dtsp-panesContainer div.dtsp-searchPane div.dt-container div.dtsp-nameCont span.badge {
+        min-width: 30px;
+        line-height: 1.25em;
+        margin-top: 2.5px;
+    }
+</style>
+
+<div class="row">
+    <div class="card">
+        <div class="card-body mb-5">
+            <div class="row mt-3 mb-2">
+                <div class="col-md-10">
+                    <h4 class="fw-semibold text-dark">Engagements
+                        <span class="badge all-job">ทั้งหมด : {{ total_engagements }} รายการ</span>
+                        <span class="badge open-job-all">เปิดงาน : {{ open_engagements }} รายการ</span>
+                        <span class="badge close-job-all">ปิดงาน : {{ closed_engagements }} รายการ</span>
+                    </h4>
+                </div>
+                <div class="col-md-2">
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'taskcontrol:engagement_create' %}">
+                            <button type="button" class="btn btn-primary">
+                                <i class="fa-solid fa-circle-plus"></i> เพิ่มงานใหม่
+                            </button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table id="engagement_table" class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-start" style="width: 10%;">#</th>
+                            <th class="text-center" style="width: 30%;">ชื่อลูกค้า</th>
+                            <th class="text-center" style="width: 15%;">ผู้ดูแล</th>
+                            <th class="text-center" style="width: 15%;">วันที่ให้บริการ</th>
+                            <th class="text-center" style="width: 5%;">สถานะ</th>
+                            <th class="text-center" style="width: 5%;">บัญชี</th>
+                            <th class="text-center" style="width: 5%;">ภาษี</th>
+                            <th class="text-center" style="width: 5%;">เงินเดือน</th>
+                            <th class="text-center" style="width: 5%;">รายงาน</th>
+                            <th class="text-center" style="width: 5%;"><i class="fa-solid fa-gears"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for engagement in engagements|slice:"0:value" %}
+                        <tr data-toggle="collapse" data-target="#demo{{ forloop.counter }}" class="accordion-toggle">
+                            <td><a href="{% url 'taskcontrol:engagement_detail' engagement_id=engagement.id %}" class="fw-semibold">{{ engagement.job_code }}</a></td>
+                            <td>
+                                <span class="fw-semibold">{{ engagement.client.company_name }}</span><br>
+                                <span style="font-size: 11px;">{{ engagement.client.tax_id }}</span>
+                            </td>
+                            
+                            <td>{{ engagement.administrator.first_name }} {{ engagement.administrator.last_name }}</td>
+                            <td class="text-center" style="font-size: 12px;">{{ engagement.start_date_service|date:"d/m/Y" }} -
+                                {{ engagement.end_date_service|date:"d/m/Y" }}
+                            </td>
+                            <td>
+                                {% if engagement.status == "OPEN_JOB" %}
+                                <span class="badge status-open"><i class="fi fi-sr-bullet"></i> เปิดงาน</span>
+                                {% elif engagement.status == "IN_PROGRESS" %}
+                                <span class="badge status-in-progress"><i class="fi fi-sr-bullet"></i> กำลังดำเนินงาน</span>
+                                {% elif engagement.status == "REVIEW" %}
+                                <span class="badge status-review"><i class="fi fi-sr-bullet"></i> รอตรวจทาน</span>
+                                {% elif engagement.status == "PENDING_CLIENT" %}
+                                <span class="badge status-pend-client"><i class="fi fi-sr-bullet"></i> รอลูกค้า</span>
+                                {% else %}
+                                <span class="badge status-done"><i class="fi fi-sr-bullet"></i> ปิดงาน</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% for detail in engagement_details %}
+                                    {% if detail.engagement == engagement and detail.engagement_category.name_th == 'บัญชี' %}
+                                        {% if detail.type == "ครั้งเดียว" %}
+                                            <span class="badge tags-jods">{{ detail.type }}</span><br>
+                                        {% elif detail.type == "รายเดือน" %}
+                                            <span class="badge tags-jods">{{ detail.type }}</span><br>
+                                        {% else %}
+                                            <span class="badge tags-jods">{{ detail.type }}</span><br>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
+                            
+                            <td>
+                                {% for detail in engagement_details %}
+                                    {% if detail.engagement == engagement and detail.engagement_category.name_th == 'ภาษี' %}
+                                        {% if detail.type == "ครั้งเดียว" %}
+                                            <span class="badge tags-jods">{{ detail.type }}</span><br>
+                                        {% elif detail.type == "รายเดือน" %}
+                                            <span class="badge tags-jods">{{ detail.type }}</span><br>
+                                        {% else %}
+                                            <span class="badge tags-jods">{{ detail.type }}</span><br>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% for detail in engagement_details %}
+                                    {% if detail.engagement == engagement and detail.engagement_category.name_th == 'เงินเดือน' %}
+                                        {% if detail.type == "ครั้งเดียว" %}
+                                            <span class="badge tags-jods">{{ detail.type }}</span><br>
+                                        {% elif detail.type == "รายเดือน" %}
+                                            <span class="badge tags-jods">{{ detail.type }}</span><br>
+                                        {% else %}
+                                            <span class="badge tags-jods">{{ detail.type }}</span><br>
+                                        {% endif %}
+                                {% endif %}
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% for detail in engagement_details %}
+                                {% if detail.engagement == engagement and detail.engagement_category.name_th == 'รายงาน' %}
+                                    {% if detail.engagement_type.name_th == "ครั้งเดียว" %}
+                                            <span class="badge tags-jods">{{ detail.engagement_type.name_th }}</span><br>
+                                        {% elif detail.engagement_type.name_th == "รายเดือน" %}
+                                            <span class="badge tags-jods">{{ detail.engagement_type.name_th }}</span><br>
+                                        {% else %}
+                                            <span class="badge tags-jods">{{ detail.engagement_type.name_th }}</span><br>
+                                        {% endif %}
+                                {% endif %}
+                                {% endfor %}
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group" role="group" aria-label="Basic mixed styles example">
+                                    <a href="{% url 'taskcontrol:engagement_detail' engagement.id %}" class="btn btn-outline-primary btn-sm "><i class="fa-solid fa-eye"></i></a>
+                                    <button class="btn btn-outline-danger btn-sm delete-client-btn" data-client-id="{{ c.id }}"><i class="fa-regular fa-trash-can"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.7/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/2.0.7/js/dataTables.bootstrap5.js"></script>
+<script src="https://cdn.datatables.net/searchpanes/2.3.1/js/dataTables.searchPanes.js"></script>
+<script src="https://cdn.datatables.net/searchpanes/2.3.1/js/searchPanes.bootstrap5.js"></script>
+<script src="https://cdn.datatables.net/select/2.0.2/js/dataTables.select.js"></script>
+<script src="https://cdn.datatables.net/select/2.0.2/js/select.bootstrap5.js"></script>
+
+<script>
+    $('#engagement_table').DataTable({
+        layout: {
+            top1: {
+                searchPanes: {
+                    cascadePanes: true,
+                    layout: 'columns-7',
+                    orderable: false,
+                    controls: false,
+                    i18n: {
+                        emptyMessage: '<i><b>ไม่มีข้อมูล</b></i>'
+                    }
+                }
+            }
+        },
+        columnDefs: [
+            {
+                searchPanes: {
+                    show: true
+                },
+                targets: [1, 2, 4, 5, 6, 7, 8]
+            },
+            {
+                searchPanes: {
+                    show: false
+                },
+                targets: [3]
+            }
+        ],
+        language: {
+            search: "ค้นหา",
+            lengthMenu: "แสดง _MENU_ รายการ",
+            info: "แสดง _START_ ถึง _END_ จากทั้งหมด _TOTAL_ รายการ",
+            paginate: {
+                previous: "ก่อนหน้า",
+                next: "ถัดไป"
+            },
+            searchPanes: {
+                collapseMessage: '<i class="fa-solid fa-eye-slash"></i>',
+                showMessage: '<i class="fa-solid fa-eye"></i>',
+                clearMessage: '<i class="fa-solid fa-filter-circle-xmark"></i>'
+            }
+        },
+    });
+</script>
+
+{% endblock content %}

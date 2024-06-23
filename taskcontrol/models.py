@@ -199,6 +199,8 @@ class Engagement(models.Model):
     create_at = models.DateTimeField(default=timezone.now)
     update_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='engagement_update_by')
     update_at = models.DateTimeField(default=timezone.now)
+    completed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='engagement_completed_by')
+    completed_at = models.DateTimeField(blank=True, null=True)
     voide_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='engagement_voide_by')
     voide_at = models.DateTimeField(default=timezone.now)
 
@@ -206,24 +208,28 @@ class Engagement(models.Model):
         db_table = 'engagement'
 
     def update_status(self):
-        open_jobs = self.task_set.filter(status='OPEN JOB').count()
-        in_progress = self.task_set.filter(status='IN PROGRESS').count()
+        open_jobs = self.task_set.filter(status='OPEN_JOB').count()
+        in_progress = self.task_set.filter(status='IN_PROGRESS').count()
         review = self.task_set.filter(status='REVIEW').count()
-        pending_client = self.task_set.filter(status='PENDING CLIENT').count()
+        pending_client = self.task_set.filter(status='PENDING_CLIENT').count()
         done = self.task_set.filter(status='DONE').count()
 
-        if open_jobs > 0:
-            self.status = 'OPEN JOB'
-        elif done > 0:
+        # ตรวจสอบสถานะของ EngagementDetail
+        all_details_done = self.engagementdetail_set.filter(status='DONE').count() == self.engagementdetail_set.count()
+
+        # ตรวจสอบว่ามี EngagementDetail ทุกตัวเป็นสถานะ DONE หรือไม่
+        if all_details_done:
             self.status = 'DONE'
+        elif open_jobs > 0:
+            self.status = 'OPEN_JOB'
         elif pending_client > 0:
-            self.status = 'PENDING CLIENT'
+            self.status = 'PENDING_CLIENT'
         elif review > 0:
             self.status = 'REVIEW'
         elif in_progress > 0:
-            self.status = 'IN PROGRESS'
+            self.status = 'IN_PROGRESS'
         else:
-            self.status = 'OPEN JOB'
+            self.status = 'OPEN_JOB'
         self.save()
 
 class EngagementDetail(models.Model):
@@ -237,15 +243,46 @@ class EngagementDetail(models.Model):
     end_date = models.DateField(null=True, blank=True)
     review_by = models.BooleanField(default=False)
     approved_by = models.BooleanField(default=False)
+    status = models.CharField(max_length=20, default='OPEN_JOB')
+    comment = models.TextField(blank=True, null=True)
     create_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='engagement_detail_create_by')
     create_at = models.DateTimeField(default=timezone.now)
     update_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='engagement_detail_update_by')
     update_at = models.DateTimeField(default=timezone.now)
+    completed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='engagement_detail_completed_by')
+    completed_at = models.DateTimeField(blank=True, null=True)
     voide_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='engagement_detail_voide_by')
     voide_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = 'engagement_detail'
+
+    def update_status(self):
+        # นับจำนวนงานในแต่ละสถานะที่เกี่ยวข้องกับ EngagementDetail ที่เกี่ยวข้อง
+        open_jobs = EngagementDetail.objects.filter(engagement=self.engagement, status='OPEN_JOB').count()
+        in_progress = EngagementDetail.objects.filter(engagement=self.engagement, status='IN_PROGRESS').count()
+        review = EngagementDetail.objects.filter(engagement=self.engagement, status='REVIEW').count()
+        pending_client = EngagementDetail.objects.filter(engagement=self.engagement, status='PENDING_CLIENT').count()
+        done = EngagementDetail.objects.filter(engagement=self.engagement, status='DONE').count()
+
+        # อัพเดทสถานะของ EngagementDetail
+        if done > 0:
+            self.status = 'DONE'
+            if not self.completed_at:
+                self.completed_at = timezone.now()
+        elif open_jobs > 0:
+            self.status = 'OPEN_JOB'
+        elif pending_client > 0:
+            self.status = 'PENDING_CLIENT'
+        elif review > 0:
+            self.status = 'REVIEW'
+        elif in_progress > 0:
+            self.status = 'IN_PROGRESS'
+        else:
+            self.status = 'OPEN_JOB'
+
+        self.save()
+
 class EngagementCategory(models.Model):
     name_th = models.CharField(max_length=255, default=None, null=True, blank=True)
     name_en = models.CharField(max_length=255, default=None, null=True, blank=True)
@@ -270,56 +307,44 @@ class EngagementType(models.Model):
         db_table = 'engagement_type'
 
 class Task(models.Model):
-    OPENJOB = 'OPEN JOB'
-    IN_PROGRESS = 'IN PROGRESS'
-    REVIEW = 'REVIEW'
-    PENDINGCLIENT = 'PENDING CLIENT'
-    DONE = 'DONE'
-
-    STATUS_CHOICES = [
-        (OPENJOB, 'Open Job'),
-        (IN_PROGRESS, 'In Progress'),
-        (REVIEW, 'Review'),
-        (PENDINGCLIENT, 'Pending Client'),
-        (DONE, 'Done'),
-    ]
-    engagement = models.ForeignKey('Engagement', on_delete=models.CASCADE, null=True, blank=True)
     client = models.ForeignKey(Client, on_delete=models.CASCADE, null=True, blank=True)
+    number = models.CharField(max_length=255, null=True, blank=True, unique=True)
     new_job = models.CharField(max_length=255, null=True, blank=True)
     description = models.CharField(max_length=255, null=True, blank=True)
+    comment = models.TextField(blank=True, null=True)
     due_date = models.DateField(null=True, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=OPENJOB)
+    status = models.CharField(max_length=20, default='OPEN_JOB')
     create_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='task_create_by')
     create_at = models.DateTimeField(default=timezone.now)
     update_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='task_update_by')
     update_at = models.DateTimeField(default=timezone.now)
+    completed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name='task_completed_by')
+    completed_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         db_table = 'task'
 
-    def update_engagement_status(self):
-        if self.engagement is not None and self.status != Task.OPENJOB:
-            engagement = self.engagement
-            engagement.status = self.status
-            engagement.save()
-    
-    @classmethod
-    def create_tasks_for_open_jobs(cls):
-        # ดึง EngagementDetail ที่มี start_date ถึง end_date ในเดือนปัจจุบัน
-        current_month = timezone.now().month
-        current_year = timezone.now().year
-        engagement_details = EngagementDetail.objects.filter(start_date__month=current_month, start_date__year=current_year)
-        
-        # สร้าง Task สำหรับ EngagementDetail ที่พบ
-        for engagement_detail in engagement_details:
-            # สร้าง Task เฉพาะถ้า engagement ของ engagement_detail มีสถานะเป็น OPEN JOB
-            if engagement_detail.engagement.status == Engagement.OPENJOB:
-                Task.objects.create(
-                    engagement=engagement_detail.engagement,
-                    client=engagement_detail.engagement.client,
-                    new_job=f"New job for {engagement_detail.engagement.job_code}",
-                    description="Description here...",
-                    due_date=engagement_detail.end_date,
-                    status=Task.OPENJOB,
-                    create_by=None,  # ระบุ user ที่สร้าง Task ตามที่ต้องการ
-                )
+    def update_status(self):
+        # นับจำนวนงานในแต่ละสถานะ
+        open_jobs = Task.objects.filter(status='OPEN_JOB').count()
+        in_progress = Task.objects.filter(status='IN_PROGRESS').count()
+        review = Task.objects.filter(status='REVIEW').count()
+        pending_client = Task.objects.filter(status='PENDING_CLIENT').count()
+        done = Task.objects.filter(status='DONE').count()
+
+        # อัพเดทสถานะของงาน Task
+        if done > 0:
+            self.status = 'DONE'
+            if not self.completed_at:
+                self.completed_at = timezone.now()
+        elif open_jobs > 0:
+            self.status = 'OPEN_JOB'
+        elif pending_client > 0:
+            self.status = 'PENDING_CLIENT'
+        elif review > 0:
+            self.status = 'REVIEW'
+        elif in_progress > 0:
+            self.status = 'IN_PROGRESS'
+        else:
+            self.status = 'OPEN_JOB'
+        self.save()

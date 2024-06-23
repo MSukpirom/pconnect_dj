@@ -1,56 +1,82 @@
-let currentMonth = document.querySelector(".current-month");
-let calendarDays = document.querySelector(".calendar-days");
-let today = new Date();
-let date = new Date();
+document.addEventListener('DOMContentLoaded', function() {
+    const currentWeekElement = document.querySelector('.current-week');
+    const monthSelect = document.querySelector('.month-select');
+    const yearSelect = document.querySelector('.year-select');
+    const prevWeekBtn = document.querySelector('.prev.week-btn');
+    const nextWeekBtn = document.querySelector('.next.week-btn');
+    const todayBtn = document.querySelector('.today-btn');
+    const calendarDays = document.querySelector('.calendar-days');
 
-currentMonth.textContent = date.toLocaleDateString("en-US", { month: 'long', year: 'numeric' });
-today.setHours(0, 0, 0, 0);
-renderCalendar();
+    let currentDate = new Date();
 
-function renderCalendar() {
-    const prevLastDay = new Date(date.getFullYear(), date.getMonth(), 0).getDate();
-    const totalMonthDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-    const startWeekDay = new Date(date.getFullYear(), date.getMonth(), 0).getDay();
+    // Populate year select
+    const currentYear = currentDate.getFullYear();
+    for (let i = currentYear - 5; i <= currentYear + 5; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = i;
+        yearSelect.appendChild(option);
+    }
+    yearSelect.value = currentYear;
+    monthSelect.value = currentDate.getMonth();
 
-    calendarDays.innerHTML = "";
+    function getStartOfWeek(date) {
+        const day = date.getDay();
+        const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+        return new Date(date.setDate(diff));
+    }
 
-    let totalCalendarDay = 6 * 7;
-    for (let i = 0; i < totalCalendarDay; i++) {
-        let day = i - startWeekDay;
+    function getEndOfWeek(date) {
+        const start = getStartOfWeek(new Date(date));
+        return new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6);
+    }
 
-        if (i <= startWeekDay) {
-            // adding previous month days
-            calendarDays.innerHTML += `<div class="padding-day">${prevLastDay - i}</div>`;
-        } else if (i <= startWeekDay + totalMonthDay) {
-            // adding this month days
-            date.setDate(day);
-            date.setHours(0, 0, 0, 0);
+    function renderWeek() {
+        calendarDays.innerHTML = '';
+        let start = getStartOfWeek(new Date(currentDate));
+        let end = getEndOfWeek(new Date(currentDate));
 
-            let dayClass = date.getTime() === today.getTime() ? 'current-day' : 'month-day';
-            calendarDays.innerHTML += `<div class="${dayClass}">${day}</div>`;
-        } else {
-            // adding next month days
-            calendarDays.innerHTML += `<div class="padding-day">${day - totalMonthDay}</div>`;
+        currentWeekElement.textContent = `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
+
+        const today = new Date();
+        for (let i = 0; i < 7; i++) {
+            const dayElement = document.createElement('div');
+            dayElement.classList.add('calendar-day');
+            dayElement.textContent = start.getDate();
+            if (start.toDateString() === today.toDateString()) {
+                dayElement.classList.add('today');
+            }
+            calendarDays.appendChild(dayElement);
+            start.setDate(start.getDate() + 1);
         }
     }
-}
 
-document.querySelectorAll(".month-btn").forEach(function (element) {
-    element.addEventListener("click", function () {
-        date = new Date(currentMonth.textContent);
-        date.setMonth(date.getMonth() + (element.classList.contains("prev") ? -1 : 1));
-        currentMonth.textContent = date.toLocaleDateString("en-US", { month: 'long', year: 'numeric' });
-        renderCalendar();
+    prevWeekBtn.addEventListener('click', function() {
+        currentDate.setDate(currentDate.getDate() - 7);
+        renderWeek();
     });
-});
 
-document.querySelectorAll(".btn").forEach(function (element) {
-    element.addEventListener("click", function () {
-        let btnClass = element.classList;
-        date = new Date(currentMonth.textContent);
-        if (btnClass.contains("today"))
-            date = new Date();
-        currentMonth.textContent = date.toLocaleDateString("en-US", { month: 'long', year: 'numeric' });
-        renderCalendar();
+    nextWeekBtn.addEventListener('click', function() {
+        currentDate.setDate(currentDate.getDate() + 7);
+        renderWeek();
     });
+
+    todayBtn.addEventListener('click', function() {
+        currentDate = new Date();
+        monthSelect.value = currentDate.getMonth();
+        yearSelect.value = currentDate.getFullYear();
+        renderWeek();
+    });
+
+    monthSelect.addEventListener('change', function() {
+        currentDate.setMonth(monthSelect.value);
+        renderWeek();
+    });
+
+    yearSelect.addEventListener('change', function() {
+        currentDate.setFullYear(yearSelect.value);
+        renderWeek();
+    });
+
+    renderWeek();
 });

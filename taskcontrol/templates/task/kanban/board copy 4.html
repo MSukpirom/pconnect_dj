@@ -1,0 +1,293 @@
+{% extends 'task/index.html' %}
+{% block content %}
+<style>
+
+    .filter-container {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .kanban {
+        display: flex;
+        justify-content: space-between;
+        overflow-x: auto;
+    }
+
+    .column {
+        flex: 0 0 auto;
+        width: calc(20% - 20px);
+        /* Adjust column width as needed */
+        min-width: 200px;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #f4f4f4;
+        margin-right: 20px;
+    }
+
+    .column-header {
+        font-size: 20px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .sub-card {
+        background-color: #fff;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        cursor: move;
+    }
+
+    .card-header {
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .card-description {
+        font-size: 14px;
+        color: #666;
+    }
+
+    .card-details {
+        margin-top: 10px;
+    }
+
+    .deadline,
+    .period {
+        font-size: 14px;
+        color: #999;
+    }
+
+    .period {
+        margin-left: 10px;
+    }
+
+    .open-job {
+        background-color: aqua;
+        color: black;
+    }
+
+</style>
+
+<div class="row">
+    <div class="card">
+        <div class="card-body">
+            <h1>Isotope - Kanban Board</h1>
+
+            <div class="filter-container">
+                <input type="checkbox" id="filter-open" class="filter-checkbox" value=".open">
+                <label for="filter-open">Open</label>
+                <input type="checkbox" id="filter-in-progress" class="filter-checkbox" value=".in-progress">
+                <label for="filter-in-progress">In Progress</label>
+                <input type="checkbox" id="filter-review" class="filter-checkbox" value=".review">
+                <label for="filter-review">Review</label>
+                <input type="checkbox" id="filter-client" class="filter-checkbox" value=".client">
+                <label for="filter-client">Client</label>
+                <input type="checkbox" id="filter-done" class="filter-checkbox" value=".done">
+                <label for="filter-done">Done</label>
+            </div>
+
+            <div class="filter-container">
+                <label><input type="checkbox" class="filter-checkbox" data-filter=".deadline-urgent"> Urgent Deadline</label>
+                <label><input type="checkbox" class="filter-checkbox" data-filter=".period-short"> Short Period</label>
+            </div>
+
+            <div class="new-task-form">
+                <h2>Create New Task</h2>
+                <form id="new-task-form">
+                    <div>
+                        <label for="task-name">Task Name:</label>
+                        <input type="text" id="task-name" name="task-name" required>
+                    </div>
+                    <div>
+                        <label for="task-description">Task Description:</label>
+                        <textarea id="task-description" name="task-description"></textarea>
+                    </div>
+                    <div>
+                        <label for="task-deadline">Deadline:</label>
+                        <input type="date" id="task-deadline" name="task-deadline">
+                    </div>
+
+                    <button type="submit">Create Task</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="card">
+        <div class="kanban">
+            <div class="column open-job ">
+                <div class="column-header">
+                    <span>Open</span>
+                    <i class="fas fa-bars"></i>
+                </div>
+
+                <!-- Cards for Open status -->
+                <div class="sub-card draggable">
+                    <div class="card-header">Task 1</div>
+                    <div class="card-description">Description of Task 1</div>
+                    <div class="card-details">
+                        <div class="deadline">Deadline: June 30, 2024</div>
+                        <div class="period">Period: 2 weeks</div>
+                    </div>
+                </div>
+                <div class="sub-card draggable">
+                    <div class="card-header">Task 2</div>
+                    <div class="card-description">Description of Task 2</div>
+                </div>
+            </div>
+            <div class="column in-progress">
+                <div class="column-header">
+                    <span>In Progress</span>
+                    <i class="fas fa-bars"></i>
+                </div>
+
+                <!-- Cards for In Progress status -->
+                <div class="sub-card draggable">
+                    <div class="card-header">Task 3</div>
+                    <div class="card-description">Description of Task 3</div>
+                </div>
+            </div>
+            <div class="column review">
+                <div class="column-header">
+                    <span>Review</span>
+                    <i class="fas fa-bars"></i>
+                </div>
+
+                <!-- Cards for Review status -->
+            </div>
+            <div class="column client">
+                <div class="column-header">
+                    <span>Client</span>
+                    <i class="fas fa-bars"></i>
+                </div>
+
+                <!-- Cards for Client status -->
+            </div>
+            <div class="column done">
+                <div class="column-header">
+                    <span>Done</span>
+                    <i class="fas fa-bars"></i>
+                </div>
+
+                <!-- Cards for Done status -->
+                <div class="sub-card draggable">
+                    <div class="card-header">Task 4</div>
+                    <div class="card-description">Description of Task 4</div>
+                </div>
+                <div class="sub-card draggable">
+                    <div class="card-header">Task 5</div>
+                    <div class="card-description">Description of Task 5</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        var $kanban = $('.kanban');
+        // Initialize Isotope on the kanban container
+        $kanban.isotope({
+            itemSelector: '.column',
+            layoutMode: 'masonry'
+        });
+        // Make columns draggable
+        $kanban.sortable({
+            handle: '.fa-bars',
+            axis: 'x',
+            cursor: 'move',
+            stop: function(event, ui) {
+                $kanban.isotope('layout');
+            }
+        });
+        // Make cards draggable within columns
+        $('.card').draggable({
+            revert: "invalid",
+            helper: "clone",
+            zIndex: 100,
+            appendTo: "body",
+            cursor: 'move',
+            containment: 'document'
+        });
+        // Make columns droppable
+        $('.column').droppable({
+            accept: ".card",
+            drop: function(event, ui) {
+                var $item = $(ui.draggable);
+                var $column = $(this);
+                var $originalColumn = $item.parent();
+                var $card = $item.clone().removeClass("ui-draggable-dragging");
+                $card.appendTo($column);
+                $kanban.isotope('layout');
+                // If card is dropped into a new column, remove it from the original one
+                if ($originalColumn[0] !== $column[0]) {
+                    $item.remove();
+                    $originalColumn.isotope('layout');
+                }
+            }
+        });
+        // Add filtering functionality for checkboxes
+        $('.filter-checkbox').on('change', function() {
+            var filters = [];
+            $('.filter-checkbox:checked').each(function() {
+                filters.push($(this).val());
+            });
+            var filterValue = filters.join(',');
+            $kanban.isotope({
+                filter: filterValue
+            });
+        });
+        // Add filtering functionality for urgent deadline
+        $('.filter-urgent-deadline').on('change', function() {
+            var filters = [];
+            if ($(this).is(':checked')) {
+                var currentDate = new Date();
+                var sevenDaysLater = new Date();
+                sevenDaysLater.setDate(currentDate.getDate() + 7);
+                var formattedDate = sevenDaysLater.toISOString().split('T')[
+                0]; // Get date in YYYY-MM-DD format
+                filters.push('.deadline-urgent[data-deadline<="' + formattedDate + '"]');
+            }
+            $('.filter-checkbox:checked').each(function() {
+                filters.push($(this).data('filter'));
+            });
+            var filterValue = filters.join(',');
+            $kanban.isotope({
+                filter: filterValue
+            });
+        });
+        // Add event listener for new task form submission
+        $('#new-task-form').submit(function(event) {
+            event.preventDefault(); // Prevent form submission
+            var taskName = $('#task-name').val();
+            var taskDescription = $('#task-description').val();
+            var taskDeadline = $('#task-deadline').val();
+            var taskPeriod = $('#task-period').val();
+            // Create new task card HTML
+            var newTaskHTML = `
+                <div class="card draggable">
+                    <div class="card-header">${taskName}</div>
+                    <div class="card-description">${taskDescription}</div>
+                    <div class="card-details">
+                        <div class="deadline">Deadline: ${taskDeadline}</div>
+                        <div class="period">Period: ${taskPeriod} days</div>
+                    </div>
+                </div>
+                `;
+            // Append new task card to the "Open" column
+            $('.column.open').append(newTaskHTML);
+            $kanban.isotope('layout'); // Re-layout the kanban board
+            $('#new-task-form')[0].reset(); // Reset form fields
+        });
+    });
+</script>
+{% endblock content %}

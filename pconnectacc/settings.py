@@ -87,10 +87,10 @@ WSGI_APPLICATION = 'pconnectacc.wsgi.application'
 DATABASES = {
     # 'default': {
     #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'demopconnect',
-    #     'USER': 'pconnect',
-    #     'PASSWORD': 'Pc0nnect@cc',
-    #     'HOST': '52.76.167.149',
+    #     'NAME': 'demodb',
+    #     'USER': 'connectacc',
+    #     'PASSWORD': '',
+    #     'HOST': '46.137.234.75',
     #     'PORT': '3306',
     # },
 

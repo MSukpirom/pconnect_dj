@@ -1,0 +1,766 @@
+
+{% extends 'task/index.html' %}
+{% block content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredericka+the+Great&display=swap');
+    #kanban {
+        display: inline-flex;
+        gap: 10px;
+        padding: 5px;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        align-items: stretch;
+        width: 100%; /* ปรับความกว้างให้เต็มหน้าจอ */
+    }
+
+    #kanban-filter-all {
+        display: flex;
+        gap: 16px;
+        padding: 5px;
+        overflow-x: auto;
+        flex-direction: row;
+        width: 100%;
+        align-items: stretch;
+        flex-wrap: wrap;
+        justify-content: space-evenly;
+    }
+
+    .task-card {
+        background-color: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    .task-card a {
+        text-decoration: none;
+        margin-right: 10px;
+        color: #0085FF;
+    }
+
+    .task-card small {
+        font-size: 11px;
+        color: #393E46;
+    }
+
+    .task-card:hover {
+        box-shadow: rgba(255, 255, 255, 0.2) 0px 0px 0px 2px inset, rgba(18, 149, 255, 0.9) 0px 0px 0px 2px;
+    }
+
+    .task-header-open {
+        background-color: #cbe5ff;
+        padding: 1rem;
+        margin: 0 -1rem;
+        font-size: 15px;
+        font-weight: 600;
+        color: #0051a0;
+        border-radius: 0.75rem;
+    }
+
+    .task-header-progress {
+        background-color: #ead6ff;
+        padding: 1rem;
+        margin: 0 -1rem;
+        font-size: 15px;
+        font-weight: 600;
+        color: #5b2891;
+        border-radius: 0.75rem;
+    }
+
+    .task-header-review {
+        background-color: #fff1c6;
+        padding: 1rem;
+        margin: 0 -1rem;
+        font-size: 15px;
+        font-weight: 600;
+        color: #954800;
+        border-radius: 0.75rem;
+    }
+
+    .task-header-client {
+        background-color: #ffcfce;
+        padding: 1rem;
+        margin: 0 -1rem;
+        font-size: 15px;
+        font-weight: 600;
+        color: #a10f0a;
+        border-radius: 0.75rem;
+    }
+
+    .task-header-done {
+        background-color: #d0f4b2;
+        padding: 1rem;
+        margin: 0 -1rem;
+        font-size: 15px;
+        font-weight: 600;
+        color: #054627;
+        border-radius: 0.75rem;
+    }
+
+    .tasks-open,
+    .tasks-progress,
+    .tasks-review,
+    .tasks-client,
+    .tasks-done {
+        flex: 1; /* ทำให้คอลัมน์มีขนาดเท่ากัน */
+        display: inline-block;
+        padding: 0 1rem 1rem 1rem;
+        margin-bottom: 1.5rem;
+        border-radius: 0.75rem;
+        color: #31363E;
+    }
+
+    .tasks-open {
+        background-color: #cbe5ff;
+    }
+
+    .tasks-progress {
+        background-color: #ead6ff;
+    }
+
+    .tasks-review {
+        background-color: #fff1c6;
+    }
+
+    .tasks-client {
+        background-color: #ffcfce;
+    }
+
+    .tasks-done {
+        background-color: #d0f4b2;
+    }
+
+    .text-body {
+        opacity: 1;
+        color: rgba(108, 117, 125), 1 !important;
+    }
+    .dropdown-toggle {
+        display: none !important;
+    }
+
+    .title {
+        font-size: 14px;
+        color: #31363E;
+    }
+
+    .sub-title {
+        font-size: 13px;
+        color: #31363E;
+    }
+
+    .detail {
+        font-size: 12px;
+        color: #31363E;
+    }
+
+    .deadline {
+        font-size: 10px;
+        font-weight: 600;
+        color: #f70009;
+        margin-top: 0px;
+    }
+    
+    .date {
+        font-size: 9px;
+        color: #31363E;
+        margin-top: 0px;
+    }
+
+    .done {
+        text-decoration: line-through;
+    }
+
+    .badge-danger {
+        color: #cb2b2a;
+        font-size: 9px;
+        font-weight: 600;
+        background-color: #ffe0da;
+        border-radius: 3px;
+        margin-top: 11px;
+        padding: 3px;
+        width: fit-content;
+    }
+    
+    .icon {
+        font-size: 18px;
+    }
+
+    .badge {
+        font-size: 13px;
+        color: #fff;
+        background-color: #343a40;
+        padding: 4px 8px;
+        border-radius: 12px;
+        margin-left: 5px;
+    }
+
+    /* สไตล์เพิ่มเติมสำหรับการ์ด */
+
+    .task-filter {
+        border: 1px solid #ebf3fe;
+        padding: 10px;
+        background-color: #ecf2ff;
+        border-radius: 0.75rem;
+        min-height: 200px;
+        margin-top: 10px;
+    }
+    
+    .task-header-all {
+        color: #393E46;
+        padding: 10px;
+        margin: 0;
+        background-color: #ecf2ff;
+    }
+    
+    .task-card-filter {
+        width: 18.5%;
+        background-color: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.75rem;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+    
+    .task-card-filter a {
+        text-decoration: none;
+        margin-right: 10px;
+        color: #7d7d7d;
+    }
+    
+    .task-card-filter small {
+        font-size: 11px;
+        color: #393E46;
+    }
+    
+    .task-card-filter:hover {
+        box-shadow: rgba(255, 255, 255, 0.2) 0px 0px 0px 2px inset, rgba(18, 149, 255, 0.9) 0px 0px 0px 2px;
+    }
+
+    .rubber {
+        box-shadow: 0 0 0 3px #059212, 0 0 0 2px #059212 inset;  
+        border: 2px solid transparent;
+        border-radius: 4px;
+        display: inline-block;
+        padding: 5px 2px;
+        line-height: 22px;
+        color: #059212;
+        font-size: 20px;
+        font-family: "Fredericka the Great", serif;
+        text-transform: uppercase;
+        text-align: center;
+        opacity: 0.6;
+        width: 155px;
+        transform: rotate(335deg);
+        position: absolute;
+    }
+
+</style>
+
+<div class="row">
+    <div class="card">
+        <div class="card-body">
+            <div class="text-end">
+                <div class="btn-group" role="group" aria-label="Basic example">
+                    <a href="{% url 'taskcontrol:kanban_board' %}" class="btn btn-primary" id=""><i class="fa-solid fa-border-all"></i> Board</a>
+                    <a href="{% url 'taskcontrol:kanban_board_filter' %}" class="btn btn-outline-primary " id=""><i class="fa-solid fa-arrow-down-wide-short"></i> Filter</a>
+                </div>
+            </div>
+            
+            <div class="text-start">
+                <span class="badge bg-light text-dark mb-2">วันที่ {{ today|date:'d/m/Y' }}</span>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <!-- Button trigger modal Add Task-->
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        <i class="fa-solid fa-circle-plus"></i> Add Task
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Add Task-->
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <!-- เนื้อหาใน Modal ที่นี่ -->
+                            ...
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary">Save changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kanban -->
+            <div class="row">
+                <div id="kanban" class="mt-2">
+                    <div class="tasks-open" data-status="OPEN_JOB" ondrop="drop(event)" ondragover="allowDrop(event)">
+                        <h5 class="task-header-open" id="task-open-header"> เปิดงาน <span class="badge badge-dark">{{ engagement_details_open }}</span></h5>
+                        {% for detail in engagement_details %}
+                        {% if detail.status == 'OPEN_JOB' %}
+                        <div class="task-card" draggable="true" ondragstart="drag(event)" id="{{ detail.id }}">
+                            <input type="hidden" id="newStatusInput_{{ detail.id }}" name="new_status" value="OPEN_JOB">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="title fw-semibold">{{ detail.engagement.client.company_name }}</div>
+                                    <div class="detail fw-semibold">{{ detail.engagement.job_code }}</div>
+                                </div>
+                                <div class="col-4 text-end">
+                                    <i class="fi fi-rr-note-medical" style="color:#2a3547;" onclick="openUpdateNotesModal('{{ detail.id }}', '{{ detail.engagement.job_code }}', '{{ detail.engagement.notes }}')"></i>
+                                    <i class="fi fi-br-up-right-from-square" style="color:#0085FF; cursor: pointer;" onclick="openEngagementModal('{{ detail.engagement.job_code }}')"></i>
+
+                                </div>
+                            </div>
+                            <div class="date text-end"><i class="fi fi-br-calendar-day"></i>
+                                {{ detail.engagement.create_at|date:'d/m/Y' }}</div>
+                            <div class="detail"><i class="fi fi-ss-thumbtack" style="color: #f42a2a;"></i> :
+                                {{ detail.engagement.type.name_th }}</div>
+                            <div class="detail">
+                                {% if detail.engagement.administrator %}
+                                <i class="fi fi-br-user"></i> :
+                                {{ detail.engagement.administrator.first_name }}
+                                {{ detail.engagement.administrator.last_name }}
+                                {% else %}
+                                <i class="fi fi-br-user"></i> : -
+                                {% endif %}
+                            </div>
+                            <div class="detail">
+                                {% if detail.engagement.reviewer %}
+                                <i class="fi fi-br-user-time" style="color: #FFB000;"></i> :
+                                {{ detail.engagement.reviewer.first_name }}
+                                {{ detail.engagement.reviewer.last_name }}
+                                {% else %}
+                                <i class="fi fi-br-user-time" style="color: #FFB000;"></i> : -
+                                {% endif %}
+                            </div>
+                            <div class="detail">
+                                {% if detail.engagement.approver %}
+                                <i class="fi fi-br-user-trust" style="color: #198754;"></i> :
+                                {{ detail.engagement.approver.first_name }}
+                                {{ detail.engagement.approver.last_name }}
+                                {% else %}
+                                <i class="fi fi-br-user-trust" style="color: #198754;"></i> : -
+                                {% endif %}
+                            </div>
+                            <div class="detail">
+                                <i class="fi fi-rr-time-fast"></i> :
+                                {% if detail.days_remaining >= 0 %}
+                                <span class="fw-semibold">{{ detail.days_remaining }} วัน</span>
+                                {% else %}
+                                <span class="fw-semibold" style="color: #f70009;">{{ detail.days_remaining }} วัน</span>
+                                {% endif %}
+                            </div>
+                            <div class="deadline text-end">
+                                <i class="fi fi-br-clock-three"></i> {{ detail.deadline|date:'d/m/Y' }}
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <div class="tasks-progress" data-status="IN_PROGRESS" ondrop="drop(event)" ondragover="allowDrop(event)">
+                        <h5 class="task-header-progress fw-semibold" id="task-progress-header"> กำลังดำเนินงาน <span class="badge badge-dark">{{ engagement_details_inprogress }}</span></h5>
+                        {% for detail in engagement_details %}
+                        {% if detail.status == 'IN_PROGRESS' %}
+                        <div class="task-card" draggable="true" ondragstart="drag(event)" id="{{ detail.id }}">
+                            <input type="hidden" id="newStatusInput_{{ detail.id }}" name="new_status" value="OPEN_JOB">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="title fw-semibold">{{ detail.engagement.client.company_name }}</div>
+                                    <div class="detail fw-semibold">{{ detail.engagement.job_code }}</div>
+                                </div>
+                                <div class="col-4 text-end">
+                                    <i class="fi fi-rr-note-medical" style="color:#2a3547;" onclick="openUpdateNotesModal('{{ detail.id }}', '{{ detail.engagement.job_code }}', '{{ detail.engagement.notes }}')"></i>
+                                    <i class="fi fi-br-up-right-from-square" style="color:#0085FF; cursor: pointer;" onclick="openEngagementModal('{{ detail.engagement.job_code }}')"></i>
+                                </div>
+                            </div>
+                            <div class="date text-end"><i class="fi fi-br-calendar-day"></i>
+                                {{ detail.engagement.create_at|date:'d/m/Y' }}</div>
+                            <div class="detail">
+                                <i class="fi fi-ss-thumbtack" style="color: #f42a2a;"></i> :
+                                {{ detail.engagement.type.name_th }}</div>
+                            <div class="detail">
+                                {% if detail.engagement.administrator %}
+                                <i class="fi fi-br-user"></i> :
+                                {{ detail.engagement.administrator.first_name }}
+                                {{ detail.engagement.administrator.last_name }}
+                                {% else %}
+                                <i class="fi fi-br-user"></i> : -
+                                {% endif %}
+                            </div>
+                            <div class="detail">
+                                {% if detail.engagement.reviewer %}
+                                <i class="fi fi-br-user-time" style="color: #FFB000;"></i> :
+                                {{ detail.engagement.reviewer.first_name }}
+                                {{ detail.engagement.reviewer.last_name }}
+                                {% else %}
+                                <i class="fi fi-br-user-time" style="color: #FFB000;"></i> : -
+                                {% endif %}
+                            </div>
+                            <div class="detail">
+                                {% if detail.engagement.approver %}
+                                <i class="fi fi-br-user-trust" style="color: #198754;"></i> :
+                                {{ detail.engagement.approver.first_name }}
+                                {{ detail.engagement.approver.last_name }}
+                                {% else %}
+                                <i class="fi fi-br-user-trust" style="color: #198754;"></i> : -
+                                {% endif %}
+                            </div>
+                            <div class="detail">
+                                <i class="fi fi-rr-time-fast"></i> :
+                                {% if detail.days_remaining >= 0 %}
+                                <span class="fw-semibold">{{ detail.days_remaining }} วัน</span>
+                                {% else %}
+                                <span class="fw-semibold" style="color: #f70009;">{{ detail.days_remaining }} วัน</span>
+                                {% endif %}
+                            </div>
+                            <div class="deadline text-end">
+                                <i class="fi fi-br-clock-three"></i> {{ detail.deadline|date:'d/m/Y' }}
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <div class="tasks-review" data-status="REVIEW" ondrop="drop(event)" ondragover="allowDrop(event)">
+                        <h5 class="task-header-review fw-semibold" id="task-review-header">รอตรวจทาน <span class="badge badge-dark">{{ engagement_details_review }}</span></h5>
+                        {% for detail in engagement_details %}
+                        {% if detail.status == 'REVIEW' %}
+                        <div class="task-card" draggable="true" ondragstart="drag(event)" id="{{ detail.id }}">
+                            <input type="hidden" id="newStatusInput_{{ detail.id }}" name="new_status" value="OPEN_JOB">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="title fw-semibold">{{ detail.engagement.client.company_name }}</div>
+                                    <div class="detail fw-semibold">{{ detail.engagement.job_code }}</div>
+                                </div>
+                                <div class="col-4 text-end">
+                                    <i class="fi fi-rr-note-medical" style="color:#2a3547;" onclick="openUpdateNotesModal('{{ detail.id }}', '{{ detail.engagement.job_code }}', '{{ detail.engagement.notes }}')"></i>
+                                    <i class="fi fi-br-up-right-from-square" style="color:#0085FF; cursor: pointer;" onclick="openEngagementModal('{{ detail.engagement.job_code }}')"></i>
+                                </div>
+                            </div>
+                            <div class="date text-end"><i class="fi fi-br-calendar-day"></i>
+                                {{ detail.engagement.create_at|date:'d/m/Y' }}</div>
+                            <div class="detail">
+                                <i class="fi fi-ss-thumbtack" style="color: #f42a2a;"></i> :
+                                {{ detail.engagement.type.name_th }}</div>
+                            <div class="detail">
+                                {% if detail.engagement.administrator %}
+                                <i class="fi fi-br-user"></i> :
+                                {{ detail.engagement.administrator.first_name }}
+                                {{ detail.engagement.administrator.last_name }}
+                                {% else %}
+                                <i class="fi fi-br-user"></i> :
+                                -
+                                {% endif %}
+                            </div>
+                            <div class="detail">
+                                {% if detail.engagement.reviewer %}
+                                <i class="fi fi-br-user-time" style="color: #FFB000;"></i> :
+                                {{ detail.engagement.reviewer.first_name }}
+                                {{ detail.engagement.reviewer.last_name }}
+                                {% else %}
+                                <i class="fi fi-br-user-time" style="color: #FFB000;"></i> :
+                                -
+                                {% endif %}
+                            </div>
+                            <div class="detail">
+                                {% if detail.engagement.approver %}
+                                <i class="fi fi-br-user-trust" style="color: #198754;"></i> :
+                                {{ detail.engagement.approver.first_name }}
+                                {{ detail.engagement.approver.last_name }}
+                                {% else %}
+                                <i class="fi fi-br-user-trust" style="color: #198754;"></i> :
+                                -
+                                {% endif %}
+                            </div>
+                            <div class="detail">
+                                <i class="fi fi-rr-time-fast"></i> :
+                                {% if detail.days_remaining >= 0 %}
+                                <span class="fw-semibold">{{ detail.days_remaining }} วัน</span>
+                                {% else %}
+                                <span class="fw-semibold" style="color: #f70009;">{{ detail.days_remaining }} วัน</span>
+                                {% endif %}
+                            </div>
+                            <div class="deadline text-end">
+                                <i class="fi fi-br-clock-three"></i> {{ detail.deadline|date:'d/m/Y' }}
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <div class="tasks-client" data-status="PENDING_CLIENT" ondrop="drop(event)"
+                        ondragover="allowDrop(event)">
+                        <h5 class="task-header-client fw-semibold" id="task-client-header">รอลูกค้า <span
+                                class="badge badge-dark">{{ engagement_details_pending }}</span></h5>
+                        {% for detail in engagement_details %}
+                        {% if detail.status == 'PENDING_CLIENT' %}
+                        <div class="task-card" draggable="true" ondragstart="drag(event)" id="{{ detail.id }}">
+                            <input type="hidden" id="newStatusInput_{{ detail.id }}" name="new_status" value="OPEN_JOB">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="title fw-semibold">{{ detail.engagement.client.company_name }}</div>
+                                    <div class="detail fw-semibold">{{ detail.engagement.job_code }}</div>
+                                </div>
+                                <div class="col-4 text-end">
+                                    <i class="fi fi-rr-note-medical" style="color:#2a3547;"
+                                        onclick="openUpdateNotesModal('{{ detail.id }}', '{{ detail.engagement.job_code }}', '{{ detail.engagement.notes }}')"></i>
+                                    <i class="fi fi-br-up-right-from-square" style="color:#0085FF; cursor: pointer;"
+                                        onclick="openEngagementModal('{{ detail.engagement.job_code }}')"></i>
+
+                                </div>
+                            </div>
+                            <div class="date text-end"><i class="fi fi-br-calendar-day"></i>
+                                {{ detail.engagement.create_at|date:'d/m/Y' }}</div>
+                            <div class="detail">
+                                <i class="fi fi-ss-thumbtack" style="color: #f42a2a;"></i> :
+                                {{ detail.engagement.type.name_th }}</div>
+                            <div class="detail">
+                                {% if detail.engagement.administrator %}
+                                <i class="fi fi-br-user"></i> :
+                                {{ detail.engagement.administrator.first_name }}
+                                {{ detail.engagement.administrator.last_name }}
+                                {% else %}
+                                <i class="fi fi-br-user"></i> : -
+                                {% endif %}
+                            </div>
+                            <div class="detail">
+                                {% if detail.engagement.reviewer %}
+                                <i class="fi fi-br-user-time" style="color: #FFB000;"></i> :
+                                {{ detail.engagement.reviewer.first_name }}
+                                {{ detail.engagement.reviewer.last_name }}
+                                {% else %}
+                                <i class="fi fi-br-user-time" style="color: #FFB000;"></i> : -
+                                {% endif %}
+                            </div>
+                            <div class="detail">
+                                {% if detail.engagement.approver %}
+                                <i class="fi fi-br-user-trust" style="color: #198754;"></i> :
+                                {{ detail.engagement.approver.first_name }}
+                                {{ detail.engagement.approver.last_name }}
+                                {% else %}
+                                <i class="fi fi-br-user-trust" style="color: #198754;"></i> : - 
+                                {% endif %}
+                            </div>
+                            <div class="detail">
+                                <i class="fi fi-rr-time-fast"></i> :
+                                {% if detail.days_remaining >= 0 %}
+                                <span class="fw-semibold">{{ detail.days_remaining }} วัน</span>
+                                {% else %}
+                                <span class="fw-semibold" style="color: #f70009;">{{ detail.days_remaining }} วัน</span>
+                                {% endif %}
+                            </div>
+                            <div class="deadline text-end">
+                                <i class="fi fi-br-clock-three"></i> {{ detail.deadline|date:'d/m/Y' }}
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <div class="tasks-done" data-status="DONE" ondrop="drop(event)" ondragover="allowDrop(event)">
+                        <h5 class="task-header-done fw-semibold" id="task-done-header">เรียบร้อย <span class="badge badge-dark">{{ engagement_details_done }}</span></h5>
+                            {% for detail in engagement_details %}
+                            {% if detail.status == 'DONE' %}
+                            <div class="task-card" draggable="true" ondragstart="drag(event)" id="{{ detail.id }}">
+                                <input type="hidden" id="newStatusInput_{{ detail.id }}" name="new_status" value="OPEN_JOB">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <div class="title fw-semibold">{{ detail.engagement.client.company_name }}</div>
+                                        <div class="detail fw-semibold">{{ detail.engagement.job_code }}</div>
+                                    </div>
+                                    <div class="col-4 text-end">
+                                        <i class="fi fi-rr-note-medical" style="color:#2a3547;" onclick="openUpdateNotesModal('{{ detail.id }}', '{{ detail.engagement.job_code }}', '{{ detail.engagement.notes }}')"></i>
+                                        <i class="fi fi-br-up-right-from-square" style="color:#0085FF; cursor: pointer;" onclick="openEngagementModal('{{ detail.engagement.job_code }}')"></i>
+                                    </div>
+                                </div>
+                                
+                                <div class="date text-end">
+                                    <i class="fi fi-br-calendar-day"></i>
+                                    {{ detail.engagement.create_at|date:'d/m/Y' }}
+                                </div>
+                                <div class="rubber">Completed</div>
+                                <div class="detail">
+                                    <i class="fi fi-ss-thumbtack" style="color: #f42a2a;"></i> :
+                                    {{ detail.engagement.type.name_th }}
+                                </div>
+                                <div class="detail">
+                                    {% if detail.engagement.administrator %}
+                                    <i class="fi fi-br-user"></i> :
+                                    {{ detail.engagement.administrator.first_name }}
+                                    {{ detail.engagement.administrator.last_name }}
+                                    {% else %}
+                                    <i class="fi fi-br-user"></i> : -
+                                    {% endif %}
+                                </div>
+                                <div class="detail">
+                                    {% if detail.engagement.reviewer %}
+                                    <i class="fi fi-br-user-time" style="color: #FFB000;"></i> :
+                                    {{ detail.engagement.reviewer.first_name }}
+                                    {{ detail.engagement.reviewer.last_name }}
+                                    {% else %}
+                                    <i class="fi fi-br-user-time" style="color: #FFB000;"></i> : -
+                                    {% endif %}
+                                </div>
+                                <div class="detail">
+                                    {% if detail.engagement.approver %}
+                                    <i class="fi fi-br-user-trust" style="color: #198754;"></i> :
+                                    {{ detail.engagement.approver.first_name }}
+                                    {{ detail.engagement.approver.last_name }}
+                                    {% else %}
+                                    <i class="fi fi-br-user-trust" style="color: #198754;"></i> : -
+                                    {% endif %}
+                                </div>
+                                <div class="detail">
+                                    <i class="fi fi-rr-time-fast"></i> :
+                                    {% if detail.days_remaining >= 0 %}
+                                    <span class="fw-semibold">{{ detail.days_remaining }} วัน</span>
+                                    {% else %}
+                                    <span class="fw-semibold" style="color: #f70009;">{{ detail.days_remaining }} วัน</span>
+                                    {% endif %}
+                                </div>
+                                <div class="deadline text-end">
+                                    <i class="fi fi-br-clock-three"></i> {{ detail.deadline|date:'d/m/Y' }}
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Update Notes Modal -->
+<div class="modal fade" id="updateNotesModal" tabindex="-1" aria-labelledby="updateNotesModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateNotesModalLabel">Update Notes</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <textarea id="notesInput" class="form-control" rows="5"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveNotes()">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Engagement Details Modal -->
+<div class="modal fade" id="engagementModal" tabindex="-1" aria-labelledby="engagementModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="engagementModalLabel">Engagement Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="engagementDetails"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    var updateEngagementStatusUrl = "{% url 'taskcontrol:update_engagement_detail_status' %}";
+    var csrfToken = "{{ csrf_token }}";
+
+    function updateTaskCount() {
+        // Implement any logic for updating task count here
+    }
+
+    function allowDrop(event) {
+        event.preventDefault();
+    }
+
+    function drag(event) {
+        event.dataTransfer.setData("engagementId", event.target.id);
+    }
+
+    function isValidStatus(status) {
+        // List of valid statuses
+        var validStatuses = ['OPEN_JOB', 'IN_PROGRESS', 'REVIEW', 'PENDING_CLIENT', 'DONE'];
+        return validStatuses.includes(status);
+    }
+
+    function drop(event) {
+        event.preventDefault();
+        var engagementDetailId = event.dataTransfer.getData("engagementId");
+        var newStatus = event.target.getAttribute("data-status");
+
+        // Check if newStatus is valid
+        if (!isValidStatus(newStatus)) {
+            console.error("Invalid status:", newStatus);
+            return;  // Do not proceed if status is not valid
+        }
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', updateEngagementStatusUrl, true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.setRequestHeader('X-CSRFToken', csrfToken);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    console.log('Status updated successfully');
+                    location.reload();  // Reload the page after successful update
+                } else {
+                    console.error('Failed to update status:', xhr.responseText);
+                }
+            }
+        };
+        xhr.send("engagement_detail_id=" + engagementDetailId + "&new_status=" + newStatus);
+    }
+</script>
+
+
+<script>
+    function openUpdateNotesModal(id, jobCode, notes) {
+        // Set the content of the modal
+        document.getElementById('notesInput').value = notes;
+        // Show the modal
+        var myModal = new bootstrap.Modal(document.getElementById('updateNotesModal'));
+        myModal.show();
+    }
+
+    function saveNotes() {
+        // Logic to save notes (you might send an AJAX request here)
+        var updatedNotes = document.getElementById('notesInput').value;
+        // Implement save functionality here
+        console.log("Notes saved:", updatedNotes);
+        // Hide the modal after saving
+        var myModal = bootstrap.Modal.getInstance(document.getElementById('updateNotesModal'));
+        myModal.hide();
+    }
+
+    function openEngagementModal(jobCode) {
+        // Fetch engagement details based on jobCode (example code, replace with actual logic)
+        var engagementDetails = `Details for job code ${jobCode}`;
+        document.getElementById('engagementDetails').innerText = engagementDetails;
+        // Show the modal
+        var myModal = new bootstrap.Modal(document.getElementById('engagementModal'));
+        myModal.show();
+    }
+</script>
+
+{% endblock content %}

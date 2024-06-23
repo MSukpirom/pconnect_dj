@@ -30,7 +30,7 @@
         font-size: 13px;
     }
     
-    .badge.OPENJOB {
+    .badge.OPEN_OB {
         color: #0051a0;
         background-color: #cbe5ff;
         display: flex;
@@ -69,7 +69,7 @@
         width: 100%;
     }
     
-    .badge.PENDINGCLIENT {
+    .badge.PENDING_CLIENT {
         color: #a10f0a;
         background-color: #ffcfce;
         display: flex;
@@ -255,11 +255,11 @@
                         <button class="toggle-btn" onclick="toggleTable('{{ status }}')">
                             <i class="fa-solid fa-caret-down"></i>
                         </button>&nbsp;&nbsp;
-                        {% if status == 'OPENJOB' %}
+                        {% if status == 'OPEN_JOB' %}
                         เปิดงาน
                         {% elif status == 'IN_PROGRESS' %}
                         กำลังดำเนินการ
-                        {% elif status == 'PENDINGCLIENT' %}
+                        {% elif status == 'PENDING_CLIENT' %}
                         รอลูกค้า
                         {% elif status == 'REVIEW' %}
                         รอตรวจทาน
@@ -345,7 +345,7 @@
             engagements.forEach(function(engagement, index) {
                 var statusText, badgeClass;
                 switch (engagement.status) {
-                    case 'OPENJOB':
+                    case 'OPEN_JOB':
                         statusText = 'เปิดงาน';
                         badgeClass = 'status-open';
                         break;
@@ -353,7 +353,7 @@
                         statusText = 'กำลังดำเนินการ';
                         badgeClass = 'status-in-progress';
                         break;
-                    case 'PENDINGCLIENT':
+                    case 'PENDING_CLIENT':
                         statusText = 'รอลูกค้า';
                         badgeClass = 'status-pending-client';
                         break;

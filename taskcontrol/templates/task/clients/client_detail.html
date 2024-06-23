@@ -1,11 +1,14 @@
+<!-- CSS สำหรับ FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<!-- CSS สำหรับ Bootstrap -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<!-- SweetAlert2 CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.0/dist/sweetalert2.min.css">
 {% extends 'task/index.html' %} {% block content %}
 {% load static %}
 {% load humanize %}
 
 <style type="text/css">
-    .card {
-        margin-top: 0.25rem;
-    }
     .card, .card-body {
         box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
         background-color: #ffffff;
@@ -22,19 +25,6 @@
         font-weight: 600;
         background-color: #ff5258;
         border-radius: 8px;
-    }
-
-    .modal-content {
-        padding: 10px;
-        border-radius: 8px;
-    }
-
-    th {
-        font-size: 13px;
-    }
-
-    td {
-        font-size: 13.5px;
     }
 
     .regis-true {
@@ -66,36 +56,27 @@
         background: #2a3547;
     }
 
-    .badge-open {
-        color: #5d87ff;
-        background-color: #ecf2ff;
-        border-radius: 20px;
+    .badge-open, .badge-in-progress, .badge-review, .badge-pend-client, .badge-done {
+        font-weight: 500;
+        border-radius: 8px;
+        font-size: 12.5px;
     }
 
-    .badge-in-progress {
-        color: #a94bf4;
-        background-color: #f4eeff;
-        border-radius: 20px;
+    .badge-open { color: #054627; background-color: #d0f4b2; border-radius: 12px; font-size: 11px; }
+    .badge-in-progress { color: #5b2891; background-color: #ead6ff; border-radius: 12px; font-size: 11px; }
+    .badge-review { color: #954800; background-color: #fff1c6; border-radius: 12px; font-size: 11px; }
+    .badge-pend-client { color: #bb4900; background-color: #ffdfbc; border-radius: 12px; font-size: 11px; }
+    .badge-done { color: #a10f0a; background-color: #ffcfce; border-radius: 12px; font-size: 11px; }
+
+    .tags-engagement-type {
+        font-weight: 600;
+        color: #2a3547; 
+        background-color: #ededee; 
+        border-radius: 18px; 
+        font-size: 11px; 
+        margin-bottom: 3px;
     }
 
-    .badge-review {
-        color: #ff9731;
-        background-color: #fff5e6;
-        border-radius: 20px;
-    }
-
-    .badge-pend-client {
-        color: #ff5258;
-        background-color: #ffe4e3;
-        border-radius: 20px;
-    }
-
-    .badge-close {
-        color: #34a76f;
-        background-color: #dcf3eb;
-        border-radius: 20px;
-    }
-    
 </style>
 
 <div class="row">
@@ -110,389 +91,189 @@
                 </div>
             </div>
 
-            <h5 class="text-primary fw-semibold mb-3">
-                <a data-bs-toggle="modal" href="#updateModal{{ client.id }}">
-                    <i class="fa-solid fa-pen-to-square" style="color: #ffc300;"></i>
-                </a> 
-                <span>ข้อมูลของ {{client.company_name}}</span>
-                <span class="badge {% if client.status %}status-open{% else %}status-close{% endif %}">
-                    {% if client.status %}เปิดใช้งาน{% else %}ปิดการใช้งาน{% endif %}
-                </span>
-            </h5>
-            <div class="row mb-2">
-                <div class="col-md-3">
-                    <span class="fw-semibold">วันที่สร้าง :</span>
-                </div>
-                <div class="col-md-9">
-                    {% if client.create_client_date %}
-                        {{ client.create_client_date|date:"d/m/Y" }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </div>
-            </div>
-             <div class="row mb-2">
-                <div class="col-md-3">
-                    <span class="fw-semibold">รหัสลูกค้า :</span>
-                </div>
-                <div class="col-md-9">
-                    {% if client.code %}
-                        {{ client.code }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </div>
-            </div>
-             <div class="row mb-2">
-                <div class="col-md-3">
-                    <span class="fw-semibold">ชื่อบริษัท :</span>
-                </div>
-                <div class="col-md-9">
-                    {% if client.tax_id %}
-                        {{ client.company_name }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </div>
-            </div>
-             <div class="row mb-2">
-                <div class="col-md-3">
-                    <span class="fw-semibold">เลขที่นิติ :</span>
-                </div>
-                <div class="col-md-9">
-                    {% if client.tax_id %}
-                        {{ client.tax_id }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </div>
-            </div>
-            <div class="row mb-2">
-                <div class="col-md-3">
-                    <span class="fw-semibold">ช่องทางรู้จักเรา :</span>
-                </div>
-                <div class="col-md-9">
-                    {% if client.channel.name %}
-                        {{ client.channel.name }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </div>
-            </div>
-            <div class="row mb-2">
-                <div class="col-md-3">
-                    <span class="fw-semibold">รายละเอียด :</span>
-                </div>
-                <div class="col-md-9">
-                    {% if client.detail %}{{ client.detail }}{% else %}-{% endif %}
-                </div>
-            </div>
-            <div class="row mb-4">
-                <div class="col-md-3">
-                    <span class="fw-semibold">ที่อยู่ :</span>
-                </div>
-                <div class="col-md-9">
-                    {{ client.company_address.address }}
-                    {{ client.company_address.subdistrict.name_th }}
-                    {{ client.company_address.district.name_th }}
-                    {{ client.company_address.province.name_th }}
-                    {{ client.company_address.subdistrict.zipcode }}
-                </div>
-            </div>
-
-            <div class="h5 pb-2 mb-4 text-primary  fw-semibold border-bottom border-primary"> <i class="fi fi-sr-comment-info"></i> จดทะเบียน </div>
-            <div class="row mb-2">
-                <div class="col-md-3">
-                    <span class="fw-semibold">จดทะเบียนบริษัท :</span>
-                </div>
-                <div class="col-md-1">
-                    <span class="{% if client.register_tax.company %}regis-true{% else %}regis-false{% endif %}">
-                        {% if client.register_tax.company %}<i class="fa-solid fa-circle-check fa-lg"></i>{% else %}<i class="fa-solid fa-circle-xmark fa-lg"></i>{% endif %}
+            <!--Client Detail-->
+            <div class="mb-1">
+                <h5 class="text-primary fw-semibold mb-3">
+                    <a data-bs-toggle="modal" href="#updateModal{{ client.id }}">
+                        <i class="fa-solid fa-pen-to-square" style="color: #ffc300;"></i>
+                    </a> 
+                    <span>ข้อมูลของ {{client.company_name}}</span>
+                    <span class="badge {% if client.status %}status-open{% else %}status-close{% endif %}">
+                        {% if client.status %}เปิดใช้งาน{% else %}ปิดการใช้งาน{% endif %}
                     </span>
+                </h5>
+                <div class="row mb-2">
+                    <div class="col-md-3">
+                        <span class="fw-semibold">วันที่สร้าง :</span>
+                    </div>
+                    <div class="col-md-9">
+                        {% if client.create_client_date %}
+                            {{ client.create_client_date|date:"d/m/Y" }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="col-md-1">
-                    <label class="fw-semibold" for="r_company_date">วันที่จด :</label>
+                 <div class="row mb-2">
+                    <div class="col-md-3">
+                        <span class="fw-semibold">รหัสลูกค้า :</span>
+                    </div>
+                    <div class="col-md-9">
+                        {% if client.code %}
+                            {{ client.code }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="col-md-2">
-                    {% if client.register_tax.company_date|date:"d/m/Y" %}{{ client.register_tax.company_date|date:"d/m/Y" }}{% else %}-{% endif %}
+                 <div class="row mb-2">
+                    <div class="col-md-3">
+                        <span class="fw-semibold">ชื่อบริษัท :</span>
+                    </div>
+                    <div class="col-md-9">
+                        {% if client.tax_id %}
+                            {{ client.company_name }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="col-md-2">
-                    <label class="fw-semibold" for="r_company_period_date">รอบบัญชี (วันที่/เดือน) :</label>
+                 <div class="row mb-2">
+                    <div class="col-md-3">
+                        <span class="fw-semibold">เลขที่นิติ :</span>
+                    </div>
+                    <div class="col-md-9">
+                        {% if client.tax_id %}
+                            {{ client.tax_id }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <span>
-                        {% if client.register_tax.company_period_date|date:"d/m/Y" %}{{ client.register_tax.company_period_date|date:"d/m/Y" }}{% else %}-{% endif %}
-                    </span>
+                <div class="row mb-2">
+                    <div class="col-md-3">
+                        <span class="fw-semibold">ช่องทางรู้จักเรา :</span>
+                    </div>
+                    <div class="col-md-9">
+                        {% if client.channel.name %}
+                            {{ client.channel.name }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </div>
                 </div>
-            </div>
-
-            <div class="row mb-2">
-                <div class="col-3">
-                    <span class="fw-semibold">จดทะเบียนภาษีมูลค่าเพิ่ม : </span>
+                <div class="row mb-2">
+                    <div class="col-md-3">
+                        <span class="fw-semibold">รายละเอียด :</span>
+                    </div>
+                    <div class="col-md-9">
+                        {% if client.detail %}{{ client.detail }}{% else %}-{% endif %}
+                    </div>
                 </div>
-                <div class="col-1">
-                    <span class="{% if client.register_tax.vat %}regis-true{% else %}regis-false{% endif %}">
-                        {% if client.register_tax.vat %}<i class="fa-solid fa-circle-check fa-lg"></i>{% else %}<i class="fa-solid fa-circle-xmark fa-lg"></i>{% endif %}
-                    </span>
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <span class="fw-semibold">ที่อยู่ :</span>
+                    </div>
+                    <div class="col-md-9">
+                        {{ client.company_address.address }}
+                        {{ client.company_address.subdistrict.name_th }}
+                        {{ client.company_address.district.name_th }}
+                        {{ client.company_address.province.name_th }}
+                        {{ client.company_address.subdistrict.zipcode }}
+                    </div>
                 </div>
-                <div class="col-md-1">
-                    <label class="fw-semibold" for="r_company_date">วันที่จด :</label>
+    
+                <div class="h5 pb-2 mb-4 text-primary  fw-semibold border-bottom border-primary"> <i class="fi fi-sr-comment-info" style="color: #5d87ff;"></i> จดทะเบียน </div>
+                <div class="row mb-2">
+                    <div class="col-md-3">
+                        <span class="fw-semibold">จดทะเบียนบริษัท :</span>
+                    </div>
+                    <div class="col-md-1">
+                        <span class="{% if client.register_tax.company %}regis-true{% else %}regis-false{% endif %}">
+                            {% if client.register_tax.company %}<i class="fa-solid fa-circle-check fa-lg"></i>{% else %}<i class="fa-solid fa-circle-xmark fa-lg"></i>{% endif %}
+                        </span>
+                    </div>
+                    <div class="col-md-1">
+                        <label class="fw-semibold" for="r_company_date">วันที่จด :</label>
+                    </div>
+                    <div class="col-md-2">
+                        {% if client.register_tax.company_date|date:"d/m/Y" %}{{ client.register_tax.company_date|date:"d/m/Y" }}{% else %}-{% endif %}
+                    </div>
+                    <div class="col-md-2">
+                        <label class="fw-semibold" for="r_company_period_date">รอบบัญชี (วันที่/เดือน) :</label>
+                    </div>
+                    <div class="col-md-3">
+                        <span>
+                            {% if client.register_tax.company_period_date|date:"d/m/Y" %}{{ client.register_tax.company_period_date|date:"d/m/Y" }}{% else %}-{% endif %}
+                        </span>
+                    </div>
                 </div>
-                <div class="col-md-2">
-                    {% if client.register_tax.vat_date|date:"d/m/Y" %}{{ client.register_tax.vat_date|date:"d/m/Y" }}{% else %}-{% endif %}
+    
+                <div class="row mb-2">
+                    <div class="col-3">
+                        <span class="fw-semibold">จดทะเบียนภาษีมูลค่าเพิ่ม : </span>
+                    </div>
+                    <div class="col-1">
+                        <span class="{% if client.register_tax.vat %}regis-true{% else %}regis-false{% endif %}">
+                            {% if client.register_tax.vat %}<i class="fa-solid fa-circle-check fa-lg"></i>{% else %}<i class="fa-solid fa-circle-xmark fa-lg"></i>{% endif %}
+                        </span>
+                    </div>
+                    <div class="col-md-1">
+                        <label class="fw-semibold" for="r_company_date">วันที่จด :</label>
+                    </div>
+                    <div class="col-md-2">
+                        {% if client.register_tax.vat_date|date:"d/m/Y" %}{{ client.register_tax.vat_date|date:"d/m/Y" }}{% else %}-{% endif %}
+                    </div>
                 </div>
-            </div>
-
-            <div class="row mb-2">
-                <div class="col-md-3">
-                    <span class="fw-semibold">จดทะเบียนภาษีธุรกิจเฉพาะ :</span>
+    
+                <div class="row mb-2">
+                    <div class="col-md-3">
+                        <span class="fw-semibold">จดทะเบียนภาษีธุรกิจเฉพาะ :</span>
+                    </div>
+                    <div class="col-md-1">
+                        <span class="{% if client.register_tax.sbt %}regis-true{% else %}regis-false{% endif %}">
+                            {% if client.register_tax.sbt %}<i class="fa-solid fa-circle-check fa-lg"></i>{% else %}<i class="fa-solid fa-circle-xmark fa-lg"></i>{% endif %}
+                        </span>
+                    </div>
+                    <div class="col-md-1">
+                        <label class="fw-semibold" for="r_company_date">วันที่จด :</label>
+                    </div>
+                    <div class="col-md-2">
+                        {% if client.register_tax.sbt_date|date:"d/m/Y" %}{{ client.register_tax.sbt_date|date:"d/m/Y" }}{% else %}-{% endif %}
+                    </div>
                 </div>
-                <div class="col-md-1">
-                    <span class="{% if client.register_tax.sbt %}regis-true{% else %}regis-false{% endif %}">
-                        {% if client.register_tax.sbt %}<i class="fa-solid fa-circle-check fa-lg"></i>{% else %}<i class="fa-solid fa-circle-xmark fa-lg"></i>{% endif %}
-                    </span>
+    
+                <div class="row mb-2">
+                    <div class="col-md-3">
+                        <span class="fw-semibold">จดทะเบียนนายจ้าง :</span>
+                    </div>
+                    <div class="col-md-1">
+                        <span class="{% if client.register_tax.sso %}regis-true{% else %}regis-false{% endif %}">
+                            {% if client.register_tax.sso %}<i class="fa-solid fa-circle-check fa-lg"></i>{% else %}<i class="fa-solid fa-circle-xmark fa-lg"></i>{% endif %}
+                        </span>
+                    </div>
+                    <div class="col-md-1">
+                        <label class="fw-semibold" for="r_company_date">วันที่จด :</label>
+                    </div>
+                    <div class="col-md-2">
+                       {% if client.register_tax.sso_date|date:"d/m/Y" %}{{ client.register_tax.sso_date|date:"d/m/Y" }}{% else %}-{% endif %}
+                    </div>
                 </div>
-                <div class="col-md-1">
-                    <label class="fw-semibold" for="r_company_date">วันที่จด :</label>
-                </div>
-                <div class="col-md-2">
-                    {% if client.register_tax.sbt_date|date:"d/m/Y" %}{{ client.register_tax.sbt_date|date:"d/m/Y" }}{% else %}-{% endif %}
-                </div>
-            </div>
-
-            <div class="row mb-2">
-                <div class="col-md-3">
-                    <span class="fw-semibold">จดทะเบียนนายจ้าง :</span>
-                </div>
-                <div class="col-md-1">
-                    <span class="{% if client.register_tax.sso %}regis-true{% else %}regis-false{% endif %}">
-                        {% if client.register_tax.sso %}<i class="fa-solid fa-circle-check fa-lg"></i>{% else %}<i class="fa-solid fa-circle-xmark fa-lg"></i>{% endif %}
-                    </span>
-                </div>
-                <div class="col-md-1">
-                    <label class="fw-semibold" for="r_company_date">วันที่จด :</label>
-                </div>
-                <div class="col-md-2">
-                   {% if client.register_tax.sso_date|date:"d/m/Y" %}{{ client.register_tax.sso_date|date:"d/m/Y" }}{% else %}-{% endif %}
-                </div>
-            </div>
-
-            <div class="row mb-5">
-                <div class="col-md-3">
-                    <span class="fw-semibold">จดทะเบียนยื่นภาษีออนไลน์ :</span>
-                </div>
-                <div class="col-md-1">
-                    <span class="{% if client.register_tax.dbd_e_filling %}regis-true{% else %}regis-false{% endif %}">
-                        {% if client.register_tax.dbd_e_filling %}<i class="fa-solid fa-circle-check fa-lg"></i>{% else %}<i class="fa-solid fa-circle-xmark fa-lg"></i>{% endif %}
-                    </span>
-                </div>
-                <div class="col-md-1">
-                    <label class="fw-semibold" for="r_company_date">วันที่จด :</label>
-                </div>
-                <div class="col-md-2">
-                    {% if client.register_tax.dbd_e_filling_date|date:"d/m/Y" %}{{ client.register_tax.dbd_e_filling_date|date:"d/m/Y" }}{% else %}-{% endif %}
-                </div>
-            </div>
-
-            <!--Modal Edit Client-->
-            <div class="modal fade" id="updateModal{{ client.id }}" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-lg" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <h1 class="modal-title fs-5 pb-2 mb-3 text-primary fw-semibold border-bottom border-warning"><i class="fi fi-sr-comment-alt-edit" style="color: #ffc300;"></i> แก้ไขข้อมูล {{ client.company_name }}</h1>
-                            <form method="post" action="{% url 'taskcontrol:client_update' client_id=client.id %}">
-                                {% csrf_token %}
-                                <!--Client-->
-                                <div class="mb-4">
-                                    <div class="row mb-3">
-                                        <div class="col-md-4">
-                                            <label for="" class="form-label fw-semibold">วันที่สร้าง :</label>
-                                            <input type="date" name="update_create_client_date" id="" class="form-control" value="{{ client.create_client_date|date:'Y-m-d' }}" disabled />
-                                        </div>
-                                        <div class="col-md-4"></div>
-                                        <div class="col-md-4 text-end">
-                                            <input class="form-check-input" type="checkbox" name="update_c_status" id="update_c_status" {% if client.status %}checked{% endif %}>
-                                            <label class="form-label" for="update_c_status">สถานะการใช้งาน</label>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <div class="col-md-2">
-                                            <label for="update_c_code" class="form-label fw-semibold">รหัสลูกค้า :</label>
-                                            <input type="text" name="update_c_code" id="update_c_code" class="form-control" value="{{ client.code }}" />
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label for="update_c_company_name" class="form-label fw-semibold">ชื่อบริษัท :</label>
-                                            <input type="text" name="update_c_company_name" id="update_c_company_name" class="form-control" value="{{ client.company_name }}" />
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label for="update_c_tax_id" class="form-label fw-semibold">เลขที่นิติ :</label>
-                                            <input type="text" name="update_c_tax_id" id="update_c_tax_id" class="form-control" maxlength="13" value="{{ client.tax_id }}" />
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <div class="col-md-12">
-                                            <label for="update_c_address" class="form-label fw-semibold">ที่อยู่บริษัท :</label>
-                                            <input type="text" name="update_c_address" id="update_c_address" class="form-control" value="{{ client.company_address.address }}" />
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <div class="col-md-4">
-                                            <label for="province" class="form-label fw-semibold">จังหวัด :</label>
-                                            <select name="update_c_province" id="province" class="form-select">
-                                                <option value selected disabled hidden>- กรุณาเลือก -</option>
-                                                {% for p in provinces %}
-                                                <option value="{{ p.id }}" {% if p.id == client.company_address.province.id %} selected {% endif %}>{{ p.name_th }}</option>
-                                                {% endfor %}
-                                            </select>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label for="district" class="form-label fw-semibold">อำเภอ/เขต :</label>
-                                            <select name="update_c_district" id="district" class="form-select">
-                                                <option value="" selected disabled hidden>อำเภอ/เขต</option>
-                                                {% for d in districts %}
-                                                    {% if d.id %}
-                                                        <option value="{{ d.id }}" {% if d.id == client.company_address.district.id %} selected {% endif %}>
-                                                            {{ d.name_th }}
-                                                        </option>
-                                                    {% endif %}
-                                                {% endfor %}
-                                            </select>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label for="subdistrict" class="form-label fw-semibold">ตำบล/แขวง/รหัสไปรษณีย์ :</label>
-                                            <select name="update_c_subdistrict" id="subdistrict" class="form-select">
-                                                <option value="" selected disabled hidden>ตำบล/แขวง/รหัสไปรษณีย์</option>
-                                                {% for s in subdistricts %}
-                                                    <option value="{{ s.id }}" {% if s.id == client.company_address.subdistrict.id %} selected {% endif %}>
-                                                        {{ s.name_th }} {{ s.zipcode }}
-                                                    </option>
-                                                {% endfor %}
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <div class="col-md-4">
-                                            <label for="update_c_channel" class="form-label fw-semibold">ช่องทางรู้จักเรา :</label>
-                                            <select name="update_c_channel" id="channel" class="form-select">
-                                                <option value="" selected disabled hidden>- กรุณาเลือก -</option>
-                                                {% for channel in channels %}
-                                                    <option value="{{ channel.id }}" {% if channel.id == client.channel.id %} selected {% endif %}>
-                                                        {{ channel.name }}
-                                                    </option>
-                                                {% endfor %}
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <div class="col-md-12">
-                                            <label for="update_c_detail" class="form-label fw-semibold">รายละเอียดเพิ่มเติม :</label>
-                                            <input type="text" name="update_c_detail" id="update_c_detail" class="form-control" value="{{ client.detail }}">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!--Tax Register-->
-                                <div class="mb-4">
-                                    <h5 class="pb-2 mb-3 text-primary fw-semibold border-bottom border-warning"><i class="fi fi-sr-comment-alt-edit" style="color: #ffc300;"></i> จดทะเบียน</h5>
-                                    <div class="row mb-3">
-                                        <div class="col-md-4">
-                                            <label class="form-label fw-semibold">จดทะเบียนบริษัท :</label>
-                                            <div class="form-check">
-                                                <input type="radio" name="update_r_company" class="form-check-input" value="True" {% if client.register_tax.company %} checked {% endif %}>
-                                                <label class="form-check-label" for="update_r_company">ใช่</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input type="radio" name="update_r_company" class="form-check-input" value="False" {% if not client.register_tax.company %} checked {% endif %}>
-                                                <label class="form-check-label" for="update_r_company">ไม่ใช่</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label for="update_r_company_date" class="form-label fw-semibold">วันที่จด :</label>
-                                            <input type="date" name="update_r_company_date" id="update_r_company_date" class="form-control" value="{{ client.register_tax.company_date|date:'Y-m-d' }}" />
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label for="update_r_company_period_date" class="form-label fw-semibold">รอบบัญชี (วันที่/เดือน) :</label>
-                                            <input type="date" name="update_r_company_period_date" id="update_r_company_period_date" class="form-control" value="{{ client.register_tax.company_period_date|date:'Y-m-d' }}" />
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <div class="col-md-4">
-                                            <label class="form-label fw-semibold">จดทะเบียนภาษีมูลค่าเพิ่ม :</label>
-                                            <div class="form-check">
-                                                <input type="radio" name="update_r_vat" class="form-check-input" value="True" {% if client.register_tax.vat %} checked {% endif %}>
-                                                <label class="form-check-label" for="update_r_vat">ใช่</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input type="radio" name="update_r_vat" class="form-check-input" value="False" {% if not client.register_tax.vat %} checked {% endif %}>
-                                                <label class="form-check-label" for="update_r_vat">ไม่ใช่</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label for="update_r_vat_date" class="form-label fw-semibold">วันที่จด :</label>
-                                            <input type="date" name="update_r_vat_date" id="update_r_vat_date" class="form-control" value="{{ client.register_tax.vat_date|date:'Y-m-d' }}" />
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <div class="col-md-4">
-                                            <label class="form-label fw-semibold">จดทะเบียนภาษีธุรกิจเฉพาะ :</label>
-                                            <div class="form-check">
-                                                <input type="radio" name="update_r_sbt" class="form-check-input" value="True" {% if client.register_tax.sbt %} checked {% endif %}>
-                                                <label class="form-check-label" for="update_r_sbt">ใช่</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input type="radio" name="update_r_sbt" class="form-check-input" value="False" {% if not client.register_tax.sbt %} checked {% endif %}>
-                                                <label class="form-check-label" for="update_r_sbt">ไม่ใช่</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label for="update_r_sbt_date" class="form-label fw-semibold">วันที่จด :</label>
-                                            <input type="date" name="update_r_sbt_date" id="update_r_sbt_date" class="form-control" value="{{ client.register_tax.sbt_date|date:'Y-m-d' }}" />
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <div class="col-md-4">
-                                            <label class="form-label fw-semibold">จดทะเบียนนายจ้าง :</label>
-                                            <div class="form-check">
-                                                <input type="radio" name="update_r_sso" class="form-check-input" value="True" {% if client.register_tax.sso %} checked {% endif %}>
-                                                <label class="form-check-label" for="update_r_sso">ใช่</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input type="radio" name="update_r_sso" class="form-check-input" value="False" {% if not client.register_tax.sso %} checked {% endif %}>
-                                                <label class="form-check-label" for="update_r_sso">ไม่ใช่</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label for="update_r_sso_date" class="form-label fw-semibold">วันที่จด :</label>
-                                            <input type="date" name="update_r_sso_date" id="update_r_sso_date" class="form-control" value="{{ client.register_tax.sso_date|date:'Y-m-d' }}" />
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <div class="col-md-4">
-                                            <label class="form-label fw-semibold">จดทะเบียนยื่นภาษีออนไลน์ :</label>
-                                            <div class="form-check">
-                                                <input type="radio" name="update_r_dbd_e_filling" class="form-check-input" value="True" {% if client.register_tax.dbd_e_filling %} checked {% endif %}>
-                                                <label class="form-check-label" for="update_r_dbd_e_filling">ใช่</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input type="radio" name="update_r_dbd_e_filling" class="form-check-input" value="False" {% if not client.register_tax.dbd_e_filling %} checked {% endif %}>
-                                                <label class="form-check-label" for="update_r_dbd_e_filling">ไม่ใช่</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label for="update_r_dbd_e_filling_date" class="form-label fw-semibold">วันที่จด :</label>
-                                            <input type="date" name="update_r_dbd_e_filling_date" id="update_r_dbd_e_filling_date" class="form-control" value="{{ client.register_tax.dbd_e_filling_date|date:'Y-m-d' }}" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
-                                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-circle-check"></i> แก้ไขข้อมูล</button>
-                                </div>
-                            </form>
-                        </div>
+    
+                <div class="row mb-5">
+                    <div class="col-md-3">
+                        <span class="fw-semibold">จดทะเบียนยื่นภาษีออนไลน์ :</span>
+                    </div>
+                    <div class="col-md-1">
+                        <span class="{% if client.register_tax.dbd_e_filling %}regis-true{% else %}regis-false{% endif %}">
+                            {% if client.register_tax.dbd_e_filling %}<i class="fa-solid fa-circle-check fa-lg"></i>{% else %}<i class="fa-solid fa-circle-xmark fa-lg"></i>{% endif %}
+                        </span>
+                    </div>
+                    <div class="col-md-1">
+                        <label class="fw-semibold" for="r_company_date">วันที่จด :</label>
+                    </div>
+                    <div class="col-md-2">
+                        {% if client.register_tax.dbd_e_filling_date|date:"d/m/Y" %}{{ client.register_tax.dbd_e_filling_date|date:"d/m/Y" }}{% else %}-{% endif %}
                     </div>
                 </div>
             </div>
@@ -505,14 +286,14 @@
                 </a>
             </div>
             <div class="table-responsive mb-4">
-                <table class="table">
+                <table id="contact-table" class="table table-bordered">
                     <thead class="table-light">
                         <tr>
                             <th style="width: 4%;">#</th>
                             <th style="width: 12%;">ชื่อผู้ติดต่อ</th>
                             <th style="width: 8%;">ตำแหน่ง</th>
                             <th style="width: 8%; text-align: center;"><i class="fa-solid fa-phone-volume"></i></th>
-                            <th style="width: 10%; text-align: center;"><i class="fa-solid fa-paper-plane"></i></th>
+                            <th style="width: 10%; text-align: center;"><i class="fa-solid fa-at"></i></th>
                             <th style="width: 10%; text-align: center;"><i class="fa-brands fa-line"></i></th>
                             <th style="width: 33%; text-align: center;"><i class="fa-solid fa-map-location-dot"></i></th>
                             <th style="width: 10%; text-align: center;"><i class="fi fi-sr-comment-dots"></i></th>
@@ -556,162 +337,73 @@
                 <input type="hidden" id="delete-contact-url" value="{% url 'taskcontrol:delete_contact' contact_id=0 %}">
             </div>
 
-            <!--Modal Add Contact-->
-            <div class="modal fade" id="addContactModal{{ contact.id }}" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="h5 pb-2 mb-4 text-primary border-bottom border-primary"> 
-                                <a data-bs-toggle="modal" href="#addContactModal{{ contact.id }}">
-                                    <i class="fi fi-sr-comment-medical" style="color: #53c536;"></i> 
-                                </a>
-                                <span>ผู้ติดต่อ</span>
-                                <i class="fas fa-chevron-left"></i>
-                                {{ client.company_name }}
-                                <i class="fas fa-chevron-right"></i>
-                            </div>
-                            <form id="createContactForm" method="post" action="{% url 'taskcontrol:create_contact' client_id=client.id %}">
-                                {% csrf_token %}
-                                <div class="row mb-3">
-                                    <div class="col-md-4">
-                                        <label for="" class="form-label fw-semibold">ชื่อ :</label>
-                                        <input type="text" name="ct_name" id="ct_name" class="form-control" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label for="" class="form-label fw-semibold">ตำแหน่ง :</label>
-                                        <input type="text" name="ct_position" id="ct_position" class="form-control" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label for="" class="form-label fw-semibold">เบอร์ติดต่อ :</label>
-                                        <input type="text" name="ct_phone" id="ct_phone" class="form-control" maxlength="10" />
-                                    </div>
-                                </div>
-                                <div class="row mb-3">
-                                    <div class="col-md-4">
-                                        <label for="" class="form-label fw-semibold">อีเมล :</label>
-                                        <input type="text" name="ct_email" id="ct_email" class="form-control" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label for="" class="form-label fw-semibold">ไลน์ :</label>
-                                        <input type="text" name="ct_line" id="ct_line" class="form-control" />
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label for="" class="form-label fw-semibold">ช่องทางติดต่ออื่นๆ :</label>
-                                        <input type="text" name="ct_other" id="ct_other" class="form-control" />
-                                    </div>
-                                </div>
-                                <div class="row mb-3">
-                                    <div class="col-md-12">
-                                        <label for="" class="form-label fw-semibold">ที่อยู่&nbsp;&nbsp;&nbsp;&nbsp;</label>
-                                        <input type="checkbox" class="form-check-input" name="ct_address2" id="ct_address2"
-                                            value="{{ client.company_address.address }} {{ client.company_address.subdistrict.name_th }} {{ client.company_address.district.name_th }} {{ client.company_address.province.name_th }} {{ client.company_address.subdistrict.zipcode }}"
-                                            onchange="copyCompanyAddress()" />
-                                        <label for="ct_address2"
-                                            class="form-label fw-semibold">&nbsp;ใช้ที่อยู่เหมือนบริษัท</label>
-                                        <input type="text" class="form-control" name="ct_address" id="ct_address" />
-                                    </div>
-                                </div>
-
-                                <div class="row mb-3">
-                                    <div class="col-md-4">
-                                        <select name="ct_province" id="province2" class="form-select">
-                                            <option value selected disabled hidden>จังหวัด</option>
-                                            {% for p in provinces %}
-                                            <option value="{{ p.id }}">{{ p.name_th }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <select name="ct_district" id="district2" class="form-select">
-                                            <option value="" selected disabled hidden>อำเภอ/เขต</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <select name="ct_subdistrict" id="subdistrict2" class="form-select">
-                                            <option value="" selected disabled hidden>ตำบล/แขวง/รหัสไปรษณีย์</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
-                            <button type="button" id="submitContactBtn" class="btn btn-primary"><i class="fa-solid fa-plus"></i> เพิ่มผู้ติดต่อ</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
             <!--Engagement Detail-->
-            <div class="h5 pb-2 mb-4 text-primary fw-semibold border-bottom border-primary"><i class="fi fi-sr-comment-info" style="color: #ffc300;"></i> Engagements</div>
+            <div class="h5 pb-2 mb-4 text-primary fw-semibold border-bottom border-primary"><i class="fi fi-sr-comment-info" style="color: #5d87ff;"></i> Engagements</div>
             <div class="table-responsive mb-4">
-                <table id="engagement-table" class="table">
-                    <thead class="table-light" style="text-align: center;">
+                <table id="engagement-table" class="table table-bordered">
+                    <thead class="table-light">
                         <tr>
-                            <th>#</th>
-                            <th>เลขที่</th>
-                            <th>สถานะ</th>
-                            <th>ผู้ดูแล</th>
-                            <th>เริ่ม - สิ้นสุด</th>
-                            <th>ประเภท</th>
-                            <th style="width: 20%;">รายละเอียด</th>
-                            <th>ค่าบริการ</th>
+                            <th class="text-center">#</th>
+                            <th class="text-center">เลขที่</th>
+                            <th class="text-center">สถานะ</th>
+                            <th class="text-center">ผู้ดูแล</th>
+                            <th class="text-center">เริ่ม - สิ้นสุด</th>
+                            <th class="text-center">ประเภท</th>
+                            <th class="text-center" style="width: 20%;">รายละเอียด</th>
+                            <th class="text-center">ค่าบริการ</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for engagement in engagement_all %}
+                        {% for data in engagement_data %}
                         <tr>
                             <td style="text-align: center;">{{ forloop.counter }}</td>
-                            <td>{{ engagement.job_code }}</td>
+                            <td><a href="{% url 'taskcontrol:engagement_detail' engagement_id=data.engagement.id %}" class="fw-semibold">{{ data.engagement.job_code }}</a></td>
                             <td style="text-align: start;">
-                                {% if engagement.status == "OPENJOB" %}
-                                <span class="badge badge-open"><i class="fa-regular fa-circle"></i> เปิดงาน</span>
-                                {% elif engagement.status == "IN_PROGRESS" %}
-                                <span class="badge badge-in-progress"><i class="fa-regular fa-circle-dot"></i> กำลังดำเนินงาน</span>
-                                {% elif engagement.status == "REVIEW" %}
-                                <span class="badge badge-review"><i class="fa-solid fa-spinner"></i> รอตรวจทาน</span>
-                                {% elif engagement.status == "PENDINGCLIENT" %}
-                                <span class="badge badge-pend-client"><i class="fa-solid fa-clock"></i> รอลูกค้า</span>
+                                {% if data.engagement.status == "OPEN_JOB" %}
+                                <span class="badge badge-open"> เปิดงาน</span>
+                                {% elif data.engagement.status == "IN_PROGRESS" %}
+                                <span class="badge badge-in-progress"> กำลังดำเนินงาน</span>
+                                {% elif data.engagement.status == "REVIEW" %}
+                                <span class="badge badge-review"> รอตรวจทาน</span>
+                                {% elif data.engagement.status == "PENDING_CLIENT" %}
+                                <span class="badge badge-pend-client"> รอลูกค้า</span>
                                 {% else %}
-                                <span class="badge badge-close"><i class="fa-solid fa-circle-check"></i> ปิดงาน</span>
+                                <span class="badge badge-close"> ปิดงาน</span>
                                 {% endif %}
                             </td>
                             <td class="text-center">
-                                {% if engagement.administrator.first_name and engagement.administrator.last_name %}
-                                    {{ engagement.administrator.first_name }} {{ engagement.administrator.last_name }}
+                                {% if data.engagement.administrator.first_name and data.engagement.administrator.last_name %}
+                                    {{ data.engagement.administrator.first_name }} {{ data.engagement.administrator.last_name }}
                                 {% else %}
                                     -
                                 {% endif %}
                             </td>
                             <td style="text-align: center;">
-                                {% if engagement.start_date_period and engagement.end_date_period %}
-                                    {{ engagement.start_date_period|date:"d/m/Y" }} - {{ engagement.end_date_period|date:"d/m/Y" }}
-                                {% elif engagement.start_date_period %}
-                                    {{ engagement.start_date_period|date:"d/m/Y" }} - {% if engagement.end_date_period_infinity %}ไม่มีกำหนด{% else %}{{ engagement.end_date_period_infinity }}{% endif %}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-                            <td class="text-center">
-                                {% if engagement.type.name_th %}
-                                    {{ engagement.type.name_th }}
+                                {% if data.engagement.start_date_period and data.engagement.end_date_period %}
+                                    {{ data.engagement.start_date_period|date:"d/m/Y" }} - {{ data.engagement.end_date_period|date:"d/m/Y" }}
+                                {% elif data.engagement.start_date_period %}
+                                    {{ data.engagement.start_date_period|date:"d/m/Y" }} - {% if data.engagement.end_date_period_infinity %}ไม่มีกำหนด{% else %}{{ data.engagement.end_date_period_infinity }}{% endif %}
                                 {% else %}
                                     -
                                 {% endif %}
                             </td>
                             <td>
-                                {% if engagement.notes %}
-                                    {{ engagement.notes }}
+                                {% for engagement_type in data.types %}
+                                    <span class="badge tags-engagement-type"> - {{ engagement_type }}</span><br>
+                                {% empty %}
+                                    <span>ไม่ได้ระบุ</span><br>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% if data.engagement.notes %}
+                                    {{ data.engagement.notes }}
                                 {% else %}
                                     -
                                 {% endif %}
                             </td>
                             <td style="text-align: right;">
-                                {% if engagement.service_fee %}
-                                    {{ engagement.service_fee|intcomma }}
+                                {% if data.engagement.service_fee %}
+                                    {{ data.engagement.service_fee|intcomma }}
                                 {% else %}
                                     -
                                 {% endif %}
@@ -719,15 +411,348 @@
                         </tr>
                         {% endfor %}
                     </tbody>
+                    
+                    
                 </table>
             </div>
         </div>
     </div>
 </div>
 
+<!--Modal Edit Client-->
+<div class="modal fade" id="updateModal{{ client.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h1 class="modal-title fs-5 pb-2 mb-3 text-primary fw-semibold border-bottom border-warning"><i class="fi fi-sr-comment-alt-edit" style="color: #ffc300;"></i> แก้ไขข้อมูล {{ client.company_name }}</h1>
+                <form id="updateForm{{ client.id }}" method="post" action="{% url 'taskcontrol:client_update' client_id=client.id %}">
+                    {% csrf_token %}
+                    <!--Client-->
+                    <div class="mb-4">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="" class="form-label fw-semibold">วันที่สร้าง :</label>
+                                <input type="date" name="update_create_client_date" id="" class="form-control" value="{{ client.create_client_date|date:'Y-m-d' }}" disabled />
+                            </div>
+                            <div class="col-md-4"></div>
+                            <div class="col-md-4 text-end">
+                                <input class="form-check-input" type="checkbox" name="update_c_status" id="update_c_status" {% if client.status %}checked{% endif %}>
+                                <label class="form-label" for="update_c_status">สถานะการใช้งาน</label>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-2">
+                                <label for="update_c_code" class="form-label fw-semibold">รหัสลูกค้า :</label>
+                                <input type="text" name="update_c_code" id="update_c_code" class="form-control" value="{{ client.code }}" />
+                            </div>
+                            <div class="col-md-6">
+                                <label for="update_c_company_name" class="form-label fw-semibold">ชื่อบริษัท :</label>
+                                <input type="text" name="update_c_company_name" id="update_c_company_name" class="form-control" value="{{ client.company_name }}" />
+                            </div>
+                            <div class="col-md-4">
+                                <label for="update_c_tax_id" class="form-label fw-semibold">เลขที่นิติ :</label>
+                                <input type="text" name="update_c_tax_id" id="update_c_tax_id" class="form-control" maxlength="13" value="{{ client.tax_id }}" />
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label for="update_c_address" class="form-label fw-semibold">ที่อยู่บริษัท :</label>
+                                <input type="text" name="update_c_address" id="update_c_address" class="form-control" value="{{ client.company_address.address }}" />
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="province" class="form-label fw-semibold">จังหวัด :</label>
+                                <select name="update_c_province" id="province" class="form-select">
+                                    <option value selected disabled hidden>- กรุณาเลือก -</option>
+                                    {% for p in provinces %}
+                                    <option value="{{ p.id }}" {% if p.id == client.company_address.province.id %} selected {% endif %}>{{ p.name_th }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="district" class="form-label fw-semibold">อำเภอ/เขต :</label>
+                                <select name="update_c_district" id="district" class="form-select">
+                                    <option value="" selected disabled hidden>อำเภอ/เขต</option>
+                                    {% for d in districts %}
+                                        {% if d.id %}
+                                            <option value="{{ d.id }}" {% if d.id == client.company_address.district.id %} selected {% endif %}>
+                                                {{ d.name_th }}
+                                            </option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="subdistrict" class="form-label fw-semibold">ตำบล/แขวง/รหัสไปรษณีย์ :</label>
+                                <select name="update_c_subdistrict" id="subdistrict" class="form-select">
+                                    <option value="" selected disabled hidden>ตำบล/แขวง/รหัสไปรษณีย์</option>
+                                    {% for s in subdistricts %}
+                                        <option value="{{ s.id }}" {% if s.id == client.company_address.subdistrict.id %} selected {% endif %}>
+                                            {{ s.name_th }} {{ s.zipcode }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="update_c_channel" class="form-label fw-semibold">ช่องทางรู้จักเรา :</label>
+                                <select name="update_c_channel" id="channel" class="form-select">
+                                    <option value="" selected disabled hidden>- กรุณาเลือก -</option>
+                                    {% for channel in channels %}
+                                        <option value="{{ channel.id }}" {% if channel.id == client.channel.id %} selected {% endif %}>
+                                            {{ channel.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label for="update_c_detail" class="form-label fw-semibold">รายละเอียดเพิ่มเติม :</label>
+                                <input type="text" name="update_c_detail" id="update_c_detail" class="form-control" value="{{ client.detail }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Tax Register-->
+                    <div class="mb-4">
+                        <h5 class="pb-2 mb-3 text-primary fw-semibold border-bottom border-warning"><i class="fi fi-sr-comment-alt-edit" style="color: #ffc300;"></i> จดทะเบียน</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">จดทะเบียนบริษัท :</label>
+                                <div class="form-check">
+                                    <input type="radio" name="update_r_company" class="form-check-input" value="True" {% if client.register_tax.company %} checked {% endif %}>
+                                    <label class="form-check-label" for="update_r_company">ใช่</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="radio" name="update_r_company" class="form-check-input" value="False" {% if not client.register_tax.company %} checked {% endif %}>
+                                    <label class="form-check-label" for="update_r_company">ไม่ใช่</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="update_r_company_date" class="form-label fw-semibold">วันที่จด :</label>
+                                <input type="date" name="update_r_company_date" id="update_r_company_date" class="form-control" value="{{ client.register_tax.company_date|date:'Y-m-d' }}" />
+                            </div>
+                            <div class="col-md-4">
+                                <label for="update_r_company_period_date" class="form-label fw-semibold">รอบบัญชี (วันที่/เดือน) :</label>
+                                <input type="date" name="update_r_company_period_date" id="update_r_company_period_date" class="form-control" value="{{ client.register_tax.company_period_date|date:'Y-m-d' }}" />
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">จดทะเบียนภาษีมูลค่าเพิ่ม :</label>
+                                <div class="form-check">
+                                    <input type="radio" name="update_r_vat" class="form-check-input" value="True" {% if client.register_tax.vat %} checked {% endif %}>
+                                    <label class="form-check-label" for="update_r_vat">ใช่</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="radio" name="update_r_vat" class="form-check-input" value="False" {% if not client.register_tax.vat %} checked {% endif %}>
+                                    <label class="form-check-label" for="update_r_vat">ไม่ใช่</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="update_r_vat_date" class="form-label fw-semibold">วันที่จด :</label>
+                                <input type="date" name="update_r_vat_date" id="update_r_vat_date" class="form-control" value="{{ client.register_tax.vat_date|date:'Y-m-d' }}" />
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">จดทะเบียนภาษีธุรกิจเฉพาะ :</label>
+                                <div class="form-check">
+                                    <input type="radio" name="update_r_sbt" class="form-check-input" value="True" {% if client.register_tax.sbt %} checked {% endif %}>
+                                    <label class="form-check-label" for="update_r_sbt">ใช่</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="radio" name="update_r_sbt" class="form-check-input" value="False" {% if not client.register_tax.sbt %} checked {% endif %}>
+                                    <label class="form-check-label" for="update_r_sbt">ไม่ใช่</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="update_r_sbt_date" class="form-label fw-semibold">วันที่จด :</label>
+                                <input type="date" name="update_r_sbt_date" id="update_r_sbt_date" class="form-control" value="{{ client.register_tax.sbt_date|date:'Y-m-d' }}" />
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">จดทะเบียนนายจ้าง :</label>
+                                <div class="form-check">
+                                    <input type="radio" name="update_r_sso" class="form-check-input" value="True" {% if client.register_tax.sso %} checked {% endif %}>
+                                    <label class="form-check-label" for="update_r_sso">ใช่</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="radio" name="update_r_sso" class="form-check-input" value="False" {% if not client.register_tax.sso %} checked {% endif %}>
+                                    <label class="form-check-label" for="update_r_sso">ไม่ใช่</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="update_r_sso_date" class="form-label fw-semibold">วันที่จด :</label>
+                                <input type="date" name="update_r_sso_date" id="update_r_sso_date" class="form-control" value="{{ client.register_tax.sso_date|date:'Y-m-d' }}" />
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">จดทะเบียนยื่นภาษีออนไลน์ :</label>
+                                <div class="form-check">
+                                    <input type="radio" name="update_r_dbd_e_filling" class="form-check-input" value="True" {% if client.register_tax.dbd_e_filling %} checked {% endif %}>
+                                    <label class="form-check-label" for="update_r_dbd_e_filling">ใช่</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="radio" name="update_r_dbd_e_filling" class="form-check-input" value="False" {% if not client.register_tax.dbd_e_filling %} checked {% endif %}>
+                                    <label class="form-check-label" for="update_r_dbd_e_filling">ไม่ใช่</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="update_r_dbd_e_filling_date" class="form-label fw-semibold">วันที่จด :</label>
+                                <input type="date" name="update_r_dbd_e_filling_date" id="update_r_dbd_e_filling_date" class="form-control" value="{{ client.register_tax.dbd_e_filling_date|date:'Y-m-d' }}" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+                        <button type="button" class="btn btn-warning" onclick="showAlert({{ client.id }})">
+                            <i class="fa-solid fa-pen-to-square"></i> แก้ไขข้อมูล
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Modal Add Contact-->
+<div class="modal fade" id="addContactModal{{ contact.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="h5 pb-2 mb-4 text-primary border-bottom border-primary"> 
+                    <a data-bs-toggle="modal" href="#addContactModal{{ contact.id }}">
+                        <i class="fi fi-sr-comment-medical" style="color: #53c536;"></i> 
+                    </a>
+                    <span>ผู้ติดต่อ</span>
+                    <i class="fas fa-chevron-left"></i>
+                    {{ client.company_name }}
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                <form id="createContactForm" method="post" action="{% url 'taskcontrol:create_contact' client_id=client.id %}">
+                    {% csrf_token %}
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="" class="form-label fw-semibold">ชื่อ :</label>
+                            <input type="text" name="ct_name" id="ct_name" class="form-control" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="" class="form-label fw-semibold">ตำแหน่ง :</label>
+                            <input type="text" name="ct_position" id="ct_position" class="form-control" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="" class="form-label fw-semibold">เบอร์ติดต่อ :</label>
+                            <input type="text" name="ct_phone" id="ct_phone" class="form-control" maxlength="10" />
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="" class="form-label fw-semibold">อีเมล :</label>
+                            <input type="text" name="ct_email" id="ct_email" class="form-control" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="" class="form-label fw-semibold">ไลน์ :</label>
+                            <input type="text" name="ct_line" id="ct_line" class="form-control" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="" class="form-label fw-semibold">ช่องทางติดต่ออื่นๆ :</label>
+                            <input type="text" name="ct_other" id="ct_other" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label for="" class="form-label fw-semibold">ที่อยู่&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                            <input type="checkbox" class="form-check-input" name="ct_address2" id="ct_address2"
+                                value="{{ client.company_address.address }} {{ client.company_address.subdistrict.name_th }} {{ client.company_address.district.name_th }} {{ client.company_address.province.name_th }} {{ client.company_address.subdistrict.zipcode }}"
+                                onchange="copyCompanyAddress()" />
+                            <label for="ct_address2"
+                                class="form-label fw-semibold">&nbsp;ใช้ที่อยู่เหมือนบริษัท</label>
+                            <input type="text" class="form-control" name="ct_address" id="ct_address" />
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <select name="ct_province" id="province2" class="form-select">
+                                <option value selected disabled hidden>จังหวัด</option>
+                                {% for p in provinces %}
+                                <option value="{{ p.id }}">{{ p.name_th }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <select name="ct_district" id="district2" class="form-select">
+                                <option value="" selected disabled hidden>อำเภอ/เขต</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <select name="ct_subdistrict" id="subdistrict2" class="form-select">
+                                <option value="" selected disabled hidden>ตำบล/แขวง/รหัสไปรษณีย์</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+                <button type="button" id="submitContactBtn" class="btn btn-primary"><i class="fa-solid fa-plus"></i> เพิ่มผู้ติดต่อ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Popper.js -->
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+<!-- Bootstrap JS -->
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.min.js"></script>
+<!-- SweetAlert2 JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.0/dist/sweetalert2.all.min.js"></script>
+
+<script>
+    function showAlert(clientId) {
+        Swal.fire({
+            title: 'ยืนยันการแก้ไข',
+            text: "คุณต้องการแก้ไขข้อมูลใช่หรือไม่?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#5d87ff',
+            cancelButtonColor: '#ff5258',
+            confirmButtonText: 'ยืนยัน',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var form = document.getElementById(`updateForm${clientId}`);
+                if (form) {
+                    form.submit();
+                } else {
+                    console.error(`Form with ID updateForm${clientId} not found`);
+                }
+            } else if (result.dismiss === Swal.DismissReason.cancel) {
+                Swal.fire(
+                    'ยกเลิก',
+                    'การแก้ไขข้อมูลถูกยกเลิก',
+                    'error'
+                );
+            }
+        });
+    }
+    
+</script>
 
 <script>
     const getDistrictUrl = "{% url 'taskcontrol:GetDistrict' %}";
@@ -886,7 +911,6 @@
     });
 </script>
 
-
 <script>
     $(document).ready(function () {
         // Handling status label update
@@ -986,17 +1010,32 @@
 
 <script>
     $(document).ready(function () {
-         const dataTable = $("#engagement-table").DataTable({
-              "language": {
-                   "search": "ค้นหา",
-                   "lengthMenu": "แสดง _MENU_ รายการ",
-                   "info": "แสดง _START_ ถึง _END_ จากทั้งหมด _TOTAL_ รายการ",
-                   "paginate": {
-                        "previous": "ก่อนหน้า",
-                        "next": "ถัดไป"
-                   }
-              }
-         });
+        // DataTable initialization for engagement table
+        const engagementTable = $("#engagement-table").DataTable({
+            "language": {
+                "search": "ค้นหา",
+                "lengthMenu": "แสดง _MENU_ รายการ",
+                "info": "แสดง _START_ ถึง _END_ จากทั้งหมด _TOTAL_ รายการ",
+                "paginate": {
+                    "previous": "ก่อนหน้า",
+                    "next": "ถัดไป"
+                }
+            }
+        });
+
+        // DataTable initialization for contact table
+        const contactTable = $("#contact-table").DataTable({
+            "language": {
+                "search": "ค้นหา",
+                "lengthMenu": "แสดง _MENU_ รายการ",
+                "info": "แสดง _START_ ถึง _END_ จากทั้งหมด _TOTAL_ รายการ",
+                "paginate": {
+                    "previous": "ก่อนหน้า",
+                    "next": "ถัดไป"
+                }
+            }
+        });
     });
 </script>
+
 {% endblock content %}

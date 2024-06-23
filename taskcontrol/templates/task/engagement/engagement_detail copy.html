@@ -51,25 +51,25 @@
                     </a> 
                     {{ engagements.job_code }} &nbsp;
                     <span class="badge
-                        {% if engagements.status == "OPENJOB" %}
+                        {% if engagements.status == "OPEN_JOB" %}
                             status-open
                         {% elif engagements.status == "IN_PROGRESS" %}
                             status-in-progress
                         {% elif engagements.status == "REVIEW" %}
                             status-review
-                        {% elif engagements.status == "PENDINGCLIENT" %}
+                        {% elif engagements.status == "PENDING_CLIENT" %}
                             status-pend-client
                         {% else %}
                             status-close
                         {% endif %}
                     ">
-                        {% if engagements.status == "OPENJOB" %}
+                        {% if engagements.status == "OPEN_JOB" %}
                             เปิดงาน
                         {% elif engagements.status == "IN_PROGRESS" %}
                             กำลังดำเนินงาน
                         {% elif engagements.status == "REVIEW" %}
                             รอตรวจทาน
-                        {% elif engagements.status == "PENDINGCLIENT" %}
+                        {% elif engagements.status == "PENDING_CLIENT" %}
                             รอลูกค้า
                         {% else %}
                             ปิดงาน
@@ -108,9 +108,9 @@
                                     <div class="col-md-2">
                                         <div class="content-end">
                                             <div class="form-check form-switch">
-                                                <input class="form-check-input" type="checkbox" id="inputstatus" name="status" {% if engagements.status == "OPENJOB" or engagements.status == "IN_PROGRESS" or engagements.status == "REVIEW" or engagements.status == "PENDINGCLIENT" %} checked {% endif %}>
+                                                <input class="form-check-input" type="checkbox" id="inputstatus" name="status" {% if engagements.status == "OPEN_JOB" or engagements.status == "IN_PROGRESS" or engagements.status == "REVIEW" or engagements.status == "PENDING_CLIENT" %} checked {% endif %}>
                                                 <label class="form-check-label fw-semibold" for="inputstatus">
-                                                    {% if engagements.status == "OPENJOB" or engagements.status == "IN_PROGRESS" or engagements.status == "REVIEW" or engagements.status == "PENDINGCLIENT" %}
+                                                    {% if engagements.status == "OPEN_JOB" or engagements.status == "IN_PROGRESS" or engagements.status == "REVIEW" or engagements.status == "PENDING_CLIENT" %}
                                                         เปิดงาน
                                                     {% else %}
                                                         ปิดงาน
@@ -197,7 +197,7 @@
 
             <div class="mt-1">
                 <h5 class="pb-2 mb-4 text-primary fw-semibold border-bottom border-primary">
-                    <i class="fi fi-sr-assept-document" style="color: #61c35e;"></i> 
+                    <i class="fi fi-sr-assept-document" style="color: #53c536;"></i> 
                     <span>เพิ่ม Engagement ใหม่ </span>
                     <span style="color: #2A3547;"><i class="fi fi-br-hastag"></i> 
                         {{ engagement.job_code }}

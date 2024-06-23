@@ -10,25 +10,20 @@ app_name = "taskcontrol"
 handler404 = 'taskcontrol.views.error_404_view'
 
 urlpatterns = [
+    path('eror404/', error_404_view, name='eror404'),
     path('coding/', building_code, name='building_code'),
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
     # path('test/', testpage, name='testpage'),
     path('get_districts/', get_districts, name='GetDistrict'),
     path('get_subdistricts/', get_subdistricts, name='GetSubdistrict'),
-    path('get_latest_job_code/', get_latest_job_code, name='get_latest_job_code'),
+    path('gen_engagement_code_auto/', gen_engagement_code_auto, name='get_latest_job_code'),
     path('get_channel/', get_channel, name='get_channel'),
 
     path('get_engagement_type/', get_engagement_type, name='get_engagement_type'),
+    path('api/get_engagement_details/', get_engagement_details, name='get_engagement_details'),
 
-    path('dashboard/', dashboard, name='dashboard'),
-    path('get_filter_dashboard/', get_filter_dashboard, name='get_filter_dashboard'),
-    # path('search_datatable/', search_datatable, name='search_datatable'),
-    path('get_engagement_data/', get_engagement_data, name='get_engagement_data'),
-    path('get_engagement_accounting/', get_engagement_accounting, name='get_engagement_accounting'),
-    path('get_engagement_tax/', get_engagement_tax, name='get_engagement_tax'),
-    path('get_engagement_payroll/', get_engagement_payroll, name='get_engagement_payroll'),
-    path('get_engagement_report/', get_engagement_report, name='get_engagement_report'),
+
 
     path('client/list/', client_list, name='client_list'),
     path('client/<int:client_id>/', record_client, name='record_client'),
@@ -86,11 +81,28 @@ urlpatterns = [
     path('manage_register_type/delete/<int:register_type_id>/', delete_register_type, name='delete_register_type'),
 
     path('kanban_board/', kanban_board, name='kanban_board'),
-    path('update_engagement_status/', update_engagement_status, name='update_engagement_status'),
-    path('update_notes/', update_engagement_notes, name='update_engagement_notes'),
-    path('get_engagement_details/', get_engagement_details, name='get_engagement_details'),
+    path('update_engagement_detail_status/', update_engagement_detail_status, name='update_engagement_detail_status'),
+    path('update_task_status/', update_task_status, name='update_task_status'),
+    path('add_new_task/', add_new_task, name='add_new_task'),
+
+    path('kanban_board_filter/', kanban_board_filter, name='kanban_board_filter'),
+    path('get_status_counts/', get_status_counts, name='get_status_counts'),
+    path('update_near_deadline/', update_near_deadline, name='update_near_deadline'),
+    path('get_date_deadlines/', get_date_deadlines, name='get_date_deadlines'),
+
+    
+    path('update_engagement_detail_comment', update_engagement_detail_comment, name='update_engagement_detail_comment'),
     path('search_filter_engagement_details/', search_filter_engagement_details, name='search_filter_engagement_details'),
     path('get_filter_engagement_details/', get_filter_engagement_details, name='get_filter_engagement_details'),
+
+    path('dashboard/', dashboard, name='dashboard'),
+    path('api/engagement-details/', get_engagement_detail_dashboard, name='get_engagement_detail_dashboard'),
+    # path('search_datatable/', search_datatable, name='search_datatable'),
+    path('get_engagement_detail_status/', get_engagement_detail_status, name='get_engagement_detail_status'),
+    path('get_accounting/', get_accounting, name='get_accounting'),
+    path('get_tax/', get_tax, name='get_tax'),
+    path('get_payroll/', get_payroll, name='get_payroll'),
+    path('get_report/', get_report, name='get_report'),
 
 ]
 

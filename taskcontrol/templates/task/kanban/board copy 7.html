@@ -1,0 +1,584 @@
+{% extends 'task/index.html' %}
+{% block content %}
+<style>
+    #kanban {
+        display: inline-flex;
+        gap: 10px;
+        padding: 5px;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        align-items: stretch;
+        width: 100%; /* ปรับความกว้างให้เต็มหน้าจอ */
+    }
+
+    #kanban-filter-all {
+        display: inline-flex;
+        gap: 10px;
+        padding: 5px;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        align-items: stretch;
+        width: 100%; /* ปรับความกว้างให้เต็มหน้าจอ */
+    }
+
+    .column {
+        flex: 1; /* ทำให้คอลัมน์มีขนาดเท่ากัน */
+        border: 1px solid #ebebeb;
+        padding: 10px;
+        margin: 10px;
+        min-width: 200px;
+    }
+
+    .task-card {
+        background-color: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    .task-card a {
+        text-decoration: none;
+        margin-right: 10px;
+        color: #0085FF;
+    }
+
+    .task-card small {
+        font-size: 11px;
+        color: #393E46;
+    }
+
+    .task-card:hover {
+        box-shadow: rgba(255, 255, 255, 0.2) 0px 0px 0px 2px inset, rgba(18, 149, 255, 0.9) 0px 0px 0px 2px;
+    }
+
+    .task-header-open {
+        background-color: #cbe5ff;
+        padding: 1rem;
+        margin: 0 -1rem;
+        font-size: 15px;
+        font-weight: 600;
+        color: #0051a0;
+        border-radius: 0.75rem;
+    }
+
+    .task-header-progress {
+        background-color: #ead6ff;
+        padding: 1rem;
+        margin: 0 -1rem;
+        font-size: 15px;
+        font-weight: 600;
+        color: #5b2891;
+        border-radius: 0.75rem;
+    }
+
+    .task-header-review {
+        background-color: #fff1c6;
+        padding: 1rem;
+        margin: 0 -1rem;
+        font-size: 15px;
+        font-weight: 600;
+        color: #954800;
+        border-radius: 0.75rem;
+    }
+
+    .task-header-client {
+        background-color: #ffcfce;
+        padding: 1rem;
+        margin: 0 -1rem;
+        font-size: 15px;
+        font-weight: 600;
+        color: #a10f0a;
+        border-radius: 0.75rem;
+    }
+
+    .task-header-done {
+        background-color: #d0f4b2;
+        padding: 1rem;
+        margin: 0 -1rem;
+        font-size: 15px;
+        font-weight: 600;
+        color: #054627;
+        border-radius: 0.75rem;
+    }
+
+    .tasks-open,
+    .tasks-progress,
+    .tasks-review,
+    .tasks-client,
+    .tasks-done {
+        flex: 1; /* ทำให้คอลัมน์มีขนาดเท่ากัน */
+        display: inline-block;
+        padding: 0 1rem 1rem 1rem;
+        margin-bottom: 1.5rem;
+        border-radius: 0.75rem;
+        color: #31363E;
+    }
+
+    .tasks-open {
+        background-color: #cbe5ff;
+    }
+
+    .tasks-progress {
+        background-color: #ead6ff;
+    }
+
+    .tasks-review {
+        background-color: #fff1c6;
+    }
+
+    .tasks-client {
+        background-color: #ffcfce;
+    }
+
+    .tasks-done {
+        background-color: #d0f4b2;
+    }
+
+    .text-body {
+        opacity: 1;
+        color: rgba(108, 117, 125), 1 !important;
+    }
+    .dropdown-toggle {
+        display: none !important;
+    }
+
+    .title {
+        font-size: 14px;
+        color: #31363E;
+    }
+
+    .sub-title {
+        font-size: 13px;
+        color: #31363E;
+    }
+
+    .detail {
+        font-size: 12px;
+        color: #31363E;
+    }
+    
+    .date {
+        font-size: 9px;
+        color: #31363E;
+        margin-top: 0px;
+    }
+
+    .done {
+        text-decoration: line-through;
+    }
+
+    .badge-danger {
+        color: #cb2b2a;
+        font-size: 9px;
+        font-weight: 600;
+        background-color: #ffe0da;
+        border-radius: 3px;
+        margin-top: 11px;
+        padding: 3px;
+        width: fit-content;
+    }
+    
+    .icon {
+        font-size: 18px;
+    }
+
+    .badge {
+        font-size: 12px;
+        color: #ffffff;
+        background-color: #2a3547; /* Dark background color */
+        padding: 4px 8px;
+        border-radius: 12px;
+        margin-left: 5px;
+    }
+
+    /* สไตล์เพิ่มเติมสำหรับการ์ด */
+    .task-filter {
+        border: 1px solid #ebf3fe;
+        padding: 10px;
+        background-color: #ecf2ff;
+        border-radius: 0.75rem;
+        min-height: 200px;
+        margin-top: 10px;
+    }
+
+    .task-header-all {
+        color: #393E46;
+        padding: 10px;
+        margin: 0;
+        background-color: #ecf2ff;
+    }
+
+
+    .task-card-filter {
+        background-color: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.75rem;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    .task-card-filter a {
+        text-decoration: none;
+        margin-right: 10px;
+        color: #7d7d7d;
+    }
+
+    .task-card-filter small {
+        font-size: 11px;
+        color: #393E46;
+    }
+
+    .task-card-filter:hover {
+        box-shadow: rgba(255, 255, 255, 0.2) 0px 0px 0px 2px inset, rgba(18, 149, 255, 0.9) 0px 0px 0px 2px;
+    }
+
+</style>
+
+<div class="row">
+    <div class="card">
+        <div class="card-body">
+            <div class="col-12 text-end">
+                <i class="fa-solid fa-border-all"></i> บอร์ด
+                <i class="fa-solid fa-list-ul"></i> List
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <!-- Filter buttons -->
+                    <div class="btn-group" role="group" aria-label="Filter tasks by status">
+                        <button type="button" class="btn btn-outline-primary btn-filter" data-filter="*">ทั้งหมด</button>
+                        <button type="button" class="btn btn-outline-danger btn-filter" id="btn-near-deadline">Deadline</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Filter By All -->
+            <div class="row">
+                <div class="task-filter" data-status="">
+                    <h5 class="task-header-all" id=""> ทั้งหมด <span class="badge">{{ engagement_detail_total }}</span></h5>
+                    <div class="row" id="task-container">
+                        {% for detail in engagement_details %}
+                        <div class="col-md-6 col-lg-4 col-xl-3 {{ detail.status_class }}"> <!-- Add status class dynamically -->
+                            <div class="task-card-filter column" id="{{ detail.id }}">
+                                <div class="row">
+                                    <div class="col-8 text-start">
+                                        <div class="title fw-semibold text-start">{{ detail.engagement.client.company_name }}</div>
+                                        <div class="detail fw-semibold text-start">{{ detail.engagement.job_code }}</div>
+                                    </div>
+                                    <div class="col-4 text-end">
+                                        <i class="fa-solid fa-ellipsis-vertical" onclick="openUpdateNotesModal('{{ detail.id }}', '{{ detail.engagement.job_code }}', '{{ detail.engagement.notes }}')"></i>
+                                        <i class="fa-solid fa-arrow-up-right-from-square" style="color:#0085FF; cursor: pointer;" onclick="openEngagementModal('{{ detail.engagement.job_code }}')"></i>
+                                    </div>
+                                </div>
+                                <div class="date text-end">วันที่: {{ detail.engagement.create_at|date:'d/m/Y' }}</div>
+                                <div class="detail"><i class="fi fi-br-thumbtack"></i> {{ detail.engagement.type.name_th }}</div>
+                                <div class="detail"><i class="fi fi-rr-user-pen"></i> {{ detail.engagement.administrator.first_name }} {{ detail.engagement.administrator.last_name }}</div>
+                                <div class="detail"><i class="fi fi-rr-user-time"></i> {{ detail.engagement.reviewer.first_name }} {{ detail.engagement.reviewer.last_name }}</div>
+                                <div class="detail"><i class="fi fi-sr-map-marker-check"></i> {{ detail.engagement.approver.first_name }} {{ detail.engagement.approver.last_name }}</div>
+                                <div class="badge-danger"><i class="fi fi-br-calendar-clock"></i>  {{ detail.deadline|date:'d/m/Y' }} <br></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="card">
+        <div class="card-body">
+            <!--Filter By Status-->
+            <div class="row">
+                <div id="kanban" class="mt-3">
+                    <div class="tasks-open" data-status="OPEN_JOB" ondrop="drop(event)"
+                        ondragover="allowDrop(event)">
+                        <h5 class="task-header-open" id="task-open-header"> เปิดงาน <span
+                                class="badge badge-dark">{{ engagement_details_open }}</span></h5>
+                        {% for detail in engagement_details %}
+                        {% if detail.status == 'OPEN_JOB' %}
+                        <div class="task-card" draggable="true" ondragstart="drag(event)"
+                            id="{{ detail.id }}">
+                            <input type="hidden" id="newStatusInput_{{ detail.id }}" name="new_status"
+                                value="OPEN_JOB">
+                            <div class="row">
+                                <div class="col-8 text-start">
+                                    <div class="title fw-semibold text-start">
+                                        {{ detail.engagement.job_code }}</div>
+                                </div>
+                                <div class="col-4 text-end">
+                                    <i class="fa-solid fa-ellipsis-vertical"
+                                        onclick="openUpdateNotesModal('{{ detail.id }}', '{{ detail.engagement.job_code }}', '{{ detail.engagement.notes }}')"></i>
+                                    <i class="fa-solid fa-arrow-up-right-from-square"
+                                        style="color:#0085FF; cursor: pointer;"
+                                        onclick="openEngagementModal('{{ detail.engagement.job_code }}')"></i>
+                                </div>
+                            </div>
+                            <div class="date text-end">วันที่:
+                                {{ detail.engagement.create_at|date:'d/m/Y' }}</div>
+                            <div class="detail"><i class="fa-solid fa-thumbtack"
+                                    style="color: #f42a2a;"></i> {{ detail.engagement.type.name_th }}</div>
+                            <div class="detail"><i class="fa-regular fa-circle-user"></i>
+                                {{ detail.engagement.administrator.first_name }}
+                                {{ detail.engagement.administrator.last_name }}</div>
+                            <div class="detail"><i class="fa-regular fa-circle-check"></i>
+                                {{ detail.engagement.reviewer.first_name }}
+                                {{ detail.engagement.reviewer.last_name }}</div>
+                            <div class="detail"><i class="fa-solid fa-circle-check"></i>
+                                {{ detail.engagement.approver.first_name }}
+                                {{ detail.engagement.approver.last_name }}</div>
+                            <div class="badge-danger text-end"> เดดไลน์ : {{ detail.deadline|date:'d/m/Y' }}
+                                <br> </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <div class="tasks-progress" data-status="IN_PROGRESS" ondrop="drop(event)"
+                        ondragover="allowDrop(event)">
+                        <h5 class="task-header-progress fw-semibold" id="task-progress-header">
+                            กำลังดำเนินงาน <span
+                                class="badge badge-dark">{{ engagement_details_inprogress }}</span></h5>
+                        {% for detail in engagement_details %}
+                        {% if detail.status == 'IN_PROGRESS' %}
+                        <div class="task-card" draggable="true" ondragstart="drag(event)"
+                            id="{{ detail.id }}">
+                            <input type="hidden" id="newStatusInput_{{ detail.id }}" name="new_status"
+                                value="IN_PROGRESS">
+
+                            <div class="row">
+                                <div class="col-8 text-start">
+                                    <div class="title fw-semibold text-start">
+                                        {{ detail.engagement.job_code }}</div>
+                                </div>
+                                <div class="col-4 text-end">
+                                    <i class="fa-solid fa-ellipsis-vertical"
+                                        onclick="openUpdateNotesModal('{{ detail.id }}', '{{ detail.engagement.job_code }}', '{{ detail.engagement.notes }}')"></i>
+                                    <i class="fa-solid fa-arrow-up-right-from-square"
+                                        style="color:#0085FF; cursor: pointer;"
+                                        onclick="openEngagementModal('{{ detail.engagement.job_code }}')"></i>
+                                </div>
+                            </div>
+                            <div class="date text-end">วันที่:
+                                {{ detail.engagement.create_at|date:'d/m/Y' }}</div>
+                            <div class="detail"><i class="fa-solid fa-thumbtack"
+                                    style="color: #f42a2a;"></i> {{ detail.engagement.type.name_th }}</div>
+                            <div class="detail"><i class="fa-regular fa-circle-user"></i>
+                                {{ detail.engagement.administrator.first_name }}
+                                {{ detail.engagement.administrator.last_name }}</div>
+                            <div class="detail"><i class="fa-regular fa-circle-check"></i>
+                                {{ detail.engagement.reviewer.first_name }}
+                                {{ detail.engagement.reviewer.last_name }}</div>
+                            <div class="detail"><i class="fa-solid fa-circle-check"></i>
+                                {{ detail.engagement.approver.first_name }}
+                                {{ detail.engagement.approver.last_name }}</div>
+                            <div class="badge-danger text-end"> เดดไลน์ : {{ detail.deadline|date:'d/m/Y' }}
+                                <br> </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <div class="tasks-review" data-status="REVIEW" ondrop="drop(event)"
+                        ondragover="allowDrop(event)">
+                        <h5 class="task-header-review fw-semibold" id="task-review-header">รอตรวจทาน <span
+                                class="badge badge-dark">{{ engagement_details_review }}</span></h5>
+                        {% for detail in engagement_details %}
+                        {% if detail.status == 'REVIEW' %}
+                        <div class="task-card" draggable="true" ondragstart="drag(event)"
+                            id="{{ detail.id }}">
+                            <input type="hidden" id="newStatusInput_{{ detail.id }}" name="new_status"
+                                value="REVIEW">
+
+                            <div class="row">
+                                <div class="col-8 text-start">
+                                    <div class="title fw-semibold text-start">
+                                        {{ detail.engagement.job_code }}</div>
+                                </div>
+                                <div class="col-4 text-end">
+                                    <i class="fa-solid fa-ellipsis-vertical"
+                                        onclick="openUpdateNotesModal('{{ detail.id }}', '{{ detail.engagement.job_code }}', '{{ detail.engagement.notes }}')"></i>
+                                    <i class="fa-solid fa-arrow-up-right-from-square"
+                                        style="color:#0085FF; cursor: pointer;"
+                                        onclick="openEngagementModal('{{ detail.engagement.job_code }}')"></i>
+                                </div>
+                            </div>
+                            <div class="date text-end">วันที่:
+                                {{ detail.engagement.create_at|date:'d/m/Y' }}</div>
+                            <div class="detail"><i class="fa-solid fa-thumbtack"
+                                    style="color: #f42a2a;"></i> {{ detail.engagement.type.name_th }}</div>
+                            <div class="detail"><i class="fa-regular fa-circle-user"></i>
+                                {{ detail.engagement.administrator.first_name }}
+                                {{ detail.engagement.administrator.last_name }}</div>
+                            <div class="detail"><i class="fa-regular fa-circle-check"></i>
+                                {{ detail.engagement.reviewer.first_name }}
+                                {{ detail.engagement.reviewer.last_name }}</div>
+                            <div class="detail"><i class="fa-solid fa-circle-check"></i>
+                                {{ detail.engagement.approver.first_name }}
+                                {{ detail.engagement.approver.last_name }}</div>
+                            <div class="badge-danger text-end"> เดดไลน์ : {{ detail.deadline|date:'d/m/Y' }}
+                                <br> </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <div class="tasks-client" data-status="PENDING_CLIENT" ondrop="drop(event)"
+                        ondragover="allowDrop(event)">
+                        <h5 class="task-header-client fw-semibold" id="task-client-header">รอลูกค้า <span
+                                class="badge badge-dark">{{ engagement_details_pending }}</span></h5>
+                        {% for detail in engagement_details %}
+                        {% if detail.status == 'PENDING_CLIENT' %}
+                        <div class="task-card" draggable="true" ondragstart="drag(event)"
+                            id="{{ detail.id }}">
+                            <input type="hidden" id="newStatusInput_{{ detail.id }}" name="new_status"
+                                value="PENDING_CLIENT">
+
+                            <div class="row">
+                                <div class="col-8 text-start">
+                                    <div class="title fw-semibold text-start">
+                                        {{ detail.engagement.job_code }}</div>
+                                </div>
+                                <div class="col-4 text-end">
+                                    <i class="fa-solid fa-ellipsis-vertical"
+                                        onclick="openUpdateNotesModal('{{ detail.id }}', '{{ detail.engagement.job_code }}', '{{ detail.engagement.notes }}')"></i>
+                                    <i class="fa-solid fa-arrow-up-right-from-square"
+                                        style="color:#0085FF; cursor: pointer;"
+                                        onclick="openEngagementModal('{{ detail.engagement.job_code }}')"></i>
+                                </div>
+                            </div>
+                            <div class="date text-end">วันที่:
+                                {{ detail.engagement.create_at|date:'d/m/Y' }}</div>
+                            <div class="detail"><i class="fa-solid fa-thumbtack"
+                                    style="color: #f42a2a;"></i> {{ detail.engagement.type.name_th }}</div>
+                            <div class="detail"><i class="fa-regular fa-circle-user"></i>
+                                {{ detail.engagement.administrator.first_name }}
+                                {{ detail.engagement.administrator.last_name }}</div>
+                            <div class="detail"><i class="fa-regular fa-circle-check"></i>
+                                {{ detail.engagement.reviewer.first_name }}
+                                {{ detail.engagement.reviewer.last_name }}</div>
+                            <div class="detail"><i class="fa-solid fa-circle-check"></i>
+                                {{ detail.engagement.approver.first_name }}
+                                {{ detail.engagement.approver.last_name }}</div>
+                            <div class="badge-danger text-end"> เดดไลน์ : {{ detail.deadline|date:'d/m/Y' }}
+                                <br> </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <div class="tasks-done" data-status="DONE" ondrop="drop(event)"
+                        ondragover="allowDrop(event)">
+                        <h5 class="task-header-done fw-semibold" id="task-done-header">เรียบร้อย <span
+                                class="badge badge-dark">{{ engagement_details_done }}</span></h5>
+                        {% for detail in engagement_details %}
+                        {% if detail.status == 'DONE' %}
+                        <div class="task-card" draggable="true" ondragstart="drag(event)"
+                            id="{{ detail.id }}">
+                            <input type="hidden" id="newStatusInput_{{ detail.id }}" name="new_status"
+                                value="DONE">
+
+                            <div class="row">
+                                <div class="col-8 text-start">
+                                    <div class="title fw-semibold text-start">
+                                        {{ detail.engagement.job_code }}</div>
+                                </div>
+                                <div class="col-4 text-end">
+                                    <i class="fa-solid fa-ellipsis-vertical"
+                                        onclick="openUpdateNotesModal('{{ detail.id }}', '{{ detail.engagement.job_code }}', '{{ detail.engagement.notes }}')"></i>
+                                    <i class="fa-solid fa-arrow-up-right-from-square"
+                                        style="color:#0085FF; cursor: pointer;"
+                                        onclick="openEngagementModal('{{ detail.engagement.job_code }}')"></i>
+                                </div>
+                            </div>
+                            <div class="date text-end">วันที่:
+                                {{ detail.engagement.create_at|date:'d/m/Y' }}</div>
+                            <div class="detail"><i class="fa-solid fa-thumbtack"
+                                    style="color: #f42a2a;"></i> {{ detail.engagement.type.name_th }}</div>
+                            <div class="detail"><i class="fa-regular fa-circle-user"></i>
+                                {{ detail.engagement.administrator.first_name }}
+                                {{ detail.engagement.administrator.last_name }}</div>
+                            <div class="detail"><i class="fa-regular fa-circle-check"></i>
+                                {{ detail.engagement.reviewer.first_name }}
+                                {{ detail.engagement.reviewer.last_name }}</div>
+                            <div class="detail"><i class="fa-solid fa-circle-check"></i>
+                                {{ detail.engagement.approver.first_name }}
+                                {{ detail.engagement.approver.last_name }}</div>
+                            <div class="badge-danger text-end"> เดดไลน์ : {{ detail.deadline }} <br> </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function(){
+        var $grid = $('#kanban-board').isotope({
+            itemSelector: '.column',
+            layoutMode: 'fitRows'
+        });
+
+        $('.btn-filter').on('click', function() {
+            var filterValue = $(this).data('filter');
+            
+            if (filterValue === '.tasks-all') {
+                // แสดงทุกสถานะ
+                $('.tasks-open, .tasks-progress, .tasks-review, .tasks-client, .tasks-done').show();
+            } else {
+                // ซ่อนทุกสถานะก่อน
+                $('.tasks-open, .tasks-progress, .tasks-review, .tasks-client, .tasks-done').hide();
+                // แสดงเฉพาะสถานะที่เลือก
+                $(filterValue).show();
+            }
+        });
+    });
+
+    var updateEngagementStatusUrl = "{% url 'taskcontrol:update_engagement_detail_status' %}";
+    var csrfToken = "{{ csrf_token }}";
+
+    function updateTaskCount() {
+    }
+
+
+</script>
+
+<script>
+    $(document).ready(function(){
+        // เรียกใช้ Isotope
+        var $container = $('#task-container').isotope({
+            itemSelector: '.col-md-6',
+            layoutMode: 'fitRows',
+            getSortData: {
+                deadline: function(itemElem) {
+                    var deadline = $(itemElem).find('.badge-danger').text().trim().split(':')[1].trim();
+                    var deadlineDate = deadline.split('/').reverse().join('-'); // Convert to YYYY-MM-DD for sorting
+                    return new Date(deadlineDate);
+                }
+            }
+        });
+    
+        // ปุ่มกรอง
+        $('.btn-filter').on('click', function(){
+            var filterValue = $(this).attr('data-filter');
+            $container.isotope({ filter: filterValue });
+        });
+    
+        // ปุ่ม Deadline
+        $('#btn-near-deadline').on('click', function(){
+            $container.isotope({ sortBy: 'deadline', sortAscending: true });
+        });
+    });
+    
+    
+</script>
+
+
+{% endblock content %}
