@@ -1,27 +1,26 @@
 import os
 from pathlib import Path
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 
-# load_dotenv()
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+# BASE_DIR = Path(__file__).resolve().parent.parent
 
-# BASE_DIR = os.path.dirname(
-#     os.path.dirname(
-#         os.path.abspath(__file__)
-#     )
-# )
+BASE_DIR = os.path.dirname(
+    os.path.dirname(
+        os.path.abspath(__file__)
+    )
+)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = 'django-insecure-zkntbe%k(eex3xvk7f^3i9i3ogw7_*(&t41upv5y_n-w5&res5'
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
 DEBUG = os.getenv('DEBUG')
 
 # ALLOWED_HOSTS = ['*']
@@ -84,26 +83,6 @@ WSGI_APPLICATION = 'pconnectacc.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# DATABASES = {
-#     # 'default': {
-#     #     'ENGINE': 'django.db.backends.mysql',
-#     #     'NAME': 'demodb',
-#     #     'USER': 'connectacc',
-#     #     'PASSWORD': 'C0nnect@cc',
-#     #     'HOST': '46.137.234.75',
-#     #     'PORT': '3306',
-#     # },
-
-#     # 'default':{
-#     #     'ENGINE': 'django.db.backends.mysql',
-#     #     'NAME': 'DemonPconnectacc',
-#     #     'USER': 'demoacc',
-#     #     'PASSWORD': 'P@ssw0rd',
-#     #     'HOST': '127.0.0.1',
-#     #     'PORT': '3306',
-#     # }
-# }
-
 DATABASES = {
     'default': {
         'ENGINE': os.getenv('DB_ENGINE'),
@@ -146,7 +125,10 @@ USE_TZ = False
 
 # Static files (CSS, JavaScript, images)
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+# STATICFILES_DIRS = (
+#     os.path.join(BASE_DIR, "static"),
+# )
 
 # Media files (uploads)
 MEDIA_URL = '/media/'
