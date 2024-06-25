@@ -224,7 +224,7 @@
         <section class="form-step mb-3">
             <div class="mt-1">
                 <h5 class="pb-2 mb-4 text-primary fw-semibold border-bottom border-primary">
-                    <i class="fi fi-sr-multiple" style="color: #61c35e;"></i> 
+                    <i class="fi fi-sr-multiple" style="color: #53c536;"></i> 
                     <span> เพิ่มรายละเอียดงาน  </span>
                     <span style="color: #2A3547;"><i class="fi fi-br-hastag"></i> 
                         {{ engagement.job_code }}
@@ -232,6 +232,7 @@
                 </h5>
                 <form method="post" id="createJobForm">
                     {% csrf_token %}
+                    <span style="color: tomato; font-size: 12px;">*กรุณาเลือกหมวดงานก่อน</span>
                     <div class="row mb-3">
                         <div class="col-md-4">
                             <div class="form-group">
@@ -249,10 +250,11 @@
                         <div class="col-md-2">
                             <div class="form-group">
                                 <label for="engagement_type_id" class="form-label">ประเภทงาน :</label>
-                                <select class="form-select" id="engagement_type_id" name="engagement_type_id" required>
+                                <select class="form-select" id="engagement_type_id" name="engagement_type_id" required/>
                                     <option value="" selected disabled hidden>- กรุณาเลือก -</option>
                                 </select>
                             </div>
+                            
                         </div>
                         <div class="col-md-2">
                             <label for="type" class="form-label"><i class="fi fi-br-calendar-lines-pen"></i> ประเภท :</label>

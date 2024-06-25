@@ -222,7 +222,7 @@
                 <form id="multi-step-form" method="post" action="{% url 'taskcontrol:client_create' %}">
                     {% csrf_token %}
                     <div class="mb-5">
-                        <h5 class="pb-2 mb-4 text-primary fw-semibold border-bottom border-primary"><i class="fi fi-sr-map-marker-plus" style="color: #61c35e;"></i> เพิ่มลูกค้าใหม่ </h5>
+                        <h5 class="pb-2 mb-4 text-primary fw-semibold border-bottom border-primary"><i class="fi fi-sr-map-marker-plus" style="color: #53c536;"></i> เพิ่มลูกค้าใหม่ </h5>
                         <div class="row mb-3">
                             <div class="col-md-2">
                                 <label for="c_create_client_date" class="form-label">วันที่สร้าง
@@ -239,28 +239,28 @@
                         <div class="row mb-3">
                             <div class="col-md-2">
                                 <label for class="form-label">รหัสลูกค้า :</label>
-                                <input type="text" name="c_code" id class="form-control" />
+                                <input type="text" name="c_code" id="c_code" class="form-control" required/>
                             </div>
                             <div class="col-md-6">
                                 <label for class="form-label">ชื่อลูกค้า :</label>
-                                <input type="text" name="c_company_name" id class="form-control" />
+                                <input type="text" name="c_company_name" id class="form-control" required/>
                             </div>
                             <div class="col-md-4">
                                 <label for class="form-label">เลขที่นิติ :</label>
-                                <input type="text" name="c_tax_id" id="c_tax_id" class="form-control" maxlength="13" />
+                                <input type="text" name="c_tax_id" id="c_tax_id" class="form-control" maxlength="13" required/>
                             </div>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-md-12">
                                 <label for class="form-label">ที่อยู่บริษัท :</label>
-                                <input type="text" name="c_address" id="company-address" class="form-control" />
+                                <input type="text" name="c_address" id="company-address" class="form-control">
                             </div>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-md-4">
-                                <select name="c_province" id="province" class="form-select">
+                                <select name="c_province" id="province" class="form-select" required/>
                                     <option value selected disabled hidden>- กรุณาเลือกจังหวัด -</option>
                                     {% for p in province %}
                                     <option value="{{ p.id }}">{{ p.name_th }}</option>
@@ -268,12 +268,12 @@
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <select name="c_district" id="district" class="form-select">
+                                <select name="c_district" id="district" class="form-select" required/>
                                     <option value selected disabled hidden>อำเภอ/เขต</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <select name="c_subdistrict" id="subdistrict" class="form-select">
+                                <select name="c_subdistrict" id="subdistrict" class="form-select" required/>
                                     <option value selected disabled hidden>ตำบล/แขวง/รหัสไปรษณีย์</option>
                                 </select>
                             </div>
@@ -295,29 +295,29 @@
                             </div>
                         </div>
                     </div>
-                                        
+
                     <!-- Tax Register -->
                     <div class="mb-4">
-                        <h5 class="pb-2 mb-4 text-primary fw-semibold border-bottom border-primary"><i class="fi fi-sr-map-marker-plus" style="color: #61c35e;"></i> จดทะเบียน</h5>
+                        <h5 class="pb-2 mb-4 text-primary fw-semibold border-bottom border-primary"><i class="fi fi-sr-map-marker-plus" style="color: #53c536;"></i> จดทะเบียน</h5>
                         <div class="row mb-3">
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold">จดทะเบียนบริษัท :</label>
                                 <div class="form-check">
-                                    <input type="radio" name="r_company" class="form-check-input" value="True">
-                                    <label class="form-check-label" for="r_company">ใช่</label>
+                                    <input type="radio" name="r_company" class="form-check-input" value="True" id="r_company_true" required/>
+                                    <label class="form-check-label" for="r_company_true">ใช่</label>
                                 </div>
                                 <div class="form-check">
-                                    <input type="radio" name="r_company" class="form-check-input" value="False">
-                                    <label class="form-check-label" for="r_company">ไม่ใช่</label>
+                                    <input type="radio" name="r_company" class="form-check-input" value="False" id="r_company_false" required/>
+                                    <label class="form-check-label" for="r_company_false">ไม่ใช่</label>
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label"  for="r_vat_date">วันที่จด :</label>
-                                <input type="date" class="form-control" id="r_company_date" name="r_company_date" disabled>
+                                <label class="form-label" for="r_company_date">วันที่จด :</label>
+                                <input type="date" class="form-control" id="r_company_date" name="r_company_date" disabled required/>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label"  for="r_vat_date">รอบบัญชี (วันที่/เดือน) :</label>
-                                <input type="date" class="form-control" id="r_company_period_date" name="r_company_period_date" disabled>
+                                <label class="form-label" for="r_company_period_date">รอบบัญชี (วันที่/เดือน) :</label>
+                                <input type="date" class="form-control" id="r_company_period_date" name="r_company_period_date" disabled required/>
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -391,13 +391,9 @@
                     </div>
                     
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-2 mt-3">
-                        <button type="reset" class="btn btn-outline-secondary">ล้าง</button>
-                        <a href="{% url 'taskcontrol:client_list' %}" class="btn btn-outline-danger">
-                            <i class="fa-solid fa-xmark"></i> ยกเลิก
-                        </a>
-                        <button class="btn btn-primary btn-navigate-form-step" type="submit">
-                            <i class="fa-solid fa-plus"></i> <span>เพิ่มลูกค้าใหม่</span>
-                        </button>
+                        <button type="reset" class="btn btn-secondary">ล้าง</button>
+                        <a href="{% url 'taskcontrol:client_list' %}" class="btn btn-outline-danger"><i class="fa-solid fa-xmark"></i> ยกเลิก</a>
+                        <button class="btn btn-primary btn-navigate-form-step" type="submit"><i class="fa-solid fa-plus"></i> <span>เพิ่มลูกค้าใหม่</span></button>
                     </div>
                 </form>
             </div>

@@ -5,7 +5,7 @@
         color: #fff;
         font-weight: 600;
         font-size: 14px;
-        background-color: #61c35e;
+        background-color: #53c536;
         border-radius: 8px;
     }
 
@@ -216,7 +216,7 @@
         <section id="step-1" class="form-step">
             <div class="mt-1">
                 <h5 class="pb-2 mb-4 text-primary fw-semibold border-bottom border-primary">
-                    <i class="fi fi-sr-assept-document" style="color: #61c35e;"></i> 
+                    <i class="fi fi-ss-badge-check" style="color: #53c536;"></i>
                     <span>เพิ่ม Engagement ใหม่ </span>
                     <span style="color: #2A3547;"><i class="fi fi-br-hastag"></i> 
                         {{ engagement.job_code }}
@@ -237,7 +237,7 @@
                     <div class="col-md-2">
                         <label class="form-label" for="">รหัสลูกค้า :</label>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-10">
                         {{ engagement.client.company_name }} ({{ engagement.client.code }}) 
                     </div>
                 </div>
@@ -246,7 +246,7 @@
                     <div class="col-md-2">
                         <label class="form-label" for="">ค่าบริการ (บาท) :</label>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-6">
                         {% if engagement.service_fee|intcomma %}{{ engagement.service_fee|intcomma }}{% else %}-{% endif %}
                     </div>
                 </div>
@@ -276,7 +276,13 @@
                         <label class="form-label" for="">รอบที่สิ้นสุดให้บริการ :</label>
                     </div>
                     <div class="col-md-4">
-                        {% if engagement.end_date_period|date:"d/m/Y" %}{{ engagement.end_date_period|date:"d/m/Y" }}{% else %}-{% endif %}
+                        {% if engagement.end_date_period %}
+                            {{ engagement.end_date_period|date:"d/m/Y" }}
+                        {% elif engagement.end_date_period_infinity %}
+                            ไม่มีกำหนด
+                        {% else %}
+                            -
+                        {% endif %}
                     </div>
                 </div>
                 <div class="row mb-2">

@@ -171,7 +171,7 @@
     .status-open{
         color: #fff;
         font-weight: 600;
-        background-color: #61c35e;
+        background-color: #53c536;
         border-radius: 8px;
     }
     .status-close{
@@ -182,7 +182,7 @@
     }
 
     .regis-true {
-        color: #61c35e;
+        color: #53c536;
     }
 
     .regis-false{
@@ -274,17 +274,16 @@
                                     </div>
                                     <div class="row mb-3">
                                         <div class="col-md-4">
-                                            <label for="" class="form-label fw-semibold">ชื่อ :</label>
-                                            <input type="text" name="ct_name" id="ct_name" class="form-control" />
+                                            <label for="ct_name" class="form-label fw-semibold">ชื่อ :</label>
+                                            <input type="text" name="ct_name" id="ct_name" class="form-control" required/>
                                         </div>
                                         <div class="col-md-4">
-                                            <label for="" class="form-label fw-semibold">ตำแหน่ง :</label>
-                                            <input type="text" name="ct_position" id="ct_position" class="form-control" />
+                                            <label for="ct_position" class="form-label fw-semibold">ตำแหน่ง :</label>
+                                            <input type="text" name="ct_position" id="ct_position" class="form-control" required/>
                                         </div>
                                         <div class="col-md-4">
-                                            <label for="" class="form-label fw-semibold">เบอร์ติดต่อ :</label>
-                                            <input type="text" name="ct_phone" id="ct_phone" class="form-control"
-                                                maxlength="10" />
+                                            <label for="ct_phone" class="form-label fw-semibold">เบอร์ติดต่อ :</label>
+                                            <input type="text" name="ct_phone" id="ct_phone" class="form-control" maxlength="10" required/>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
@@ -430,8 +429,7 @@
                 <input type="hidden" id="delete-contact-url" value="{% url 'taskcontrol:delete_contact' contact_id=0 %}">
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                     <a href="{% url 'taskcontrol:record_client' client_id=client.id %}" class="btn btn-outline-dark"><i class="fa-solid fa-arrow-left-long"></i> ย้อนกลับ</a>
-                    <a href="{% url 'taskcontrol:create_password' client_id=client.id %}" class="btn btn-dark">ถัดไป <i class="fa-solid fa-arrow-right-long"></i>
-                    </a>
+                    <a href="{% url 'taskcontrol:create_password' client_id=client.id %}" class="btn btn-dark">ถัดไป <i class="fa-solid fa-arrow-right-long"></i></a>
                 </div>
             </section>
         </div>
@@ -547,6 +545,18 @@
     $(document).ready(function () {
         $('#submitContactBtn').on('click', function () {
             var csrftoken = $('input[name="csrfmiddlewaretoken"]').val();
+
+            // ดึงค่าที่กรอกในฟอร์ม
+            var ct_name = $("#ct_name").val().trim();
+            var ct_position = $("#ct_position").val().trim();
+            var ct_phone = $("#ct_phone").val().trim();
+            
+            // เช็คความถูกต้องของข้อมูล
+            if (ct_name === '' || ct_position === '' || ct_phone === '') {
+                alert('กรุณากรอกข้อมูลให้ครบทุกช่อง');
+                return;
+            }
+            
             $.ajax({
                 url: $('#createContactForm').attr('action'),
                 type: 'POST',
