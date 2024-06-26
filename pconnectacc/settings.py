@@ -5,12 +5,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-# BASE_DIR = os.path.dirname(
-#     os.path.dirname(
-#         os.path.abspath(__file__)
-#     )
-# )
+# BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(
+    os.path.dirname(
+        os.path.abspath(__file__)
+    )
+)
 
 SECRET_KEY = 'django-insecure-zkntbe%k(eex3xvk7f^3i9i3ogw7_*(&t41upv5y_n-w5&res5'
 # SECRET_KEY = os.getenv('SECRET_KEY')
@@ -19,8 +19,8 @@ SECRET_KEY = 'django-insecure-zkntbe%k(eex3xvk7f^3i9i3ogw7_*(&t41upv5y_n-w5&res5
 DEBUG = True
 # DEBUG = os.getenv('DEBUG')
 
-ALLOWED_HOSTS = ['*']
-# ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(' ')
+# ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(' ')
 
 LOGIN_URL = '/task-control/login/'
 
@@ -78,22 +78,13 @@ WSGI_APPLICATION = 'pconnectacc.wsgi.application'
 # Database
 DATABASES = {
     'default': {
-        'ENGINE': os.getenv('DB_ENGINE'),
+        'ENGINE': 'django.db.backends.mysql',
         'NAME': os.getenv('DB_NAME'),
         'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASS'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
         'HOST': os.getenv('DB_HOST'),
         'PORT': os.getenv('DB_PORT'),
-    },
-
-    # 'default':{
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'DemonPconnectacc',
-    #     'USER': 'demoacc',
-    #     'PASSWORD': 'P@ssw0rd',
-    #     'HOST': '127.0.0.1',
-    #     'PORT': '3306',
-    # }
+    }
 }
 
 # Password validation
