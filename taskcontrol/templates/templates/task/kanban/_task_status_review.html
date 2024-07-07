@@ -1,0 +1,118 @@
+<div class="task-card" draggable="true" ondragstart="drag(event)" id="{{ task.id }}">
+    <input type="hidden" id="newStatusInput_{{ task.id }}" name="new_status" value="REVIEW">
+    <div class="row">
+        <div class="col-8">
+            <div class="title">{{ task.client.company_name }}</div>
+            <div class="sub-title"><i class="fi fi-br-circle-t" style="color:#ffa700;"></i> {{ task.number }}</div>
+        </div>
+        <div class="col-4 text-end">
+            <i class="fi fi-rr-comment-dots" data-bs-toggle="modal" data-bs-target="#updateNotesTaskModal_{{ task.id }}"></i>
+            <i class="fa-regular fa-pen-to-square" style="color:#ffc107;" data-bs-toggle="modal" data-bs-target="#editTaskModal_{{ task.id }}"></i>
+        </div>
+    </div>
+    <div class="date text-end">
+        <i class="fi fi-br-calendar-day"></i> {{ task.create_at|date:'d/m/Y' }}
+    </div>
+    <div class="detail">
+        <i class="fi fi-br-caret-right" style="color: #f42a2a;"></i>
+        {{ task.new_job }}
+    </div>
+    <div class="detail">{{ task.description }}</div>
+    <div class="detail">
+        <i class="fi fi-rr-calendar-clock"></i> :
+        {% if task.days_remaining is not None %}
+            {% if task.days_remaining < 0 %}
+                <span class="fw-semibold" style="color: #f70009;">เกินกำหนด {{ task.days_remaining }} วัน</span>
+            {% elif task.days_remaining == 0 %}
+                <span class="fw-semibold" style="color: #3aa81f;">ครบกำหนด</span>
+            {% else %}
+                <span class="fw-semibold">{{ task.days_remaining }} วัน</span>
+            {% endif %}
+        {% else %}
+            <span class="fw-semibold">ไม่ได้กำหนด</span>
+        {% endif %}
+    </div>
+    <div class="deadline text-end">
+        <i class="fi fi-br-clock-three"></i> {{ task.due_date|date:'d/m/Y' }}
+    </div>
+</div>
+
+<!-- Modal for editing task -->
+<div class="modal fade" id="editTaskModal_{{ task.id }}" tabindex="-1" aria-labelledby="editTaskModalLabel_{{ task.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-top">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-dark" id="editTaskModalLabel_{{ task.id }}"><i class="fi fi-sr-pen-square" style="color:#ffc107;"></i> แก้ไขงาน {{ task.number }}</span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'taskcontrol:edit_task_card' task.id %}">
+                    {% csrf_token %}
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label for="client_id" class="form-label">ชื่อบริษัท :</label>
+                            <select name="client_id" id="client_id" class="form-select">
+                                {% for client in clients %}
+                                    <option value="{{ client.id }}" {% if client.id == task.client_id %} selected {% endif %}>{{ client.company_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="number" class="form-label">เลขที่ :</label>
+                            <input type="text" id="number" name="number" class="form-control" value="{{ task.number }}">
+                        </div>
+                        <div class="col-md-8">
+                            <label for="new_job" class="form-label">ชื่องาน :</label>
+                            <input type="text" id="new_job" name="new_job" class="form-control" value="{{ task.new_job }}">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label for="description" class="form-label">รายละเอียดงาน :</label>
+                            <textarea id="description" name="description" class="form-control">{{ task.description }}</textarea>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label for="due_date" class="form-label">วันที่สิ้นสุด :</label>
+                            <input type="date" id="due_date" name="due_date" class="form-control" value="{{ task.due_date|date:'Y-m-d' }}">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-warning">แก้ไข</button>
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">ปิด</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Update Note NewTask -->
+<div class="modal fade" id="updateNotesTaskModal_{{ task.id }}" tabindex="-1"
+    aria-labelledby="updateNotesTaskModalLabel_{{ task.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-top">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-dark" id="updateNotesTaskModal_{{ task.id }}"><i
+                        class="fi fi-rr-comment-dots"></i> Comment <span
+                        style="font-size:13px; color:#ffa701;">Task {{ task.number }}</span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updateForm{{ task.id }}" method="post" action="{% url 'taskcontrol:update_task_comment' task.id %}">
+                    {% csrf_token %}
+                    <div>
+                        <textarea id="comment" name="comment" rows="4" cols="50" class="form-control">{{ task.comment }}</textarea>
+                    </div>
+                    <br>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-primary">Comment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

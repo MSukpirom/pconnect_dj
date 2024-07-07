@@ -1,0 +1,259 @@
+<div class="task-card" draggable="true" ondragstart="drag(event)" id="{{ detail.id }}">
+    <input type="hidden" id="newStatusInput_{{ detail.id }}" name="new_status" value="DONE">
+    
+    <div class="row">
+        <div class="col-8">
+            <div class="title">{{ detail.engagement.client.company_name }}</div>
+            <div class="sub-title"><i class="fi fi-br-circle-e" style="color: #0085FF;"></i> {{ detail.engagement.job_code }}</div>
+        </div>
+        <div class="col-4 text-end">
+            <i class="fi fi-sr-comment-dots" data-bs-toggle="modal" data-bs-target="#updateNotesModal_{{ detail.id }}"></i>
+            <i class="fi fi-br-up-right-from-square icon" style="color:#0085FF; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#openEngagementDetailModal_{{ detail.id }}"></i>
+        </div>
+    </div>
+    <div class="date text-end">
+        <i class="fi fi-br-calendar-day"></i> {{ detail.engagement.create_at|date:'d/m/Y' }}
+    </div>
+
+    <div id="watermark"><i class="fi fi-br-check-circle"></i></div>
+
+    <div class="detail">
+        <i class="fi fi-sr-map-pin" style="color: #f42a2a;"></i> :
+        {{ detail.engagement_category.name_th }} <i class="fa-solid fa-angle-right"></i>
+        {{ detail.engagement_type.name_th }}
+    </div>
+    <div class="detail">
+        {% if detail.engagement.administrator %}
+        <i class="fi fi-rr-user"></i> :
+        {{ detail.engagement.administrator.first_name }}
+        {{ detail.engagement.administrator.last_name }}
+        {% else %}
+        <i class="fi fi-br-user"></i> : -
+        {% endif %}
+    </div>
+    <div class="detail">
+        {% if detail.engagement.reviewer %}
+        <i class="fi fi-rr-member-search"></i> :
+        {{ detail.engagement.reviewer.first_name }}
+        {{ detail.engagement.reviewer.last_name }}
+        {% else %}
+        <i class="fi fi-rr-member-search"></i> : -
+        {% endif %}
+    </div>
+    <div class="detail">
+        {% if detail.engagement.approver %}
+        <i class="fi fi-rr-user-trust"></i> :
+        {{ detail.engagement.approver.first_name }}
+        {{ detail.engagement.approver.last_name }}
+        {% else %}
+        <i class="fi fi-rr-user-trust"></i> : -
+        {% endif %}
+    </div>
+    <div class="detail">
+        <i class="fi fi-rr-calendar-clock"></i> :
+        {% if detail.days_remaining is not None %}
+            {% if detail.days_remaining < 0 %}
+                <span class="fw-semibold" style="color: #f70009;">เกินกำหนด {{ detail.days_remaining }} วัน</span>
+            {% elif detail.days_remaining == 0 %}
+                <span class="fw-semibold" style="color: #3aa81f;">ครบกำหนด</span>
+            {% else %}
+                <span class="fw-semibold">{{ detail.days_remaining }} วัน</span>
+            {% endif %}
+        {% else %}
+            <span class="fw-semibold">ไม่ได้กำหนด</span>
+        {% endif %}
+    </div>
+    <div class="deadline text-end">
+        <i class="fi fi-br-clock-three"></i> {{ detail.deadline|date:'d/m/Y' }}
+    </div>
+</div>
+
+<!-- Modal Update Note -->
+<div class="modal fade" id="updateNotesModal_{{ detail.id }}" tabindex="-1"
+    aria-labelledby="updateNotesModalLabel_{{ detail.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-top">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-dark" id="editTaskModalLabel_{{ detail.id }}"><i
+                        class="fi fi-sr-comment-dots"></i> Comment <span
+                        style="font-size:12.5px; color:#5d87ff;">Engagement {{ detail.engagement.job_code }}</span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'taskcontrol:update_engagement_detail_comment' detail.id %}">
+                    {% csrf_token %}
+                    <div>
+                        <textarea id="comment" name="comment" rows="4" cols="50"
+                            class="form-control">{{ detail.comment }}</textarea>
+                    </div>
+                    <br>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-primary">Comment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Engagement Detail -->
+<div class="modal fixed-left fade" id="openEngagementDetailModal_{{ detail.id }}" tabindex="-1"
+    aria-labelledby="openEngagementDetailModalLabel_{{ detail.id }}" aria-hidden="true" role="dialog">
+    <div class="modal-dialog modal-dialog-aside">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-dark" id="editTaskModalLabel_{{ detail.id }}"><i
+                        class="fi fi-sr-comment-info" style="color: #5d87ff;"></i> รายละเอียดงาน <span
+                        style="font-size:12.5px; color:#5d87ff;">Engagement {{ detail.engagement.job_code }}</span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-4">
+                        <label for="" class="form-label">สถานะ :</label>
+                    </div>
+                    <div class="col-8">
+                        <span class="">
+                            {% if detail.status == 'OPEN_JOB' %}<i class="fi fi-sr-square-small" style="color: #5d87ff;"></i> เปิดงาน{% endif %}
+                            {% if detail.status == 'IN_PROGRESS' %}<i class="fi fi-sr-square-small" style="color: #977dfb;"></i> กำลังดำเนินงาน{% endif %}
+                            {% if detail.status == 'REVIEW' %}<i class="fi fi-sr-square-small" style="color: #fed76a;"></i> รอตรวจทาน{% endif %}
+                            {% if detail.status == 'PENDING_CLIENT' %}<i class="fi fi-sr-square-small" style="color: #ff8f6b;"></i> รอลูกค้า{% endif %}
+                            {% if detail.status == 'DONE' %}<i class="fi fi-sr-square-small" style="color: #a1dc67;"></i> ปิดงาน{% endif %}
+                        </span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="" class="form-label">รหัสลูกค้า : </label>
+                    </div>
+                    <div class="col-8">
+                        {{ detail.engagement.client.code }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="" class="form-label">ชื่อลูกค้า :</label>
+                    </div>
+                    <div class="col-8">
+                        {{ detail.engagement.client.company_name }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="" class="form-label">Engagement :</label>
+                    </div>
+                    <div class="col-8">
+                        {{ detail.engagement.job_code }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="" class="form-label">วันที่ให้บริการ :</label>
+                    </div>
+                    <div class="col-8">
+                        {{ detail.engagement.start_date_service|date:'d/m/Y' }} - {{ detail.engagement.end_date_service|date:'d/m/Y' }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="" class="form-label">วันที่รอบบัญชี :</label>
+                    </div>
+                    <div class="col-8">
+                        {% if detail.engagement.start_date_period|date:"d/m/Y" %}{{ detail.engagement.start_date_period|date:"d/m/Y" }}{% else %}-{% endif %} 
+                         - 
+                        {% if detail.engagement.end_date_period %}
+                            {{ detail.engagement.end_date_period|date:"d/m/Y" }}
+                        {% elif detail.engagement.end_date_period_infinity %}
+                            ไม่มีกำหนด
+                        {% else %}-{% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="" class="form-label">งาน :</label>
+                    </div>
+                    <div class="col-8">
+                        {{ detail.engagement_category.name_th }} <i class="fa-solid fa-angle-right"></i>
+                        {{ detail.engagement_type.name_th }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="" class="form-label">ประเภท :</label>
+                    </div>
+                    <div class="col-8">
+                        {{ detail.type }}
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-4">
+                        <label for="" class="form-label">เดดไลน์ :</label>
+                    </div>
+                    <div class="col-8">
+                        {{ detail.deadline|date:'d/m/Y' }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="" class="form-label">เหลือเวลา :</label>
+                    </div>
+                    <div class="col-8">
+                        {% if detail.days_remaining is not None %}
+                            {% if detail.days_remaining < 0 %}
+                                <span class="fw-semibold" style="color: #f70009;">เกินกำหนด {{ detail.days_remaining }} วัน</span>
+                            {% elif detail.days_remaining == 0 %}
+                                <span class="fw-semibold" style="color: #3aa81f;">ครบกำหนด</span>
+                            {% else %}
+                                <span class="fw-semibold">{{ detail.days_remaining }} วัน</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="fw-semibold">ไม่ได้กำหนด</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="" class="form-label">ผู้ตรวจทาน :</label>
+                    </div>
+                    <div class="col-8">
+                        {% if detail.engagement.reviewer %}
+                        {{ detail.engagement.reviewer.first_name }}
+                        {{ detail.engagement.reviewer.last_name }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="" class="form-label">ผู้อนุมัติ :</label>
+                    </div>
+                    <div class="col-8">
+                        {% if detail.engagement.approver %}
+                        {{ detail.engagement.approver.first_name }}
+                        {{ detail.engagement.approver.last_name }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="" class="form-label">Comment :</label>
+                    </div>
+                    <div class="col-8">
+                        {% if detail.comment %}
+                        {{ detail.comment }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">ปิด</button>
+            </div>
+        </div>
+    </div>
+</div>

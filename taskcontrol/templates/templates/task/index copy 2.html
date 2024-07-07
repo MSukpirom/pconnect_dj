@@ -1,0 +1,394 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasks Controller</title>
+    <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+
+    <!-- Bootstrap Datatable,Select,Search -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/searchpanes/2.3.1/css/searchPanes.bootstrap5.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/select/2.0.2/css/select.bootstrap5.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'assets/css/styles.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/notification.css' %}">
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/css/bootstrap-select.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+   
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.4.0/uicons-bold-rounded/css/uicons-bold-rounded.css'>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.4.0/uicons-thin-straight/css/uicons-thin-straight.css'>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.4.0/uicons-bold-rounded/css/uicons-bold-rounded.css'>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.4.0/uicons-solid-straight/css/uicons-solid-straight.css'>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.4.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.4.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.4.0/uicons-bold-straight/css/uicons-bold-straight.css'>
+
+    <!-- Isotope -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.min.css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.0/dist/sweetalert2.min.css">
+</head>
+
+<style>
+    body {
+        background: linear-gradient(120deg, #89dbfe 0%, #66a6ff 100%);
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+    .loader {
+        width: 40px;
+        height: 20px;
+        --c: no-repeat radial-gradient(farthest-side, #000 93%, #0000);
+        background:
+            var(--c) 0 0,
+            var(--c) 50% 0,
+            var(--c) 100% 0;
+        background-size: 8px 8px;
+        position: relative;
+        animation: l4-0 1s linear infinite alternate;
+    }
+    .loader:before {
+        content: "";
+        position: absolute;
+        width: 8px;
+        height: 12px;
+        background: #000;
+        left: 0;
+        top: 0;
+        animation:
+            l4-1 1s linear infinite alternate,
+            l4-2 0.5s cubic-bezier(0, 200, .8, 200) infinite;
+    }
+    @keyframes l4-0 {
+        0% { background-position: 0 100%, 50% 0, 100% 0 }
+        8%, 42% { background-position: 0 0, 50% 0, 100% 0 }
+        50% { background-position: 0 0, 50% 100%, 100% 0 }
+        58%, 92% { background-position: 0 0, 50% 0, 100% 0 }
+        100% { background-position: 0 0, 50% 0, 100% 100% }
+    }
+    @keyframes l4-1 {
+        100% { left: calc(100% - 8px) }
+    }
+    @keyframes l4-2 {
+        100% { top: -0.1px }
+    }
+    /* Additional styles to manage loading state */
+    #loader {
+        display: none;
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1000;
+    }
+    body.loading #loader {
+        display: block;
+    }
+
+</style>
+
+<body>
+    <div id="loader" class="loader"></div>
+    <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full" data-sidebar-position="fixed" data-header-position="fixed">
+        <aside class="left-sidebar">
+            <div>
+                <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer text-end mr-2" id="sidebarCollapse">
+                    <i class="fi fi-sr-circle-xmark"></i>
+                </div>
+                <div class="brand-logo mt-3">
+                    <i class="fa-brands fa-connectdevelop fa-xl me-1" style="color: #5d87ff;"></i>
+                    <span class="fw-bold" style="color: #5d87ff; font-size: 13px;">Account <br> Tasks Controller</span>
+                </div>
+               
+                <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
+                    <ul id="sidebarnav">
+                        <!-- Home Section -->
+                        <li class="nav-small-cap">
+                            <span class="hide-menu">Home</span>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{% url 'taskcontrol:dashboard' %}" aria-expanded="false">
+                                <span><i class="fa-solid fa-chart-pie"></i></span>
+                                <span class="hide-menu">Dashboard</span>
+                            </a>
+                        </li>
+                        
+                        <!-- Clients Section -->
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{% url 'taskcontrol:client_list' %}" aria-expanded="false">
+                                <span><i class="fa-solid fa-users"></i></span>
+                                <span class="hide-menu">Clients</span>
+                            </a>
+                        </li>
+                        
+                        <!-- Engagement Section -->
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{% url 'taskcontrol:engagement_list' %}" aria-expanded="false">
+                                <span><i class="fa-solid fa-box-archive"></i></span>
+                                <span class="hide-menu">Engagement</span>
+                            </a>
+                        </li>
+                        
+                        <!-- Tasks Control Section -->
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{% url 'taskcontrol:kanban_board' %}" aria-expanded="false">
+                                <span><i class="fa-solid fa-list-check"></i></span>
+                                <span class="hide-menu">Tasks Control</span>
+                            </a>
+                        </li>
+        
+                        <!-- Settings Section -->
+                        <li class="nav-small-cap">
+                            <span class="hide-menu">Setting</span>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{% url 'taskcontrol:manage_category' %}" aria-expanded="false">
+                                <span><i class="fa-solid fa-layer-group"></i></span>
+                                <span class="hide-menu">Categories</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{% url 'taskcontrol:manage_channel' %}" aria-expanded="false">
+                                <span><i class="fa-solid fa-tags"></i></span>
+                                <span class="hide-menu">Channels</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{% url 'taskcontrol:manage_register_type' %}" aria-expanded="false">
+                                <span><i class="fa-solid fa-registered"></i></span>
+                                <span class="hide-menu">Registration</span>
+                            </a>
+                        </li>
+                        
+                        <!-- Profile Section -->
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{% url 'taskcontrol:profile' request.user.id %}" aria-expanded="false">
+                                <span><i class="fa-solid fa-user"></i></span>
+                                <span class="hide-menu" style="color: tomato;">Profile</span>
+                            </a>
+                        </li>
+                        
+                        <!-- Guide Section -->
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="#" aria-expanded="false">
+                                <span><i class="fa-solid fa-circle-info"></i></span>
+                                <span class="hide-menu" style="color: tomato;">Guide</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+        
+        
+        <div class="body-wrapper">
+            <header class="app-header">
+                <nav class="navbar navbar-expand-lg">
+                    <ul class="navbar-nav">
+                        <li class="nav-item d-block d-xl-none">
+                            <a class="nav-link sidebartoggler nav-icon-hover" id="headerCollapse" href="javascript:void(0)">
+                                <i class="fa-solid fa-bars"></i>
+                            </a>
+                        </li>
+                    </ul>
+                    <div>
+                        <i class="fa-solid fa-seedling me-1" style="color: #53c536;"></i>
+                        <span class="fw-semibold">สวัสดีคุณ, {{ user.first_name }} {{ user.last_name }}</span>
+                    </div>
+
+                    <!--#TODO Notification -->
+                    <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-start">
+                        <li class="nav-item me-4">
+                            <a class="nav-link nav-icon-hover position-relative" href="javascript:void(0)" id="drop1" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fi fi-bs-bell"></i>
+                                {% if count > 0%}
+                                    <span class="number with-wave">{{ count }}</span>
+                                {% endif %}
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end overflow-scroll" >
+                                {% if notification_detail %}
+                                    <div class="box-title p-2">
+                                        <span class="engagements m-0">Engagements</span>
+                                    </div>
+                                {% endif %}
+                                {% if notification_detail %}
+                                    {% for item in notification_detail %}
+                                        {% if item.is_over_deadline  and not item.is_deadline %}
+                                            <a href="{% url 'taskcontrol:engagement_detail' engagement_id=item.engagement.id %}" class="d-flex dropdown-item dropdown-box-item dropdown-box-item-detail border-danger p-0" >
+                                                <div class="p-1 d-flex align-items-center">
+                                                    <div class="fw-bold me-3 p-1 pt-2">
+                                                        <div class="">
+                                                            <span class="title"><i class="fi fi-ss-circle-small" style="color: #ff5258;"></i> {{ item.engagement.job_code }} </span>
+                                                            <span class="title" style="color:#0085FF;"><i class="fa-solid fa-angle-left"></i> {{ item.engagement.client.company_name }} <i class="fa-solid fa-angle-right"></i></span> 
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-6 text-start">
+                                                                <span class="badge rounded-pill type-job">{{ item.engagement_category.name_th }} <i class="fa-solid fa-angle-right"></i> {{ item.engagement_type.name_th }}</span>
+                                                            </div>
+                                                            <div class="col-6 text-end">
+                                                                <span class="badge noti-deadline"> เกินกำหนด {{ item.deadline|date:'d/m/Y' }}</span>
+                                                            </div>
+                                                            
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                        {% elif item.is_over_deadline and item.is_deadline %}
+                                            <a href="{% url 'taskcontrol:engagement_detail' engagement_id=item.engagement.id %}" class="d-flex dropdown-item dropdown-box-item dropdown-box-item-detail border-warning p-0" >
+                                                <div class="p-1 d-flex align-items-center">
+                                                    <div class="fw-bold me-3 p-1 pt-2">
+                                                        <div class="text-truncate">
+                                                            <span class="title"><i class="fi fi-ss-circle-small" style="color: #53c536;"></i> {{ item.engagement.job_code }} </span>
+                                                            <span class="title" style="color:#0085FF;"><i class="fa-solid fa-angle-left"></i> {{ item.engagement.client.company_name }} <i class="fa-solid fa-angle-right"></i></span> 
+                                                        </div>
+                                                        <div class="small">
+                                                            <span class="badge rounded-pill type-job">{{ item.engagement_category.name_th }} <i class="fa-solid fa-angle-right"></i> {{ item.engagement_type.name_th }}</span>
+                                                            <span class="badge noti-today" >{{ item.deadline|date:'d/m/Y' }}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                        {% else %}
+                                            <a href="{% url 'taskcontrol:engagement_detail' engagement_id=item.engagement.id %}" class="d-flex dropdown-item dropdown-box-item dropdown-box-item-detail border-muted p-0" >
+                                                <div class="p-1 d-flex align-items-center">
+                                                    <div class="fw-bold me-3 p-1 pt-2">
+                                                        
+                                                        <div class="text-truncate">
+                                                            <span class="title"><i class="fi fi-ss-circle-small" style="color: #2a3547;"></i> {{ item.engagement.job_code }} </span>
+                                                            <span class="title" style="color:#0085FF;"><i class="fa-solid fa-angle-left"></i> {{ item.engagement.client.company_name }} <i class="fa-solid fa-angle-right"></i></span> 
+                                                        </div>
+                                                        <div class="small">
+                                                            <span class="badge rounded-pill type-job">{{ item.engagement_category.name_th }} <i class="fa-solid fa-angle-right"></i> {{ item.engagement_type.name_th }}</span>
+                                                            <span class="badge noti-normal" >{{ item.deadline|date:'d/m/Y' }}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                        {% endif %}
+                                            </a>
+                                    {% endfor %}
+                                {% endif %}
+
+                                <!-- Task -->
+                                {% if tasks_list %}
+                                    <div class="box-title p-2">
+                                        <span class="badge tasks m-0">Tasks</span>
+                                    </div>
+                                {% endif %}
+
+                                {% for task in tasks_list %}
+                                    {% if is_near_duedate %}
+                                        <a href="{% url 'taskcontrol:kanban_board' %}" class="d-flex dropdown-item dropdown-box-item dropdown-box-item-detail border-warning p-0">
+                                            <div class="p-1 d-flex align-items-center">
+                                                <div class="fw-bold me-3 p-1 pt-2">
+                                                    <div class="text-truncate sub-title">
+                                                        <i class="fi fi-br-circle-t" style="color:#ffa700;"></i> {{ task.number }} {{ task.client.company_name }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span class="ms-auto mb-auto p-1 pe-2">
+                                                <div class="text-right text-warning fw-bold small">
+                                                    <i class="fi fi-rr-calendar-clock pe-1 pt-2 mt-2"></i><span>{{ task.due_date|date:'d/m/Y' }}</span>
+                                                </div>
+                                            </span>
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'taskcontrol:kanban_board' %}"  class="d-flex dropdown-item p-0">
+                                            <div class="p-1 d-flex align-items-center">
+                                                <div class="fw-bold me-3 p-1 pt-2">
+                                                    <div class="text-truncate">
+                                                        <span class="title"><i class="fi fi-br-circle-t" style="color:#ffa700;"></i> {{ task.number }}</span>
+                                                        <span class="title" style="color:#0085FF;"><i class="fa-solid fa-angle-left"></i> {{ task.client.company_name }} <i class="fa-solid fa-angle-right"></i></span>
+                                                    </div>
+                                                    <div class="small">
+                                                        <span class="badge rounded-pill type-job">{{ task.new_job }}</span>
+                                                        <span class="badge noti-normal">{{ task.due_date|date:'d/m/Y' }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </li>
+                        <li>
+                            <a href="{% url 'taskcontrol:logout' %}" aria-expanded="false" class="btn btn-outline-danger btn-logout" data-bs-toggle="tooltip" data-bs-placement="bottom" title="ออกจากระบบ">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </header>
+
+            <!-- Main Content -->
+            <div class="container-fluid">
+                <main class="content">
+                    {% block content %}
+                    {% endblock %}
+                </main>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+<!-- Latest jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+<!-- Popper.js and Bootstrap Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- DataTables -->
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+
+<!-- Bootstrap Select -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
+
+<!-- ApexCharts -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+<!-- Custom Scripts -->
+<script src="{% static 'assets/js/app.min.js' %}"></script>
+<script src="{% static 'assets/js/jquery.mask.min.js' %}"></script>
+
+<!-- Isotope (if needed) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js"></script>
+
+<!-- SweetAlert2 JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.0/dist/sweetalert2.all.min.js"></script>
+
+<script>
+    // Show loader when the page is loading
+    document.addEventListener("DOMContentLoaded", function() {
+        document.body.classList.add("loading");
+    });
+
+    // Hide loader when the page has fully loaded
+    window.addEventListener("load", function() {
+        document.body.classList.remove("loading");
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+</html>

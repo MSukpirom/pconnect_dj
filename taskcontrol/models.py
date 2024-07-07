@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.conf import settings
 from django.utils import timezone
 
@@ -208,28 +208,22 @@ class Engagement(models.Model):
         db_table = 'engagement'
 
     def update_status(self):
-        open_jobs = self.task_set.filter(status='OPEN_JOB').count()
-        in_progress = self.task_set.filter(status='IN_PROGRESS').count()
-        review = self.task_set.filter(status='REVIEW').count()
-        pending_client = self.task_set.filter(status='PENDING_CLIENT').count()
-        done = self.task_set.filter(status='DONE').count()
-
-        # ตรวจสอบสถานะของ EngagementDetail
         all_details_done = self.engagementdetail_set.filter(status='DONE').count() == self.engagementdetail_set.count()
 
-        # ตรวจสอบว่ามี EngagementDetail ทุกตัวเป็นสถานะ DONE หรือไม่
         if all_details_done:
             self.status = 'DONE'
-        elif open_jobs > 0:
-            self.status = 'OPEN_JOB'
-        elif pending_client > 0:
-            self.status = 'PENDING_CLIENT'
-        elif review > 0:
-            self.status = 'REVIEW'
-        elif in_progress > 0:
-            self.status = 'IN_PROGRESS'
+            self.completed_at = timezone.now()
         else:
-            self.status = 'OPEN_JOB'
+            # Check for other statuses like IN_PROGRESS, REVIEW, PENDING_CLIENT
+            if self.engagementdetail_set.filter(status='IN_PROGRESS').exists():
+                self.status = 'IN_PROGRESS'
+            elif self.engagementdetail_set.filter(status='REVIEW').exists():
+                self.status = 'REVIEW'
+            elif self.engagementdetail_set.filter(status='PENDING_CLIENT').exists():
+                self.status = 'PENDING_CLIENT'
+            else:
+                self.status = 'OPEN_JOB'
+
         self.save()
 
 class EngagementDetail(models.Model):
@@ -258,14 +252,14 @@ class EngagementDetail(models.Model):
         db_table = 'engagement_detail'
 
     def update_status(self):
-        # นับจำนวนงานในแต่ละสถานะที่เกี่ยวข้องกับ EngagementDetail ที่เกี่ยวข้อง
+        # Count the number of details in each status related to this EngagementDetail
         open_jobs = EngagementDetail.objects.filter(engagement=self.engagement, status='OPEN_JOB').count()
         in_progress = EngagementDetail.objects.filter(engagement=self.engagement, status='IN_PROGRESS').count()
         review = EngagementDetail.objects.filter(engagement=self.engagement, status='REVIEW').count()
         pending_client = EngagementDetail.objects.filter(engagement=self.engagement, status='PENDING_CLIENT').count()
         done = EngagementDetail.objects.filter(engagement=self.engagement, status='DONE').count()
 
-        # อัพเดทสถานะของ EngagementDetail
+        # Update the status of this EngagementDetail
         if done > 0:
             self.status = 'DONE'
             if not self.completed_at:
@@ -282,6 +276,15 @@ class EngagementDetail(models.Model):
             self.status = 'OPEN_JOB'
 
         self.save()
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.engagement.update_status()  # Update engagement status after saving
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        self.engagement.update_status()  # Update engagement status after deletion
+
 
 class EngagementCategory(models.Model):
     name_th = models.CharField(max_length=255, default=None, null=True, blank=True)

@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from taskcontrol.models import *
-from .forms import CustomUserCreationForm, CustomPasswordResetForm
 from datetime import datetime, date, timedelta
 from django.utils import timezone
 from django.contrib import messages
@@ -8,21 +7,17 @@ from django.db import transaction
 from django.utils.dateparse import parse_date
 from django.http import JsonResponse, HttpResponse, Http404, HttpResponseBadRequest, HttpResponseNotFound
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout, get_user_model
+from django.contrib.auth import authenticate, login, logout, get_user_model, update_session_auth_hash
 from django.db.models import Max, Count, F, Subquery, Q, Case, When, Value, CharField, Prefetch
-from django.core.paginator import Paginator
-from django.core.exceptions import ObjectDoesNotExist
 from collections import Counter
 from django.views.decorators.http import require_POST
 from dateutil.relativedelta import relativedelta
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models.functions import ExtractMonth, ExtractYear
-import json
-
 
 # Constants
 STATUS_OPEN_JOB = ('OPEN_JOB', 'PENDING_CLIENT', 'REVIEW', 'IN_PROGRESS')
 STATUS_DONE = ('DONE',)
+ALL_STATUS = ('OPEN_JOB', 'PENDING_CLIENT', 'REVIEW', 'IN_PROGRESS', 'DONE')
 
 #TODO Error404
 def error_404_view(request, exception):
@@ -135,6 +130,7 @@ def record_client(request, client_id):
 def client_detail(request, client_id):
     client = get_object_or_404(Client, id=client_id)
     engagements = Engagement.objects.filter(client_id=client_id).exclude(status='DONE').order_by('job_code')
+    client_files = FileManage.objects.filter(client_id=client_id).all()
 
     unique_engagements = []
     seen_job_codes = set()
@@ -170,6 +166,7 @@ def client_detail(request, client_id):
         'provinces': provinces,
         'register_types': register_types,
         'channels': channels,
+        'client_files': client_files,
     }
     return render(request, 'task/clients/client_detail.html', context)
 
@@ -468,7 +465,7 @@ def create_contact(request, client_id):
         'client': client,
         'company_address': company_address,
         'contacts': contacts,
-        'error_message': error_message,  # Pass the error message to the template
+        'error_message': error_message,
     })
 
 #TODO Contact Deleted
@@ -572,7 +569,7 @@ def file_client_create(request, client_id):
             create_by=user,
         )
         file.save()
-        return redirect('taskcontrol:file_client_create', client_id=client.id)
+        return redirect('taskcontrol:client_detail', client_id=client.id)
 
     return render(request, 'task/clients/client_file.html', {'client': client, 'files': files})
 
@@ -628,6 +625,7 @@ def engagement_list(request):
     current_month = datetime.now().month
     current_year = datetime.now().year
 
+    # engagements = Engagement.objects.exclude(status='DONE').all().order_by('job_code')
     engagements = Engagement.objects.all().order_by('job_code')
     # engagement_details = EngagementDetail.objects.prefetch_related('engagement', 'engagement_category').all()
     # กรอง engagement_details ตามเดือนปัจจุบัน โดยใช้ start_date และ end_date
@@ -642,7 +640,7 @@ def engagement_list(request):
     clients = Client.objects.all()
     total_engagements = engagements.count()
     open_engagements = engagements.filter(status__in=['OPEN_JOB', 'IN_PROGRESS', 'REVIEW', 'PENDING_CLIENT']).count()
-    closed_engagements = engagements.filter(status='DONE').count()
+    closed_engagements = Engagement.objects.filter(status='DONE').count()
 
     unique_statuses = Engagement.objects.values_list('status', flat=True).distinct()
 
@@ -686,6 +684,7 @@ def engagement_detail(request,engagement_id):
     client_list = Client.objects.exclude(status=False).values('id', 'code', 'company_name').order_by('code')
     categories = EngagementCategory.objects.all()
     types = EngagementType.objects.all
+    engagement_files = FileManage.objects.filter(engagement=engagement).all()
     administrators = get_user_model().objects.filter(is_staff=True)
     reviewers = get_user_model().objects.filter(is_superuser=True)
     approvers = get_user_model().objects.filter(is_superuser=True)
@@ -695,10 +694,30 @@ def engagement_detail(request,engagement_id):
         'client_list':client_list,
         'categories':categories,
         'types':types,
+        'engagement_files':engagement_files,
         'administrators':administrators,
         'reviewers':reviewers,
         'approvers':approvers
     })
+
+# TODO Engagement Detail Status Update
+def update_engagement_detail_status(request, engagement_detail_id):
+    if request.method == 'POST':
+        engagement_detail = get_object_or_404(EngagementDetail, id=engagement_detail_id)
+        
+        # Update the status of the EngagementDetail as needed
+        new_status = request.POST.get('status')
+        if new_status in ['IN_PROGRESS', 'REVIEW', 'PENDING_CLIENT', 'DONE']:
+            engagement_detail.status = new_status
+            engagement_detail.save()
+        
+        # Update the status of the related Engagement
+        engagement_detail.update_status()
+
+        # Return a success message
+        return JsonResponse({'message': 'อัพเดทสถานะเรียบร้อย'})
+    else:
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
 
 # TODO Engagement Create
 @login_required
@@ -886,18 +905,23 @@ def engagement_job_create(request, engagement_id):
         # Parse dates
         job_start_date = datetime.strptime(start_date, '%Y-%m-%d')
         job_end_date = datetime.strptime(end_date, '%Y-%m-%d')
+        job_deadline = datetime.strptime(deadline, '%Y-%m-%d')
 
         # ตรวจสอบว่าระยะเวลาระหว่างวันเริ่มและวันสิ้นสุดมีเดือนเกินหรือเท่ากับ 1 เดือนหรือไม่
         if (job_end_date - job_start_date).days > 30:
             # คำนวณจำนวนเดือนทั้งหมดที่ต้องสร้าง
             num_months = (job_end_date.year - job_start_date.year) * 12 + job_end_date.month - job_start_date.month + 1
-            
+
             # สร้าง engagement details สำหรับแต่ละเดือน
             current_date = job_start_date
-            for _ in range(num_months):
+            for month_offset in range(num_months):
                 end_of_month = min(current_date + relativedelta(day=31), job_end_date)
-                # กำหนด deadline เป็นวันที่ 15 ของเดือนนั้น ๆ
-                deadline_date = min(datetime(current_date.year, current_date.month, 15), end_of_month)
+                
+                # กำหนด deadline ของทุกๆเดือนนั้น ๆ โดยการเพิ่มเดือน
+                deadline_date = job_deadline + relativedelta(months=month_offset)
+                if deadline_date > end_of_month:
+                    deadline_date = end_of_month
+
                 engagement_detail = create_engagement_detail(
                     engagement, category_id, type_id, type_name, deadline_date, notification,
                     current_date, end_of_month,
@@ -907,7 +931,7 @@ def engagement_job_create(request, engagement_id):
         else:
             # สร้าง engagement detail สำหรับงานในช่วงเวลาที่กำหนด
             engagement_detail = create_engagement_detail(
-                engagement, category_id, type_id, type_name, deadline, notification,
+                engagement, category_id, type_id, type_name, job_deadline, notification,
                 job_start_date, job_end_date,
                 review_by, approved_by, request.user
             )
@@ -930,8 +954,7 @@ def engagement_job_create(request, engagement_id):
     })
 
 #TODO EngagementJob Create 2/2
-def create_engagement_detail(engagement, category_id, type_id, type_name, deadline, notification,
-                             start_date, end_date, review_by, approved_by, user):
+def create_engagement_detail(engagement, category_id, type_id, type_name, deadline, notification,start_date, end_date, review_by, approved_by, user):
     # Get or create engagement category and type instances
     engagement_category_instance = get_object_or_404(EngagementCategory, id=category_id)
     engagement_type_instance = get_object_or_404(EngagementType, id=type_id)
@@ -987,7 +1010,7 @@ def file_engagement_create(request, engagement_id):
             create_by=user,
         )
         engagement_file.save()
-        return redirect('taskcontrol:file_engagement_create', engagement_id=engagement.id)
+        return redirect('taskcontrol:engagement_detail', engagement_id=engagement.id)
 
     return render(request, 'task/engagement/engagement_file.html', {'engagement': engagement, 'engagement_files': engagement_files})
 
@@ -1035,7 +1058,7 @@ def download_image_engagement(request, image_id):
     except Exception as e:
         raise Http404("Failed to download image")
 
-#TODO Dashboard
+#TODO Dashboard Count
 @login_required
 def get_engagement_data(request):
     engagement_data = Engagement.objects.all()
@@ -1051,22 +1074,22 @@ def get_engagement_data(request):
 
     return JsonResponse(response_data)
 
+#TODO Dashboard
 @login_required
 def dashboard(request):
     # ดึงข้อมูลจากฐานข้อมูล
     clients = Client.objects.exclude(status='0').all().order_by('code')
     total_clients = clients.count()
     engagements = Engagement.objects.all()
-    engagement_details = EngagementDetail.objects.exclude(status='DONE').all().order_by('engagement__job_code')
     total_engagements = engagements.count()
+    engagement_details = EngagementDetail.objects.exclude(status='DONE').all().order_by('engagement__job_code')
+    count_engagement_detail_open_all = engagement_details.count()
+    count_engagement_detail_done = EngagementDetail.objects.filter(status='DONE').count()
     open_job_engagement = engagements.filter(status__in=STATUS_OPEN_JOB).count()
     done_job_engagement = engagements.filter(status__in=STATUS_DONE).count()
     engagement_categories = EngagementCategory.objects.all()
     engagement_types = EngagementType.objects.filter(category__in=engagement_categories).all()
     administrators = get_user_model().objects.all()
-
-    # tasks = Task.objects.exclude(status='DONE').all()
-    # task_count = Task.objects.exclude(status='DONE').count()
 
     # Get the current month and year
     current_month = timezone.now().month
@@ -1082,8 +1105,10 @@ def dashboard(request):
         'clients': clients,
         'total_clients': total_clients,
         'engagements': engagements,
-        'engagement_details': engagement_details,
         'total_engagements': total_engagements,
+        'engagement_details': engagement_details,
+        'count_engagement_detail_open_all': count_engagement_detail_open_all,
+        'count_engagement_detail_done': count_engagement_detail_done,
         'open_job_engagement': open_job_engagement,
         'done_job_engagement': done_job_engagement,
         'engagement_categories': engagement_categories,
@@ -1096,70 +1121,61 @@ def dashboard(request):
 @login_required
 def get_engagement_detail_dashboard(request):
     if request.method == 'GET':
-        # Extract parameters from the request
         client_id = request.GET.get('client_id')
+        category_id = request.GET.get('category_id')
+        engagement_type_id = request.GET.get('engagement_type_id')
+        per_month = request.GET.get('per_month')
+        near_deadline_7 = request.GET.get('near_deadline_7')
         start_date_period = request.GET.get('start_date_period')
         end_date_period = request.GET.get('end_date_period')
-        category_id = request.GET.get('category_id')
-        deadline_days = request.GET.get('deadline_days')
-        per_month = request.GET.get('per_month')
-        engagement_type_id = request.GET.get('engagement_type_id')
-        near_deadline_3 = request.GET.get('near_deadline_3') == 'true'
-        near_deadline_5 = request.GET.get('near_deadline_5') == 'true'
-        near_deadline_7 = request.GET.get('near_deadline_7') == 'true'
-        near_deadline_14 = request.GET.get('near_deadline_14') == 'true'
 
-        # Query engagement details
-        engagement_details = EngagementDetail.objects.all().order_by('engagement__job_code')
+        engagement_details = EngagementDetail.objects.select_related('engagement').order_by('engagement__job_code')
 
         # Apply filters
         if client_id:
             engagement_details = engagement_details.filter(engagement__client_id=client_id)
-        if start_date_period:
-            engagement_details = engagement_details.filter(engagement__start_date_period__gte=start_date_period)
-        if end_date_period:
-            engagement_details = engagement_details.filter(engagement__end_date_period__lte=end_date_period)
         if category_id:
-            engagement_details = engagement_details.filter(engagement_category_id=category_id)
+            engagement_details = engagement_details.filter(engagement__category_id=category_id)
         if engagement_type_id:
             engagement_details = engagement_details.filter(engagement_type_id=engagement_type_id)
-        if deadline_days:
-            today = timezone.now().date()
-            deadline_date = today + timedelta(days=int(deadline_days))
-            engagement_details = engagement_details.filter(deadline__lte=deadline_date)
-
-        # Exclude engagements with status "DONE"
-        engagement_details = engagement_details.exclude(status="DONE")
-        
-        # Filter engagement details based on per_month
         if per_month:
             current_month = timezone.now().month
             current_year = timezone.now().year
             engagement_details = engagement_details.filter(
-                engagement__start_date_period__month=current_month, 
+                engagement__start_date_period__month=current_month,
                 engagement__start_date_period__year=current_year,
                 engagement__end_date_period__month=current_month,
                 engagement__end_date_period__year=current_year,
             )
-
-        # Filter engagement details based on near deadline options
-        if near_deadline_3:
-            deadline_3_days = timezone.now().date() + timedelta(days=3)
-            engagement_details = engagement_details.filter(deadline__lte=deadline_3_days)
-
-        if near_deadline_5:
-            deadline_5_days = timezone.now().date() + timedelta(days=5)
-            engagement_details = engagement_details.filter(deadline__lte=deadline_5_days)
-
         if near_deadline_7:
-            deadline_7_days = timezone.now().date() + timedelta(days=7)
-            engagement_details = engagement_details.filter(deadline__lte=deadline_7_days)
+            today = timezone.now().date()
+            deadline_7_days = today + timedelta(days=7)
+            engagement_details = engagement_details.filter(
+                deadline__gt=today,
+                deadline__lte=deadline_7_days
+            )
+        else:
+            engagement_details = engagement_details.exclude(
+                deadline__lte=timezone.now().date()
+            )
 
-        if near_deadline_14:
-            deadline_14_days = timezone.now().date() + timedelta(days=14)
-            engagement_details = engagement_details.filter(deadline__lte=deadline_14_days)
+        if start_date_period:
+            start_date = datetime.strptime(start_date_period, '%Y-%m-%d')
+            
+            if end_date_period:
+                end_date = datetime.strptime(end_date_period, '%Y-%m-%d')
+                engagement_details = engagement_details.filter(
+                    Q(engagement__start_date_period__lte=end_date) &
+                    Q(engagement__end_date_period__gte=start_date)
+                )
+            else:
+                engagement_details = engagement_details.filter(
+                    engagement__start_date_period__month=start_date.month,
+                    engagement__start_date_period__year=start_date.year
+                )
 
-        # Prepare data for engagement details
+        engagement_details = engagement_details.exclude(status="DONE")
+        
         engagement_data = []
         for detail in engagement_details:
             remaining_days = (detail.deadline - timezone.now().date()).days if detail.deadline else None
@@ -1170,126 +1186,40 @@ def get_engagement_detail_dashboard(request):
                 'client': detail.engagement.client.company_name if detail.engagement.client else '',
                 'type': engagement_type,
                 'start_date_period': detail.engagement.start_date_period.strftime("%d/%m/%Y") if detail.engagement.start_date_period else '',
-                'end_date_period': detail.engagement.end_date_period.strftime("%d/%m/%Y") if detail.engagement.end_date_period else '',
+                'end_date_period': 'ไม่มีกำหนด' if detail.engagement.end_date_period_infinity else (detail.engagement.end_date_period.strftime("%d/%m/%Y") if detail.engagement.end_date_period else ''),
                 'administrator': detail.engagement.administrator.get_full_name() if detail.engagement.administrator else '',
                 'deadline': deadline,
                 'remaining_days': remaining_days,
                 'status': detail.status,
             })
-
-        # Return JSON response
+            
         return JsonResponse({'engagement_details': engagement_data})
     
-# def get_engagement_detail_dashboard(request):
-#     if request.method == 'GET':
-#         # Extract parameters from the request
-#         client_id = request.GET.get('client_id')
-#         start_date_period = request.GET.get('start_date_period')
-#         end_date_period = request.GET.get('end_date_period')
-#         category_id = request.GET.get('category_id')
-#         deadline_days = request.GET.get('deadline_days')
-#         per_month = request.GET.get('per_month')
-#         engagement_type_id = request.GET.get('engagement_type_id')
-
-#         # Query engagements
-#         engagements = Engagement.objects.all().order_by('job_code')
-
-#         # Apply filters
-#         if client_id:
-#             engagements = engagements.filter(client_id=client_id)
-#         if start_date_period:
-#             engagements = engagements.filter(start_date_period__gte=start_date_period)
-#         if end_date_period:
-#             engagements = engagements.filter(end_date_period__lte=end_date_period)
-#         if category_id:
-#             engagements = engagements.filter(category_id=category_id)
-#         if engagement_type_id:
-#             engagements = engagements.filter(type_id=engagement_type_id)
-#         if deadline_days:
-#             today = timezone.now().date()
-#             engagements_with_deadlines = EngagementDetail.objects.filter(
-#                 deadline__gt=today,
-#                 deadline__lte=F('engagement__end_date_period')
-#             ).values('engagement_id')
-#             engagements = engagements.filter(id__in=engagements_with_deadlines)
-
-#         # Exclude engagements with status "DONE"
-#         engagements = engagements.exclude(status="DONE")
-        
-#         # Filter engagements based on per_month
-#         if per_month:
-#             current_month = datetime.now().month
-#             current_year = datetime.now().year
-#             engagements = engagements.filter(
-#                 start_date_period__month=current_month, 
-#                 start_date_period__year=current_year,
-#                 end_date_period__month=current_month,
-#                 end_date_period__year=current_year,
-#             )
-
-#         # Prepare data for engagements
-#         engagement_data = []
-#         for engagement in engagements:
-#             engagement_details = EngagementDetail.objects.filter(engagement=engagement)
-#             if engagement_details.count() > 1:  # Check if more than one engagement detail exists
-#                 for engagement_detail in engagement_details:
-#                     remaining_days = (engagement_detail.deadline - datetime.today().date()).days
-#                     deadline = engagement_detail.deadline.strftime("%d/%m/%Y") if engagement_detail.deadline else ''
-#                     engagement_type = engagement_detail.engagement_type.name_th if engagement_detail.engagement_type else ''
-#                     engagement_data.append({
-#                         'job_code': engagement.job_code,
-#                         'client': engagement.client.company_name if engagement.client else '',
-#                         'type': engagement_type,
-#                         'start_date_period': engagement.start_date_period.strftime("%d/%m/%Y") if engagement.start_date_period else '',
-#                         'end_date_period': engagement.end_date_period.strftime("%d/%m/%Y") if engagement.end_date_period else '',
-#                         'administrator': engagement.administrator.get_full_name() if engagement.administrator else '',
-#                         'deadline': deadline,
-#                         'remaining_days': remaining_days,
-#                         'status': engagement.status,
-#                     })
-#             else:
-#                 remaining_days = (engagement_details[0].deadline - datetime.today().date()).days
-#                 deadline = engagement_details[0].deadline.strftime("%d/%m/%Y") if engagement_details[0].deadline else ''
-#                 engagement_type = engagement_details[0].engagement_type.name_th if engagement_details[0].engagement_type else ''
-#                 engagement_data.append({
-#                     'job_code': engagement.job_code,
-#                     'client': engagement.client.company_name if engagement.client else '',
-#                     'type': engagement_type,
-#                     'start_date_period': engagement.start_date_period.strftime("%d/%m/%Y") if engagement.start_date_period else '',
-#                     'end_date_period': engagement.end_date_period.strftime("%d/%m/%Y") if engagement.end_date_period else '',
-#                     'administrator': engagement.administrator.get_full_name() if engagement.administrator else '',
-#                     'deadline': deadline,
-#                     'remaining_days': remaining_days,
-#                     'status': engagement.status,
-#                 })
-
-
-#         # Return JSON response
-#         return JsonResponse({'engagements': engagement_data})
-
-
 #TODO Dashboard Chart
 def get_engagement_detail_status(request):
     statuses = ['OPEN_JOB', 'IN_PROGRESS', 'REVIEW', 'PENDING_CLIENT', 'DONE']
 
-    # Filter engagement details by specified statuses and annotate counts
-    status_counts = EngagementDetail.objects.filter(status__in=statuses).values('status').annotate(count=Count('status'))
+    status_counts = EngagementDetail.objects.filter(status__in=statuses).values('status').annotate(count=Count('status')).order_by(Case(
+        *[When(status=status, then=pos) for pos, status in enumerate(statuses)]
+    ))
 
-    # Calculate total count
-    total_count = sum(item['count'] for item in status_counts)
+    status_data = {status: count['count'] for status in statuses for count in status_counts if count['status'] == status}
 
-    # Calculate percentages with handling for zero total_count
-    percentages = {item['status']: round((item['count'] / total_count) * 100, 2) if total_count > 0 else 0.00 for item in status_counts}
+    for status in statuses:
+        if status not in status_data:
+            status_data[status] = 0
 
-    # Prepare data to be returned as JSON
+    total_count = sum(item['count'] for item in status_counts if item['count'] is not None)
+
+    percentages = {status: round((status_data[status] / total_count) * 100, 2) if total_count > 0 else 0.0 for status in statuses}
+
     data = {
         'labels': statuses,
-        'series': [item['count'] for item in status_counts],
-        'percentages': [percentages.get(status, 0) for status in statuses],
+        'series': [status_data[status] for status in statuses],
+        'percentages': [percentages[status] for status in statuses],
     }
 
     return JsonResponse(data, safe=False)
-
 
 #TODO Dashboard Accounting
 def get_accounting(request):
@@ -1457,9 +1387,32 @@ def kanban_board(request):
         detail.days_remaining = (detail.deadline - today).days
 
     tasks = Task.objects.filter(status__in=['OPEN_JOB', 'IN_PROGRESS', 'REVIEW', 'PENDING_CLIENT', 'DONE']
-    ).exclude(
-        Q(status='DONE') & Q(completed_at__lte=fourteen_days_ago)
-    ).order_by('number')
+            ).exclude(
+                Q(status='DONE') & Q(completed_at__lte=fourteen_days_ago)
+            ).order_by('number')
+
+    for task in tasks:
+        task.days_remaining = (task.due_date - today).days
+
+    # Calculate counts for tasks
+    count_open_tasks = tasks.filter(status='OPEN_JOB').count()
+    count_in_progress_tasks = tasks.filter(status='IN_PROGRESS').count()
+    count_review_tasks = tasks.filter(status='REVIEW').count()
+    count_pending_client_tasks = tasks.filter(status='PENDING_CLIENT').count()
+    count_done_tasks = tasks.filter(status='DONE').count()
+
+    # Calculate counts for engagement details
+    count_open_details = engagement_details.filter(status='OPEN_JOB').count()
+    count_in_progress_details = engagement_details.filter(status='IN_PROGRESS').count()
+    count_review_details = engagement_details.filter(status='REVIEW').count()
+    count_pending_client_details = engagement_details.filter(status='PENDING_CLIENT').count()
+    count_done_details = engagement_details.filter(status='DONE').count()
+
+    total_open = count_open_tasks + count_open_details
+    total_in_progress = count_in_progress_tasks + count_in_progress_details
+    total_review = count_review_tasks + count_review_details
+    total_pending_client = count_pending_client_tasks + count_pending_client_details
+    total_done = count_done_tasks + count_done_details
 
     context = {
         'clients': clients,
@@ -1472,60 +1425,37 @@ def kanban_board(request):
         'today': today,
         'date_deadlines': date_deadlines,
         'tasks': tasks,
+        'total_open': total_open,
+        'total_in_progress': total_in_progress,
+        'total_review': total_review,
+        'total_pending_client': total_pending_client,
+        'total_done': total_done,
     }
 
     return render(request, 'task/kanban/board.html', context)
 
-#TODO Kanban Update Status
-def update_engagement_detail_status(request):
+#TODO Kanban Update Status Engagement Detail
+@require_POST
+def update_status(request):
     if request.method == 'POST':
-        engagement_detail_id = request.POST.get('engagement_detail_id')
-        task_id = request.POST.get('task_id')
+        id = request.POST.get('id')
         new_status = request.POST.get('new_status')
-        
-        try:
-            # Update engagement detail
-            engagement_detail = get_object_or_404(EngagementDetail, pk=engagement_detail_id)
-                
-            if new_status == 'DONE' and engagement_detail.status != 'DONE':
-                engagement_detail.status = 'DONE'
-                engagement_detail.completed_at = timezone.now()
-            else:
-                engagement_detail.status = new_status
-                engagement_detail.completed_at = None
-            
-            engagement_detail.save()
 
-            return JsonResponse({'success': True})
-        except EngagementDetail.DoesNotExist:
-            return JsonResponse({'error': 'Engagement detail not found.'}, status=404)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
+        # Determine whether the ID belongs to EngagementDetail or Task
+        if EngagementDetail.objects.filter(id=id).exists():
+            instance = get_object_or_404(EngagementDetail, id=id)
+        elif Task.objects.filter(id=id).exists():
+            instance = get_object_or_404(Task, id=id)
+        else:
+            return JsonResponse({'error': 'Object not found'}, status=404)
 
-#TODO Kanban Update Status Task
-def update_task_status(request):
-    if request.method == 'POST':
-        task_id = request.POST.get('task_id')
-        new_status = request.POST.get('new_status')
-        
-        try:
-            # Update task
-            task = get_object_or_404(Task, pk=task_id)
-                
-            if new_status == 'DONE' and task.status != 'DONE':
-                task.status = 'DONE'
-                task.completed_at = timezone.now()
-            else:
-                task.status = new_status
-                task.completed_at = None
-            task.save()
+        # Update the status
+        instance.status = new_status
+        instance.save()
 
-            return JsonResponse({'success': True})
-        except Task.DoesNotExist:
-            return JsonResponse({'error': 'Task not found.'}, status=404)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
-
+        return JsonResponse({'message': 'Status updated successfully'})
+    else:
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
 
 #TODO Kanban NewTask 
 @login_required
@@ -1537,6 +1467,7 @@ def add_new_task(request):
         description = request.POST.get('description')
         due_date = request.POST.get('due_date')
 
+        user = request.user
         task = Task.objects.create(
             client_id=client_id,
             number=number,
@@ -1544,8 +1475,8 @@ def add_new_task(request):
             description=description,
             due_date=due_date,
             status='OPEN_JOB',
+            create_by=user,
             create_at=timezone.now(),
-            update_at=timezone.now()
         )
 
         task.save()
@@ -1553,30 +1484,53 @@ def add_new_task(request):
 
     return render(request, 'task/kanban/new_task.html')
 
+#TODO Kanban EditNewTask 
+@login_required
+def edit_task_card(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+
+    if request.method == 'POST':
+        client_id = request.POST.get('client_id')
+        client = get_object_or_404(Client, id=client_id)  # Retrieve Client instance
+        task.client = client  # Assign Client instance to task
+
+        task.number = request.POST.get('number')
+        task.new_job = request.POST.get('new_job')
+        task.description = request.POST.get('description')
+        task.due_date = request.POST.get('due_date')
+        task.update_at = timezone.now()
+        
+        task.save()
+        
+        return redirect('taskcontrol:kanban_board')
+
+    return render(request, 'task/kanban/edit_new_task.html', {'task': task})
+
+#TODO Kanban Add Comment TaskNew
+@login_required
+def update_task_comment(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+
+    if request.method == 'POST':
+        task.comment = request.POST.get('comment')
+        task.update_at = timezone.now()
+        task.save()
+        return redirect('taskcontrol:kanban_board')
+
+    return render(request, 'task/kanban/update_task_comment.html', {'task': task})
+
 #TODO Kanban Add Comment Engagement Detail
 @login_required
-def update_engagement_detail_comment(request):
-    if request.method == 'POST' and request.is_ajax():
-        engagement_detail_id = request.POST.get('engagement_detail_id')
-        new_comment = request.POST.get('new_comment')
+def update_engagement_detail_comment(request, engagement_detail_id):
+    engagement_detail = get_object_or_404(EngagementDetail, id=engagement_detail_id)
 
-        engagement_detail = get_object_or_404(EngagementDetail, pk=engagement_detail_id)
-
-        if engagement_detail.comment:
-            engagement_detail.comment += "\n" + new_comment
-        else:
-            engagement_detail.comment = new_comment
-        
+    if request.method == 'POST':
+        engagement_detail.comment = request.POST.get('comment')
+        engagement_detail.updated_at = timezone.now()
         engagement_detail.save()
+        return redirect('taskcontrol:kanban_board')
 
-        data = {
-            'status': 'success',
-            'engagement_detail_id': engagement_detail_id,
-            'new_comment': new_comment,
-        }
-
-        return JsonResponse(data)
-    return JsonResponse({'status': 'error', 'message': 'Invalid request'})
+    return render(request, 'task/kanban/update_engagement_detail_comment.html', {'engagement_detail': engagement_detail})
 
 def get_status_counts(engagement_details):
     return {
@@ -1594,7 +1548,6 @@ def update_near_deadline(engagement_details, today):
 
 def get_date_deadlines(engagement_details, today):
     return {detail.id: (detail.deadline - today).days for detail in engagement_details}
-
 
 #TODO Kanban Filter
 @login_required
@@ -1621,6 +1574,21 @@ def kanban_board_filter(request):
 
     today = date.today()
 
+    months = [
+        {'value': 1, 'name': 'January'},
+        {'value': 2, 'name': 'February'},
+        {'value': 3, 'name': 'March'},
+        {'value': 4, 'name': 'April'},
+        {'value': 5, 'name': 'May'},
+        {'value': 6, 'name': 'June'},
+        {'value': 7, 'name': 'July'},
+        {'value': 8, 'name': 'August'},
+        {'value': 9, 'name': 'September'},
+        {'value': 10, 'name': 'October'},
+        {'value': 11, 'name': 'November'},
+        {'value': 12, 'name': 'December'}
+    ]
+
     def get_status_counts(details):
         status_counts = {
             'open_count': details.filter(status="OPEN_JOB").count(),
@@ -1633,7 +1601,7 @@ def kanban_board_filter(request):
 
     def update_near_deadline(details, current_date):
         for detail in details:
-            if (detail.deadline - current_date).days <= 7:
+            if (detail.deadline - current_date).days <= 14:
                 detail.near_deadline = True
             else:
                 detail.near_deadline = False
@@ -1664,6 +1632,7 @@ def kanban_board_filter(request):
         **status_counts,
         'administrators': administrators,
         'engagement_category': engagement_category,
+        'months': months,
         'today': today,
         'date_deadlines': date_deadlines,
         'engagement_detail_total': engagement_details.count(),
@@ -1671,212 +1640,6 @@ def kanban_board_filter(request):
 
     return render(request, 'task/kanban/board_filter.html', context)
 
-def get_engagement_details(request):
-    if request.method == 'GET':
-        job_code = request.GET.get('job_code')
-        engagement = get_object_or_404(Engagement, job_code=job_code)
-        engagement_details = EngagementDetail.objects.filter(engagement=engagement)
-
-        modal_content = """
-            <div class="row mb-3">
-                <div class="col-2">
-                    <p class="fw-semibold">วันที่เปิดงาน :</p>
-                </div>
-                <div class="col-4">
-                    {create_at}
-                </div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-2">
-                    <p class="fw-semibold">ชื่อลูกค้า :</p>
-                </div>
-                <div class="col-5">
-                    {company_name}
-                </div>
-                <div class="col-2">
-                    <span class="fw-semibold">ผู้ดูแล: </span> 
-                </div>
-                <div class="col-3">
-                    {administrator_name}
-                </div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-2">
-                    <p class="fw-semibold">รอบบัญชี:</p>
-                </div>
-                <div class="col-5">
-                    {start_date_period}
-                </div>
-                <div class="col-2">
-                    <span class="fw-semibold">ผู้ตราจทาน: </span> 
-                </div>
-                <div class="col-3">
-                    {reviewer_name}
-                </div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-2">
-                    <p class="fw-semibold">หมายเหตุ:</p>
-                </div>
-                <div class="col-5">
-                    {notes}
-                </div>
-                <div class="col-2">
-                    <span class="fw-semibold">ผู้อนุมัติ: </span>
-                </div>
-                <div class="col-3">
-                    {approver_name}
-                </div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-2">
-                    <p class="fw-semibold">ประเภทงาน :</p>
-                </div>
-            </div>
-        """.format(
-            create_at=engagement.create_at.strftime('%d/%m/%Y') if engagement.create_at else "N/A",
-            company_name=engagement.client.company_name if engagement.client else "N/A",
-            start_date_period=engagement.start_date_period.strftime('%d/%m/%Y') if engagement.start_date_period else "N/A",
-            notes=engagement.notes if engagement.notes else "N/A",
-            administrator_name=f"{engagement.administrator.first_name} {engagement.administrator.last_name}" if engagement.administrator else "N/A",
-            reviewer_name=f"{engagement.reviewer.first_name} {engagement.reviewer.last_name}" if engagement.reviewer else "N/A",
-            approver_name=f"{engagement.approver.first_name} {engagement.approver.last_name}" if engagement.approver else "N/A",
-        )
-
-        for detail in engagement_details:
-            modal_content += """
-            <div class="row mb-3">
-                <div class="col-2"></div>
-                <div class="col-5">
-                    {category}
-                    <i class="fa-solid fa-angle-right"></i>
-                    {type}
-                </div>
-                <div class="col-2">
-                    <span class="fw-semibold">เดดไลน์ :</span>
-                </div>
-                <div class="col-3">
-                    {deadline}
-                </div>
-            </div>
-            """.format(
-                category=detail.engagement_category.name_th if detail.engagement_category else "N/A",
-                type=detail.engagement_type.name_th if detail.engagement_type else "N/A",
-                deadline=detail.deadline.strftime("%d/%m/%Y") if detail.deadline else "N/A"
-            )
-
-        return JsonResponse({'modal_content': modal_content})
-    else:
-        return JsonResponse({'error': 'Invalid request'}, status=400)
-
-#TODO Kanban Search
-@login_required
-def search_filter_engagement_details(request):
-    engagements = Engagement.objects.all()
-    engagement_details = EngagementDetail.objects.all()
-    administrators = get_user_model().objects.all()
-    engagement_type = EngagementType.objects.all()
-    status_order = ['OPEN_JOB', 'IN_PROCESS', 'PENDING_CLIENT', 'REVIEW', 'DONE']
-    engagement_statuses = Engagement.objects.values_list('status', flat=True).distinct().order_by(
-        Case(
-            *[When(status=s, then=pos) for pos, s in enumerate(status_order)]
-        )
-    )
-    engagement_detail_deadlines = EngagementDetail.objects.filter(engagement__in=engagements).values('id', 'deadline')
-
-    deadlines = [item['deadline'] for item in engagement_detail_deadlines]
-    formatted_dates = []
-    for date_obj in deadlines:
-        formatted_date = date_obj.strftime("%Y-%m-%d")
-        formatted_dates.append(formatted_date)
-
-    today = date.today()
-
-    date_deadlines = []
-    for formatted_date in formatted_dates:
-        deadline_date = datetime.strptime(formatted_date, "%Y-%m-%d").date()
-        difference = deadline_date - today
-        date_deadlines.append(difference.days)
-
-    status_counts = {}
-
-    return render(request, 'task/kanban/filter_engagements.html', {
-        'engagements': engagements,
-        'engagement_details': engagement_details,
-        'administrators': administrators,
-        'engagement_types': engagement_type,
-        'date_deadlines': date_deadlines,
-        'today' : today,
-        'engagement_statuses' : engagement_statuses,
-        'status_counts': status_counts,
-    })
-
-#TODO Kanban Filter
-@login_required
-def get_filter_engagement_details(request):
-    if request.method == 'GET':
-        administrator_id = request.GET.get('administrator_id')
-        engagement_type_id = request.GET.get('engagement_type_id')
-
-        engagements = Engagement.objects.all()
-        
-        if administrator_id:
-            engagements = engagements.filter(administrator_id=administrator_id)
-
-        if engagement_type_id:
-            engagements = engagements.filter(engagementdetail__engagement_type_id=engagement_type_id)
-
-        if request.GET.get('near_deadline'):
-            today = timezone.now().date()
-            engagements = engagements.filter(engagementdetail__deadline__gt=today).order_by('engagementdetail__deadline')
-
-        if request.GET.get('per_month'):
-            today = timezone.now()
-            current_month = today.month
-            current_year = today.year
-
-            # หากต้องการให้ช่วงระหว่างเดือนปัจจุบัน (current_month) ถึงเดือนถัดไป (current_month + 1)
-            next_month = (current_month % 12) + 1  # หาก current_month เป็น 12 จะได้เป็น 1 (มกราคมของปีถัดไป)
-            next_year = current_year if next_month != 1 else current_year + 1  # ถ้า next_month เป็น 1 จะเป็นเดือนของปีถัดไป
-
-            # กรอง engagements เพื่อแสดงข้อมูลที่ start_date_period หรือ end_date_period ตรงกับเดือนปัจจุบันหรืออยู่ระหว่างเดือนปัจจุบัน
-            engagements = engagements.filter(
-                models.Q(start_date_period__year=current_year, start_date_period__month=current_month) |
-                models.Q(end_date_period__year=current_year, end_date_period__month=current_month) |
-                (
-                    Q(start_date_period__year=current_year, start_date_period__month__lt=current_month) &
-                    Q(end_date_period__year=current_year, end_date_period__month__gte=current_month)
-                ) |
-                (
-                    Q(start_date_period__year__lt=current_year) &
-                    Q(end_date_period__year=current_year, end_date_period__month__gte=current_month)
-                ) |
-                (
-                    Q(start_date_period__year=current_year, start_date_period__month__lt=current_month) &
-                    Q(end_date_period__year__gt=current_year)
-                )
-            )
-
-        engagement_data = []
-        for engagement in engagements:
-            engagement_details = engagement.engagementdetail_set.all()
-            for engagement_detail in engagement_details:
-                deadline = engagement_detail.deadline.strftime("%d/%m/%Y") if engagement_detail.deadline else ''
-                engagement_type = engagement_detail.engagement_type.name_th if engagement_detail.engagement_type else ''
-                engagement_data.append({
-                    'job_code': engagement.job_code,
-                    'type': engagement_type,
-                    'reviewer': engagement.reviewer.first_name + ' ' + engagement.reviewer.last_name if engagement.reviewer else '',
-                    'approver': engagement.approver.first_name + ' ' + engagement.approver.last_name if engagement.approver else '',
-                    'administrator': engagement.administrator.first_name + ' ' + engagement.administrator.last_name if engagement.administrator else '',
-                    'deadline': deadline,
-                    'status': engagement.status,
-                })
-        return JsonResponse({'engagements': engagement_data})
-
-
-
-    
 #TODO EngagementCategory
 @login_required
 def manage_category(request):
@@ -1947,7 +1710,6 @@ def manage_type(request):
     engagement_categories = EngagementCategory.objects.all()
     engagement_types = EngagementType.objects.all()
     
-    # Render the template with context data
     return render(request, 'task/setting/engagement_type.html', {
         'engagement_categories': engagement_categories,
         'engagement_types': engagement_types
@@ -1980,7 +1742,7 @@ def update_type(request, type_id):
 
     return render(request, 'task/setting/engagement_type.html', {
         'categories': categories,
-        'engagement_type': engagement_type,  # Pass the engagement type to the template for rendering if needed
+        'engagement_type': engagement_type,
     })
 
 #TODO EngagementType Deleted
@@ -2085,3 +1847,51 @@ def delete_register_type(request, register_type_id):
         register_type.delete()
         messages.success(request, "Register type deleted successfully.")
     return redirect('taskcontrol:manage_register_type')
+
+#TODO Profile
+@login_required
+def profile(request, user_id):
+    User = get_user_model()
+    user = get_object_or_404(User, id=user_id)
+    
+    engagements = Engagement.objects.filter(administrator_id=user_id).distinct()
+    
+    engagement_details_by_engagement = {}
+    for engagement in engagements:
+        engagement_details = EngagementDetail.objects.filter(engagement=engagement, engagement__administrator_id=user_id).all()
+        engagement_details_by_engagement[engagement] = engagement_details
+    
+    count_engagement_details = sum(len(details) for details in engagement_details_by_engagement.values())
+
+    tasks = Task.objects.filter(create_by=user_id)
+
+
+    return render(request, 'task/profile.html', {
+        'user': user,
+        'engagement_details_by_engagement': engagement_details_by_engagement,
+        'count_engagement_details': count_engagement_details,
+        'tasks' : tasks
+    })
+
+#TODO Change Password
+@login_required
+def change_password(request):
+    if request.method == 'POST':
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+
+        if not request.user.check_password(current_password):
+            return JsonResponse({'error': 'รหัสผ่านปัจจุบันไม่ถูกต้อง.'}, status=400)
+
+        if new_password != confirm_password:
+            return JsonResponse({'error': 'รหัสผ่านใหม่และยืนยันรหัสผ่านไม่ตรงกัน.'}, status=400)
+
+        request.user.set_password(new_password)
+        request.user.save()
+
+        update_session_auth_hash(request, request.user)
+
+        return JsonResponse({'success': 'เปลี่ยนรหัสผ่านเรียบร้อยแล้ว.'})
+    
+    return JsonResponse({'error': 'Invalid request method.'}, status=405)

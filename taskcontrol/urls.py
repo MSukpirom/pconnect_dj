@@ -14,6 +14,10 @@ urlpatterns = [
     path('coding/', building_code, name='building_code'),
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
+    path('profile/<int:user_id>/', profile, name='profile'),
+    path('profile/change-password/', change_password, name='change_password'),
+
+
     # path('test/', testpage, name='testpage'),
     path('get_districts/', get_districts, name='GetDistrict'),
     path('get_subdistricts/', get_subdistricts, name='GetSubdistrict'),
@@ -21,8 +25,6 @@ urlpatterns = [
     path('get_channel/', get_channel, name='get_channel'),
 
     path('get_engagement_type/', get_engagement_type, name='get_engagement_type'),
-    path('api/get_engagement_details/', get_engagement_details, name='get_engagement_details'),
-
 
 
     path('client/list/', client_list, name='client_list'),
@@ -53,6 +55,7 @@ urlpatterns = [
     path('engagement/detail/<int:engagement_id>/', engagement_detail, name='engagement_detail'),
     path('engagement/update/<int:engagement_id>/', engagement_update, name='engagement_update'),
     path('engagement/delete/<int:engagement_id>/', engagement_delete, name='engagement_delete'),
+    path('engagement/update_status/<int:engagement_detail_id>/', update_engagement_detail_status, name='update_engagement_detail_status'),
 
     path('engagement/detail_job/<int:engagement_id>/', engagement_job, name='engagement_job'),
     path('engagement/detail_job/create/<int:engagement_id>/', engagement_job_create, name='engagement_job_create'),
@@ -81,22 +84,22 @@ urlpatterns = [
     path('manage_register_type/delete/<int:register_type_id>/', delete_register_type, name='delete_register_type'),
 
     path('kanban_board/', kanban_board, name='kanban_board'),
-    path('update_engagement_detail_status', update_engagement_detail_status, name='update_engagement_detail_status'),
-    path('update_task_status', update_task_status, name='update_task_status'),
+    path('update_status', update_status, name='update_status'),
     path('add_new_task/', add_new_task, name='add_new_task'),
+    path('edit_task_card/<int:task_id>/', edit_task_card, name='edit_task_card'),
+    path('update_comment/<int:task_id>/', update_task_comment, name='update_task_comment'),
 
     path('kanban_board_filter/', kanban_board_filter, name='kanban_board_filter'),
     path('get_status_counts/', get_status_counts, name='get_status_counts'),
     path('update_near_deadline/', update_near_deadline, name='update_near_deadline'),
     path('get_date_deadlines/', get_date_deadlines, name='get_date_deadlines'),
-
     
-    path('update_engagement_detail_comment', update_engagement_detail_comment, name='update_engagement_detail_comment'),
-    path('search_filter_engagement_details/', search_filter_engagement_details, name='search_filter_engagement_details'),
-    path('get_filter_engagement_details/', get_filter_engagement_details, name='get_filter_engagement_details'),
+    path('update_comment/<int:engagement_detail_id>/', update_engagement_detail_comment, name='update_engagement_detail_comment'),
+    # path('search_filter_engagement_details/', search_filter_engagement_details, name='search_filter_engagement_details'),
+    # path('get_filter_engagement_details/', get_filter_engagement_details, name='get_filter_engagement_details'),
 
     path('dashboard/', dashboard, name='dashboard'),
-    path('api/engagement-details/', get_engagement_detail_dashboard, name='get_engagement_detail_dashboard'),
+    path('get_engagement_detail_dashboard/', get_engagement_detail_dashboard, name='get_engagement_detail_dashboard'),
     # path('search_datatable/', search_datatable, name='search_datatable'),
     path('get_engagement_detail_status/', get_engagement_detail_status, name='get_engagement_detail_status'),
     path('get_accounting/', get_accounting, name='get_accounting'),

@@ -1,0 +1,196 @@
+{% extends 'task/index.html' %}
+{% block content %}
+{% load static %}
+<style>
+    .card, .card-body {
+        box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+        background-color: #ffffff;
+        border-radius: 20px;
+    }
+
+    .back-button {
+        box-sizing: border-box;
+        border: 1px solid #2a3547;
+        border-radius: 20px;
+        color: #2a3547;
+        padding: 0.5em 1em;
+        background: #fff;
+        transition: background 0.2s, color 0.2s; /* Combine transitions */
+        font-weight: bold;
+    }
+    
+    .back-button:hover {
+        color: #fff;
+        background: #2a3547;
+    }
+
+    th {
+        font-size: 13.5px;
+    }
+
+    td {
+        font-size: 14;
+    }
+
+</style>
+<div class="row">
+    <div class="card">
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-2">
+                    <a class="btn back-button" href="{% url 'taskcontrol:client_detail' client.id %}">
+                        <i class="fa-solid fa-circle-arrow-left"></i> 
+                        <span>ย้อนกลับ</span>
+                    </a>
+                </div>
+                <div class="col-8"></div>
+            </div>
+            <form method="post" enctype="multipart/form-data" action="{% url 'taskcontrol:file_client_create' client_id=client.id %}">
+                {% csrf_token %}
+                <div class="h5 pb-2 mb-4 text-primary fw-semibold border-bottom border-primary"><i class="fi fi-br-clip"></i> แนบไฟล์ 
+                    <span style="color: #2a3547;">< {{ client.company_name }} ></span>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label for="c_description" class="form-label">คำอธิบาย :</label>
+                        <input type="text" name="c_description" class="form-control" required/>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="c_file" class="form-label">ไฟล์ :</label>
+                        <input type="file" name="c_file" class="form-control" accept=".pdf, .doc, .docx, .txt">
+                        <span style="font-size: 0.8rem; color: tomato;">ไฟล์ .pdf, .doc, .docx, .txt</span>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="c_image" class="form-label">รูปภาพ :</label>
+                        <input type="file" name="c_image" class="form-control" accept="image/*">
+                        <span style="font-size: 0.8rem; color: tomato;">ไฟล์รูปภาพ</span>
+                    </div>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-upload"></i> อัปโหลด</button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="table-responsive mb-4">
+                <table id="file-table" class="table">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>คำอธิบาย</th>
+                            <th>ไฟล์ | รูปภาพแนบ</th>
+                            <th class="text-center"><i class="fa-solid fa-file-pdf fa-lg"></i></th>
+                            <th class="text-center"><i class="fa-solid fa-file-image fa-lg"></i></th>
+                            <th class="text-center"><i class="fa-solid fa-gears"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for file in files %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ file.description }}</td>
+                                <td>{{ file.file_client }} | {{ file.image_client }}</td>
+                                <td class="text-center">
+                                    {% if file.file_client %}
+                                        <a href="{% url 'taskcontrol:file_client_download_file' file_id=file.id %}" download target="_blank">
+                                            <i class="fa-solid fa-download fa-lg" style="color: #5d87ff;"></i>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if file.image_client %}
+                                        <a href="{% url 'taskcontrol:file_client_download_image' image_id=file.id %}" download target="_blank">
+                                            <i class="fa-solid fa-download fa-lg" style="color: #5d87ff;"></i>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <a class="btn btn-outline-danger btn-sm delete-btn" data-file-id="{{ file.id }}" data-delete-url="{% url 'taskcontrol:file_client_delete' file_id=file.id %}">
+                                       <i class="fa-solid fa-xmark"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const deleteButtons = document.querySelectorAll(".delete-btn");
+        deleteButtons.forEach(button => {
+            button.addEventListener("click", function() {
+                handleDelete(this);
+            });
+        });
+    
+        function handleDelete(button) {
+            const fileId = button.getAttribute("data-file-id");
+            const confirmation = confirm("ต้องการลบประเภทงานนี้ ?");
+            if (confirmation) {
+                const deleteUrl = button.getAttribute("data-delete-url");
+                fetch(deleteUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCsrfToken(),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ file_id: fileId })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error deleting item. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                    alert('Error deleting item. Please try again.');
+                });
+            }
+        }
+    
+        function getCsrfToken() {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, 'csrftoken'.length + 1) === ('csrftoken=')) {
+                        cookieValue = decodeURIComponent(cookie.substring('csrftoken'.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
+<script>
+    $(document).ready(function () {
+         const dataTable = $("#file-table").DataTable({
+              "language": {
+                   "search": "ค้นหา",
+                   "lengthMenu": "แสดง _MENU_ รายการ",
+                   "info": "แสดง _START_ ถึง _END_ จากทั้งหมด _TOTAL_ รายการ",
+                   "paginate": {
+                        "previous": "ก่อนหน้า",
+                        "next": "ถัดไป"
+                   }
+              }
+         });
+    });
+</script>
+{% endblock %}
