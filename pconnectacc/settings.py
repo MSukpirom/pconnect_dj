@@ -19,8 +19,8 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # DEBUG = True
 DEBUG = False
 
-# ALLOWED_HOSTS = ['*']
-ALLOWED_HOSTS = ['46.137.234.75']
+ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = ['46.137.234.75']
 
 LOGIN_URL = '/task-control/login/'
 
