@@ -2,6 +2,9 @@
 {% block content %}
 {% load humanize %}
 <style>
+    .card {
+        border-radius: 20px;
+    }
     .status-open{
         font-size: 12px;
         font-weight: 600;
@@ -58,7 +61,7 @@
     .custom-select {
         width: 200px;
         padding: 5px;
-    }
+    }    
 
 </style>
 
@@ -88,14 +91,14 @@
             </div>
             
             <div class="table-responsive">
-                <table id="client_datatable" class="table table-hover table-bordered" style="width:100%">
+                <table id="client_datatable" class="table table-bordered" style="width:100%">
                     <thead class="table-light">
                         <tr>
                             <th style="width: 5%;" class="text-start">#</th>
                             <th style="width: 10%;">รหัสลูกค้า</th>
-                            <th style="width: 30%;" class="text-center">ชื่อบริษัท</th>
+                            <th style="width: 35%;" class="text-center">ชื่อบริษัท</th>
                             <th style="width: 15%;" class="text-center">เลขที่นิติ</th>
-                            <th style="width: 10%;" class="text-center">สถานะ</th>
+                            <th style="width: 5%;" class="text-center">สถานะ</th>
                             <th style="width: 25%;" class="text-center">ผู้ติดต่อ</th>
                             <th style="width: 5%;" class="text-center"><i class="fa-solid fa-gears"></i></th>
                         </tr>
@@ -138,6 +141,7 @@
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
 <script>
     $(document).ready(function () {

@@ -1,17 +1,22 @@
-{% extends 'task/index.html' %} {% block content %}
+{% extends 'task/index.html' %}
+{% block content %}
 <style>
-     th, td {
-          font-size: 14px;
-          vertical-align: middle;
-     }
+    .card {
+        border-radius: 20px;
+    }
 
-     th {
-          font-size: 13.5px;
-     }
+    th, td {
+        font-size: 14px;
+        vertical-align: middle;
+    }
 
-     .table-sm>:not(caption)>*>* {
-          padding: 0.5rem 0.5rem;
-     }
+    th {
+        font-size: 13.5px;
+    }
+
+    .table-sm>:not(caption)>*>* {
+        padding: 0.5rem 0.5rem;
+    }
 </style>
 
 <div class="row">
@@ -113,9 +118,8 @@
      </div>
 </div>
 
-
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
 <script>
      $(document).ready(function() {

@@ -1,9 +1,4 @@
-<!-- CSS สำหรับ FontAwesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-<!-- CSS สำหรับ Bootstrap -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-<!-- SweetAlert2 CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.0/dist/sweetalert2.min.css">
+
 {% extends 'task/index.html' %} {% block content %}
 {% load static %}
 {% load humanize %}
@@ -77,18 +72,34 @@
         margin-bottom: 3px;
     }
 
+    .modal .modal-dialog-aside{
+        width: 850px;
+        max-width:80%;
+        height: 100%;
+        margin:0;
+        transform: translate(0); transition: transform .2s;
+    }
+    
+    .modal .modal-dialog-aside .modal-content{  height: inherit; border:0; border-radius: 0;}
+    .modal .modal-dialog-aside .modal-content .modal-body{ overflow-y: auto }
+    .modal.fixed-left .modal-dialog-aside{ margin-left:auto;  transform: translateX(100%); }
+    .modal.fixed-right .modal-dialog-aside{ margin-right:auto; transform: translateX(-100%); }
+    
+    .modal.show .modal-dialog-aside{ transform: translateX(0);  }
+
 </style>
 
 <div class="row">
     <div class="card">
         <div class="card-body">
             <div class="row mb-4">
-                <div class="col-sm-2">
+                <div class="col-2">
                     <a class="btn back-button" href="{% url 'taskcontrol:client_list'%}">
                         <i class="fa-solid fa-circle-arrow-left"></i>
                         <span>ย้อนกลับ</span>
                     </a>
                 </div>
+                <div class="col-10"></div>
             </div>
 
             <!--Client Detail-->
@@ -97,7 +108,11 @@
                     <a data-bs-toggle="modal" href="#updateModal{{ client.id }}">
                         <i class="fa-solid fa-pen-to-square" style="color: #ffc300;"></i>
                     </a> 
-                    <span>ข้อมูลของ {{client.company_name}}</span>
+                    <span>ข้อมูลของ <span style="color: #2a3547;">
+                        <span style="color: #2a3547;">
+                            <i class="fa-solid fa-angle-left"></i> {{ client.company_name }} <i class="fa-solid fa-angle-right"></i>
+                        </span>
+                    </span>
                     <span class="badge {% if client.status %}status-open{% else %}status-close{% endif %}">
                         {% if client.status %}เปิดใช้งาน{% else %}ปิดการใช้งาน{% endif %}
                     </span>
@@ -183,7 +198,7 @@
                     </div>
                 </div>
     
-                <div class="h5 pb-2 mb-4 text-primary  fw-semibold border-bottom border-primary"> <i class="fi fi-sr-comment-info" style="color: #5d87ff;"></i> จดทะเบียน </div>
+                <div class="h5 mb-3 text-primary fw-semibold"> จดทะเบียน </div>
                 <div class="row mb-2">
                     <div class="col-md-3">
                         <span class="fw-semibold">จดทะเบียนบริษัท :</span>
@@ -278,15 +293,15 @@
                 </div>
             </div>
 
-            <!--Contact Detail-->
+            <!-- Contact  -->
             <div class="h5 pb-2 mb-4 text-primary  fw-semibold border-bottom border-primary">
                 <a data-bs-toggle="modal" href="#addContactModal{{ contact.id }}">
-                    <i class="fi fi-sr-comment-medical" style="color: #53c536;"></i> 
-                    <span style="color: #5d87ff;">ผู้ติดต่อ </span>
+                    <i class="fi fi-sr-comment-medical" style="color: #53c536;"></i>
+                    <span style="color: #5d87ff;">เพิ่มผู้ติดต่อใหม่</span>
                 </a>
             </div>
             <div class="table-responsive mb-5">
-                <table id="contact-table" class="table table-bordered">
+                <table id="contact-table" class="table">
                     <thead class="table-light">
                         <tr>
                             <th style="width: 4%;">#</th>
@@ -327,7 +342,8 @@
                             <td>{{ contact.other }}</td>
                             <td class="text-center align-middle">
                                 <div class="btn-group align-top">
-                                    <button class="btn btn-outline-danger btn-sm delete-contact-btn" data-contact-id="{{ contact.id }}"><i class="fa-regular fa-trash-can"></i></button>
+                                    <button class="btn btn-outline-danger btn-sm delete-contact-btn"
+                                        data-contact-id="{{ contact.id }}"><i class="fa-regular fa-trash-can"></i></button>
                                 </div>
                             </td>
                         </tr>
@@ -337,10 +353,62 @@
                 <input type="hidden" id="delete-contact-url" value="{% url 'taskcontrol:delete_contact' contact_id=0 %}">
             </div>
 
-            <!--Engagement Detail-->
-            <div class="h5 pb-2 mb-4 text-primary fw-semibold border-bottom border-primary"><i class="fi fi-sr-comment-info" style="color: #5d87ff;"></i> Engagements</div>
+            <!-- File  -->
+            <div class="h5 pb-2 mb-4 text-primary  fw-semibold border-bottom border-primary"> 
+                <a data-bs-toggle="modal" href="#createClientFileModal">
+                    <i class="fi fi-sr-comment-medical" style="color: #53c536;"></i>
+                    <span style="color: #5d87ff;">เพิ่มไฟล์ใหม่ </span>
+                </a>
+            </div>
+            <div class="table-responsive mb-5">
+                <table id="file-client-table" class="table">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 5%;">#</th>
+                            <th style="width: 50%;">คำอธิบาย</th>
+                            <th class="text-center" style="width: 20%;">ไฟล์</th>
+                            <th class="text-center" style="width: 20%;">รูปภาพ</th>
+                            <th class="text-center" style="width: 5%;"><i class="fa-solid fa-gears"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for file in client_files %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ file.description }}</td>
+                            <td class="text-center">
+                                {% if file.file_client %}
+                                <a href="{% url 'taskcontrol:file_client_download_file' file_id=file.id %}"
+                                    class="btn btn-outline-primary btn-sm me-2" download target="_blank">
+                                    <i class="fi fi-br-download"></i> ดาวน์โหลด
+                                </a>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {% if file.image_client %}
+                                <a href="{% url 'taskcontrol:file_client_download_image' image_id=file.id %}"
+                                    class="btn btn-outline-primary btn-sm me-2" download target="_blank">
+                                    <i class="fi fi-br-download"></i> ดาวน์โหลด
+                                </a>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <button type="button" class="btn btn-outline-danger btn-sm delete-btn"
+                                    data-file-id="{{ file.id }}"
+                                    data-delete-url="{% url 'taskcontrol:file_client_delete' file_id=file.id %}">
+                                    <i class="fa-regular fa-trash-can"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Engagement -->
+            <div class="h5 pb-2 mb-4 text-primary  fw-semibold border-bottom border-primary"> <i class="fi fi-sr-comment-info" style="color: #343a40;"></i> Engagements </div>
             <div class="table-responsive mb-4">
-                <table id="engagement-table" class="table table-bordered">
+                <table id="engagement-table" class="table">
                     <thead class="table-light">
                         <tr>
                             <th class="text-center">#</th>
@@ -357,7 +425,8 @@
                         {% for data in engagement_data %}
                         <tr>
                             <td style="text-align: center;">{{ forloop.counter }}</td>
-                            <td><a href="{% url 'taskcontrol:engagement_detail' engagement_id=data.engagement.id %}" class="fw-semibold">{{ data.engagement.job_code }}</a></td>
+                            <td><a href="{% url 'taskcontrol:engagement_detail' engagement_id=data.engagement.id %}"
+                                    class="fw-semibold">{{ data.engagement.job_code }}</a></td>
                             <td style="text-align: start;">
                                 {% if data.engagement.status == "OPEN_JOB" %}
                                 <span class="badge badge-open"> เปิดงาน</span>
@@ -373,46 +442,46 @@
                             </td>
                             <td class="text-center">
                                 {% if data.engagement.administrator.first_name and data.engagement.administrator.last_name %}
-                                    {{ data.engagement.administrator.first_name }} {{ data.engagement.administrator.last_name }}
+                                {{ data.engagement.administrator.first_name }} {{ data.engagement.administrator.last_name }}
                                 {% else %}
-                                    -
+                                -
                                 {% endif %}
                             </td>
                             <td style="text-align: center;">
                                 {% if data.engagement.start_date_period and data.engagement.end_date_period %}
-                                    {{ data.engagement.start_date_period|date:"d/m/Y" }} - {{ data.engagement.end_date_period|date:"d/m/Y" }}
+                                {{ data.engagement.start_date_period|date:"d/m/Y" }} -
+                                {{ data.engagement.end_date_period|date:"d/m/Y" }}
                                 {% elif data.engagement.start_date_period %}
-                                    {{ data.engagement.start_date_period|date:"d/m/Y" }} - {% if data.engagement.end_date_period_infinity %}ไม่มีกำหนด{% else %}{{ data.engagement.end_date_period_infinity }}{% endif %}
+                                {{ data.engagement.start_date_period|date:"d/m/Y" }} -
+                                {% if data.engagement.end_date_period_infinity %}ไม่มีกำหนด{% else %}{{ data.engagement.end_date_period_infinity }}{% endif %}
                                 {% else %}
-                                    -
+                                -
                                 {% endif %}
                             </td>
                             <td>
                                 {% for engagement_type in data.types %}
-                                    <span class="badge tags-engagement-type"> - {{ engagement_type }}</span><br>
+                                <span class="badge tags-engagement-type"> - {{ engagement_type }}</span><br>
                                 {% empty %}
-                                    <span>ไม่ได้ระบุ</span><br>
+                                <span>ไม่ได้ระบุ</span><br>
                                 {% endfor %}
                             </td>
                             <td>
                                 {% if data.engagement.notes %}
-                                    {{ data.engagement.notes }}
+                                {{ data.engagement.notes }}
                                 {% else %}
-                                    -
+                                -
                                 {% endif %}
                             </td>
                             <td style="text-align: right;">
                                 {% if data.engagement.service_fee %}
-                                    {{ data.engagement.service_fee|intcomma }}
+                                {{ data.engagement.service_fee|intcomma }}
                                 {% else %}
-                                    -
+                                -
                                 {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
-                    
-                    
                 </table>
             </div>
         </div>
@@ -420,14 +489,19 @@
 </div>
 
 <!--Modal Edit Client-->
-<div class="modal fade" id="updateModal{{ client.id }}" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
+<div class="modal fixed-left fade" id="updateModal{{ client.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-aside" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <h1 class="modal-title fs-5 pb-2 mb-3 text-primary fw-semibold border-bottom border-warning"><i class="fi fi-sr-comment-alt-edit" style="color: #ffc300;"></i> แก้ไขข้อมูล {{ client.company_name }}</h1>
+                <h5 class="modal-title pb-2 mb-3 text-primary fw-semibold border-bottom border-warning">
+                    <i class="fi fi-sr-comment-pen" style="color: #ffc300;"></i> แก้ไขข้อมูล 
+                    <span style="color: #2a3547;"><i class="fa-solid fa-angle-left">
+                        </i> {{ client.company_name }} <i class="fa-solid fa-angle-right"></i>
+                    </span>
+                </h5>
                 <form id="updateForm{{ client.id }}" method="post" action="{% url 'taskcontrol:client_update' client_id=client.id %}">
                     {% csrf_token %}
                     <!--Client-->
@@ -521,7 +595,9 @@
 
                     <!--Tax Register-->
                     <div class="mb-4">
-                        <h5 class="pb-2 mb-3 text-primary fw-semibold border-bottom border-warning"><i class="fi fi-sr-comment-alt-edit" style="color: #ffc300;"></i> จดทะเบียน</h5>
+                        <h5 class="pb-2 mb-3 text-primary fw-semibold border-bottom border-warning">
+                            <i class="fi fi-sr-comment-pen" style="color: #ffc300;"></i> จดทะเบียน
+                        </h5>
                         <div class="row mb-3">
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold">จดทะเบียนบริษัท :</label>
@@ -614,9 +690,9 @@
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">ปิด</button>
                         <button type="button" class="btn btn-warning" onclick="showAlert({{ client.id }})">
-                            <i class="fa-solid fa-pen-to-square"></i> แก้ไขข้อมูล
+                            <i class="fa-solid fa-check-to-slot"></i> บันทึกการแก้ไข
                         </button>
                     </div>
                 </form>
@@ -633,14 +709,15 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="h5 pb-2 mb-4 text-primary border-bottom border-primary"> 
+                <div class="h5 pb-2 mb-4 fw-semibold text-primary border-bottom border-primary"> 
                     <a data-bs-toggle="modal" href="#addContactModal{{ contact.id }}">
                         <i class="fi fi-sr-comment-medical" style="color: #53c536;"></i> 
                     </a>
-                    <span>ผู้ติดต่อ</span>
-                    <i class="fas fa-chevron-left"></i>
-                    {{ client.company_name }}
-                    <i class="fas fa-chevron-right"></i>
+                    <span>เพิ่มผู้ติดต่อใหม่</span>
+                    <span style="color: #2a3547;"><i class="fas fa-chevron-left"></i>
+                        {{ client.company_name }}
+                        <i class="fas fa-chevron-right"></i>
+                    </span>
                 </div>
                 <form id="createContactForm" method="post" action="{% url 'taskcontrol:create_contact' client_id=client.id %}">
                     {% csrf_token %}
@@ -707,8 +784,47 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">ปิด</button>
                 <button type="button" id="submitContactBtn" class="btn btn-primary"><i class="fa-solid fa-plus"></i> เพิ่มผู้ติดต่อ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Create Client File -->
+<div class="modal fade" id="createClientFileModal" tabindex="-1" aria-labelledby="createClientFileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h5 class="modal-title pb-2 mb-4 text-primary fw-semibold border-bottom border-primary" id="createClientFileModalLabel">
+                    <i class="fi fi-br-clip" style="color: #ffc300;"></i> เพิ่มไฟล์ใหม่
+                    <span style="color: #2a3547;"><i class="fas fa-chevron-left"></i>
+                        {{ client.company_name }}
+                        <i class="fas fa-chevron-right"></i>
+                    </span> 
+                </h5>
+                <form method="post" enctype="multipart/form-data" action="{% url 'taskcontrol:file_client_create' client_id=client.id %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="c_description" class="form-label">คำอธิบาย :</label>
+                        <input type="text" name="c_description" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="c_file" class="form-label">ไฟล์ :</label>
+                        <input type="file" name="c_file" class="form-control" accept=".pdf, .doc, .docx, .txt">
+                    </div>
+                    <div class="mb-3">
+                        <label for="c_image" class="form-label">รูปภาพ :</label>
+                        <input type="file" name="c_image" class="form-control" accept="image/*">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">ปิด</button>
+                        <button type="submit" class="btn btn-primary">อัปโหลดไฟล์</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -716,12 +832,8 @@
 
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!-- Popper.js -->
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
-<!-- Bootstrap JS -->
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.min.js"></script>
-<!-- SweetAlert2 JavaScript -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.0/dist/sweetalert2.all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
     function showAlert(clientId) {
@@ -751,8 +863,8 @@
             }
         });
     }
-    
 </script>
+
 
 <script>
     const getDistrictUrl = "{% url 'taskcontrol:GetDistrict' %}";
@@ -1035,7 +1147,77 @@
                 }
             }
         });
+
+        const clientTable = $("#file-client-table").DataTable({
+            "language": {
+                "search": "ค้นหา",
+                "lengthMenu": "แสดง _MENU_ รายการ",
+                "info": "แสดง _START_ ถึง _END_ จากทั้งหมด _TOTAL_ รายการ",
+                "paginate": {
+                    "previous": "ก่อนหน้า",
+                    "next": "ถัดไป"
+                }
+            }
+        });
     });
 </script>
 
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const deleteButtons = document.querySelectorAll(".delete-btn");
+        deleteButtons.forEach(button => {
+            button.addEventListener("click", function() {
+                handleDelete(this);
+            });
+        });
+
+        function handleDelete(button) {
+            const fileId = button.getAttribute("data-file-id");
+            const confirmation = confirm("ต้องการลบประเภทงานนี้ ?");
+            if (confirmation) {
+                const deleteUrl = button.getAttribute("data-delete-url");
+                fetch(deleteUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCsrfToken(),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ file_id: fileId })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error deleting item. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                    alert('Error deleting item. Please try again.');
+                });
+            }
+        }
+
+        function getCsrfToken() {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, 'csrftoken'.length + 1) === ('csrftoken=')) {
+                        cookieValue = decodeURIComponent(cookie.substring('csrftoken'.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
 {% endblock content %}

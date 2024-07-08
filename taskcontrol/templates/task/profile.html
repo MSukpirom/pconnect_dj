@@ -1,0 +1,292 @@
+{% extends 'task/index.html' %}
+{% block content %}
+{% load static %}
+<style>
+    .card {
+        border-radius: 20px;
+    }
+    .profile-container {
+        background: #50ffdf;
+        margin-top: 5px;
+        border-radius: 15px;
+        padding: 10px;
+    }
+    .profile-header {
+        text-align: center;
+    }
+    .profile-header img {
+        border-radius: 50%;
+        margin-bottom: 20px;
+    }
+    .profile-details {
+        background: #fff;
+        padding: 20px;
+        border-radius: 15px;
+    }
+    @media (max-width: 767px) {
+        .profile-container {
+            margin-top: 20px;
+        }
+        .profile-header h2 {
+            font-size: 1.5rem;
+        }
+        .profile-details {
+            padding: 15px;
+        }
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-3 col-sm-12 mb-4 text-center">
+        <div class="card">
+            <div class="card-body">
+                <img src="{% static 'assets/images/profile/user-1.jpg' %}" alt="Profile Picture" class="img-fluid rounded-circle mb-3" width="150" height="150">
+                <h5>{{ user.first_name }} {{ user.last_name }}</h5>
+                <p class="text-start"><strong>ผู้ใช้งาน :</strong> {{ user.username }}</p>
+                <p class="text-start"><strong>อีเมล :</strong> {{ user.email }}</p>
+                <p class="col-md-12 mb-4 text-start">
+                    <strong>สถานะ :</strong>
+                    {% if user.is_staff %}
+                        <span class="badge bg-info">Staff</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Not Staff</span>
+                    {% endif %}
+        
+                    {% if user.is_active %}
+                        <span class="badge bg-success">Active</span>
+                    {% else %}
+                        <span class="badge bg-danger">Inactive</span>
+                    {% endif %}
+        
+                    {% if user.is_superuser %}
+                        <span class="badge bg-primary">Super</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Not Super</span>
+                    {% endif %}
+                </p>
+                <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                    เปลี่ยนรหัสผ่าน
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Change Password -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changePasswordModalLabel">เปลี่ยนรหัสผ่าน</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="changePasswordForm">
+                        <div class="mb-3">
+                            <label for="currentPassword" class="form-label">รหัสผ่านเดิม :</label>
+                            <input type="password" class="form-control" id="currentPassword" name="currentPassword">
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">รหัสผ่านใหม่ :</label>
+                            <input type="password" class="form-control" id="newPassword" name="newPassword">
+                            <ul>
+                                <li style="color: tomato; font-size: 11px;">- ตัวเลขอย่างน้อย 4 ตัว [0-9]</li>
+                                <li style="color: tomato; font-size: 11px;">- ตัวอักขระพิเศษ 1 ตัว [!@#$%^&*(),.?":{}|&lt;&gt;]</li>
+                                <li style="color: tomato; font-size: 11px;">- ตัวอักษรใหญ่ 1 ตัว [A-Z]</li>
+                            </ul>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">ยืนยันรหัสผ่านใหม่ :</label>
+                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword">
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="showPassword">
+                            <label class="form-check-label" for="showPassword">แสดงรหัสผ่าน</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">ปิด</button>
+                    <button type="button" class="btn btn-primary" onclick="changePassword()">บันทึกเปลี่ยนรหัสผ่าน</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-5 col-sm-12 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="engagement-details">
+                    <h5>All Engagements <span class="badge bg-primary fw-semibold">{{ count_engagement_details }}</span></h5>
+                    {% for engagement, engagement_details in engagement_details_by_engagement.items %}
+                    <h6>
+                        <button class="btn btn-outline-primary toggle-collapse-engagement" type="button" data-bs-toggle="collapse" data-target="#collapseEngagement{{ engagement.id }}" aria-expanded="false" aria-controls="collapseEngagement{{ engagement.id }}">
+                            <i class="fa-solid fa-caret-right me-2"></i> {{ engagement.job_code }}
+                        </button>
+                        
+                    </h6>
+                    <div class="collapse" id="collapseEngagement{{ engagement.id }}">
+                        <table class="table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>ประเภทงาน</th>
+                                    <th>เดดไลน์</th>
+                                    <th>ผู้รับผิดชอบ</th>
+                                    <th>ผู้ตรวจทาน</th>
+                                    <th>ผู้อนุมัติ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for detail in engagement_details %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ detail.engagement_category.name_th }} <i class="fa-solid fa-angle-right"></i> {{ detail.engagement_type.name_th }}</td>
+                                    <td>{{ detail.deadline }}</td>
+                                    <td>{{ detail.engagement.administrator.first_name }} {{ detail.engagement.administrator.last_name }}</td>
+                                    <td>{{ detail.engagement.reviewer.first_name }} {{ detail.engagement.reviewer.last_name }}</td>
+                                    <td>{{ detail.engagement.approver.first_name }} {{ detail.engagement.approver.last_name }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 col-sm-12 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="engagement-details">
+                    <h5>All Tasks <span class="badge bg-primary fw-semibold">{{ tasks.count }}</span></h5>
+                    {% for task in tasks %}
+                    <h6>
+                        <button class="btn btn-outline-primary toggle-collapse-task" type="button" data-bs-toggle="collapse" data-target="#collapseTask{{ task.id }}" aria-expanded="false" aria-controls="collapseTask{{ task.id }}">
+                            <i class="fa-solid fa-caret-right me-2"></i> {{ task.number }}
+                        </button>
+                        
+                        
+                    </h6>
+                    <div class="collapse" id="collapseTask{{ task.id }}">
+                        <table class="table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Client</th>
+                                    <th>Job</th>
+                                    <th>Description</th>
+                                    <th>Due Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ task.client.company_name }}</td>
+                                    <td>{{ task.new_job }}</td>
+                                    <td>{{ task.description }}</td>
+                                    <td>{{ task.due_date }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // Toggle collapse for Engagements
+        $('.toggle-collapse-engagement').click(function() {
+            var targetId = $(this).attr('data-target'); // เปลี่ยนจาก 'data-bs-target' เป็น 'data-target'
+            $(targetId).collapse('toggle');
+        });
+
+        // Toggle collapse for Tasks
+        $('.toggle-collapse-task').click(function() {
+            var targetId = $(this).attr('data-target'); // เปลี่ยนจาก 'data-bs-target' เป็น 'data-target'
+            $(targetId).collapse('toggle');
+        });
+    });
+</script>
+
+<script>
+    function changePassword() {
+        var currentPassword = document.getElementById('currentPassword').value;
+        var newPassword = document.getElementById('newPassword').value;
+        var confirmPassword = document.getElementById('confirmPassword').value;
+
+        var regexDigit = /[0-9]{4,}/;
+        var regexSpecialChar = /[!@#$%^&*(),.?":{}|<>]/;
+        var regexUpperCase = /[A-Z]/;
+
+        if (!regexDigit.test(newPassword)) {
+            alert('รหัสผ่านต้องมีตัวเลขอย่างน้อย 4 ตัว');
+            return;
+        }
+
+        if (!regexSpecialChar.test(newPassword)) {
+            alert('รหัสผ่านต้องมีอักขระพิเศษอย่างน้อย 1 ตัว');
+            return;
+        }
+
+        if (!regexUpperCase.test(newPassword)) {
+            alert('รหัสผ่านต้องมีตัวอักษรใหญ่อย่างน้อย 1 ตัว');
+            return;
+        }
+
+        // Check if new password and confirm password match
+        if (newPassword !== confirmPassword) {
+            alert('รหัสผ่านใหม่และยืนยันรหัสผ่านไม่ตรงกัน');
+            return;
+        }
+
+        // Example of sending AJAX request to change password
+        $.ajax({
+            url: '{% url "taskcontrol:change_password" %}',
+            type: 'POST',
+            data: {
+                current_password: currentPassword,
+                new_password: newPassword,
+                confirm_password: confirmPassword,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(response) {
+                // Handle success response
+                alert('เปลี่ยนรหัสผ่านเรียบร้อยแล้ว!');
+                $('#changePasswordModal').modal('hide');
+                location.reload(); // Reload page after success
+            },
+            error: function(xhr, status, error) {
+                // Handle error response
+                alert('ไม่สามารถเปลี่ยนรหัสผ่านได้ กรุณาลองอีกครั้ง');
+            }
+        });
+    }
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var showPasswordCheckbox = document.getElementById('showPassword');
+        var currentPasswordInput = document.getElementById('currentPassword');
+        var newPasswordInput = document.getElementById('newPassword');
+        var confirmPasswordInput = document.getElementById('confirmPassword');
+
+        showPasswordCheckbox.addEventListener('change', function() {
+            var type = this.checked ? 'text' : 'password';
+            currentPasswordInput.type = type;
+            newPasswordInput.type = type;
+            confirmPasswordInput.type = type;
+        });
+    });
+</script>
+
+
+{% endblock %}

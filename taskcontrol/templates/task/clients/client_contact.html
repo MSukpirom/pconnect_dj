@@ -2,14 +2,7 @@
 {% block content %}
 {% load static %}
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Bai+Jamjuree:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,200;1,300;1,400;1,500;1,600;1,700&display=swap');
-
-    .card {
-        margin-top: 1rem;
-    }
-
     .card, .card-body {
-        box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
         background-color: #eaf4ff;
         border-radius: 20px;
     }
@@ -198,245 +191,251 @@
     <div class="alert alert-danger">{{ error_message }}</div>
 {% endif %}
 
-<div class="card">
-    <div class="card-body">
-        <div id="multi-step-form-container">
-            <ul class="form-stepper form-stepper-horizontal text-center mx-auto pl-0 ">
-                <!-- Step 1 -->
-                <li class="form-stepper-unfinished text-center form-stepper-list">
-                    <a class="mx-2">
-                        <span class="number-step"><i class="fi fi-sr-skill-user"></i></span>
-                        <div class="number-lable">ข้อมูลลูกค้า</div>
-                        <span class="form-stepper-circle text-muted">
-                            <span><i class="fa-solid fa-circle-check fa-lg"></i></span>
-                        </span>
-                    </a>
-                </li>
-                <!-- Step 2 -->
-                <li class="form-stepper-unfinished text-center form-stepper-list">
-                    <a class="mx-2">
-                        <span class="number-step"><i class="fi fi-sr-comment-user"></i></span>
-                        <div class="number-lable"> ผู้ติดต่อ</div>
-                        <span class="form-stepper-circle text-muted">
-                            <span><i class="fa-regular fa-circle-dot fa-lg"></i></span>
-                        </span>
-                    </a>
-                </li>
-                <!-- Step 3 -->
-                <li class="form-stepper-unfinished text-center form-stepper-list">
-                    <a class="mx-2">
-                        <span class="number-step"><i class="fi fi-sr-user-lock"></i></span>
-                        <div class="number-lable">รหัสผ่าน</div>
-                        <span class="form-stepper-circle text-muted">
-                            <span><i class="fa-regular fa-circle fa-lg"></i></span>
-                        </span>
-                    </a>
-                </li>
-                <!-- Step 4 -->
-                <li class="form-stepper-unfinished text-center form-stepper-list">
-                    <a class="mx-2">
-                        <span class="number-step"><i class="fi fi-sr-document"></i></span>
-                        <div class="number-lable">แนบไฟล์</div>
-                        <span class="form-stepper-circle text-muted">
-                            <span><i class="fa-regular fa-circle fa-lg"></i></span>
-                        </span>
-                    </a>
-                </li>
-            </ul>
+<div class="row">
+    <div class="card">
+        <div class="card-body">
+            <div id="multi-step-form-container">
+                <ul class="form-stepper form-stepper-horizontal text-center mx-auto pl-0 ">
+                    <!-- Step 1 -->
+                    <li class="form-stepper-unfinished text-center form-stepper-list">
+                        <a class="mx-2">
+                            <span class="number-step"><i class="fi fi-sr-user-add"></i></span>
+                            <div class="number-lable">ข้อมูลลูกค้า</div>
+                            <span class="form-stepper-circle text-muted">
+                                <span><i class="fa-solid fa-circle-check fa-lg"></i></span>
+                            </span>
+                        </a>
+                    </li>
+                    <!-- Step 2 -->
+                    <li class="form-stepper-unfinished text-center form-stepper-list">
+                        <a class="mx-2">
+                            <span class="number-step"><i class="fi fi-sr-member-list"></i></span>
+                            <div class="number-lable"> ผู้ติดต่อ</div>
+                            <span class="form-stepper-circle text-muted">
+                                <span><i class="fa-regular fa-circle-dot fa-lg"></i></span>
+                            </span>
+                        </a>
+                    </li>
+                    <!-- Step 3 -->
+                    <li class="form-stepper-unfinished text-center form-stepper-list">
+                        <a class="mx-2">
+                            <span class="number-step"><i class="fi fi-sr-user-lock"></i></span>
+                            <div class="number-lable">รหัสผ่าน</div>
+                            <span class="form-stepper-circle text-muted">
+                                <span><i class="fa-regular fa-circle fa-lg"></i></span>
+                            </span>
+                        </a>
+                    </li>
+                    <!-- Step 4 -->
+                    <li class="form-stepper-unfinished text-center form-stepper-list">
+                        <a class="mx-2">
+                            <span class="number-step"><i class="fi fi-br-clip"></i></span>
+                            <div class="number-lable">แนบไฟล์</div>
+                            <span class="form-stepper-circle text-muted">
+                                <span><i class="fa-regular fa-circle fa-lg"></i></span>
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+    
+                <section class="form-step">
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'taskcontrol:record_client' client_id=client.id %}" class="btn btn-outline-dark btn-sm"><i class="fa-solid fa-angles-left"></i></a>
+                        <a href="{% url 'taskcontrol:create_password' client_id=client.id %}" class="btn btn-dark btn-sm"><i class="fa-solid fa-angles-right"></i></a>
+                    </div>
 
-            <section class="form-step">
-                <!-- Button trigger modal -->
-                <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-4">
-                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                        <i class="fa-solid fa-plus"></i> เพิ่มผู้ติดต่อใหม่
-                    </button>
-                </div>
-
-                <!-- Modal -->
-                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                {% if error_message %}
-                                    <div class="alert alert-danger" role="alert">
-                                        {{ error_message }}
-                                    </div>
-                                {% endif %}
-                                <form id="createContactForm" method="post" action="{% url 'taskcontrol:create_contact' client_id=client.id %}">
-                                    {% csrf_token %}
-                                    <div class="h5 pb-2 mb-4 text-primary border-bottom border-primary"> ผู้ติดต่อ
+                    <!-- Button trigger modal -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-4">
+                        <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                            <i class="fa-solid fa-plus"></i> เพิ่มผู้ติดต่อใหม่
+                        </button>
+                    </div>
+    
+                    <!-- Modal -->
+                    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <div class="h5 pb-2 mb-4 text-primary border-bottom border-primary"> เพิ่มผู้ติดต่อใหม่
                                         <i class="fas fa-chevron-left"></i>
                                         {{ client.company_name }}
                                         <i class="fas fa-chevron-right"></i>
                                     </div>
-                                    <div class="row mb-3">
-                                        <div class="col-md-4">
-                                            <label for="ct_name" class="form-label fw-semibold">ชื่อ :</label>
-                                            <input type="text" name="ct_name" id="ct_name" class="form-control" required/>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    {% if error_message %}
+                                        <div class="alert alert-danger" role="alert">
+                                            {{ error_message }}
                                         </div>
-                                        <div class="col-md-4">
-                                            <label for="ct_position" class="form-label fw-semibold">ตำแหน่ง :</label>
-                                            <input type="text" name="ct_position" id="ct_position" class="form-control" required/>
+                                    {% endif %}
+                                    <form id="createContactForm" method="post" action="{% url 'taskcontrol:create_contact' client_id=client.id %}">
+                                        {% csrf_token %}
+                                        
+                                        <div class="row mb-3">
+                                            <div class="col-md-4">
+                                                <label for="ct_name" class="form-label fw-semibold">ชื่อ :</label>
+                                                <input type="text" name="ct_name" id="ct_name" class="form-control" required/>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label for="ct_position" class="form-label fw-semibold">ตำแหน่ง :</label>
+                                                <input type="text" name="ct_position" id="ct_position" class="form-control" required/>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label for="ct_phone" class="form-label fw-semibold">เบอร์ติดต่อ :</label>
+                                                <input type="text" name="ct_phone" id="ct_phone" class="form-control" maxlength="10" required/>
+                                            </div>
                                         </div>
-                                        <div class="col-md-4">
-                                            <label for="ct_phone" class="form-label fw-semibold">เบอร์ติดต่อ :</label>
-                                            <input type="text" name="ct_phone" id="ct_phone" class="form-control" maxlength="10" required/>
+                                        <div class="row mb-3">
+                                            <div class="col-md-4">
+                                                <label for="" class="form-label fw-semibold">อีเมล :</label>
+                                                <input type="text" name="ct_email" id="ct_email" class="form-control" />
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label for="" class="form-label fw-semibold">ไลน์ :</label>
+                                                <input type="text" name="ct_line" id="ct_line" class="form-control" />
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label for="" class="form-label fw-semibold">ช่องทางติดต่ออื่นๆ :</label>
+                                                <input type="text" name="ct_other" id="ct_other" class="form-control" />
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <div class="col-md-4">
-                                            <label for="" class="form-label fw-semibold">อีเมล :</label>
-                                            <input type="text" name="ct_email" id="ct_email" class="form-control" />
+                                        <div class="row mb-3">
+                                            <div class="col-md-12">
+                                                <label for="" class="form-label fw-semibold">ที่อยู่&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                                                <input type="checkbox" class="form-check-input" name="ct_address2" id="ct_address2"
+                                                    value="{{ client.company_address.address }} {{ client.company_address.subdistrict.name_th }} {{ client.company_address.district.name_th }} {{ client.company_address.province.name_th }} {{ client.company_address.subdistrict.zipcode }}"
+                                                    onchange="copyCompanyAddress()" />
+                                                <label for="ct_address2"
+                                                    class="form-label fw-semibold">&nbsp;ใช้ที่อยู่เหมือนบริษัท</label>
+                                                <input type="text" class="form-control" name="ct_address" id="ct_address" />
+                                            </div>
                                         </div>
-                                        <div class="col-md-4">
-                                            <label for="" class="form-label fw-semibold">ไลน์ :</label>
-                                            <input type="text" name="ct_line" id="ct_line" class="form-control" />
+    
+                                        <div class="row mb-3">
+                                            <div class="col-md-4">
+                                                <select name="ct_province" id="province2" class="form-select">
+                                                    <option value selected disabled hidden>จังหวัด</option>
+                                                    {% for p in provinces %}
+                                                    <option value="{{ p.id }}">{{ p.name_th }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <select name="ct_district" id="district2" class="form-select">
+                                                    <option value="" selected disabled hidden>อำเภอ/เขต</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <select name="ct_subdistrict" id="subdistrict2" class="form-select">
+                                                    <option value="" selected disabled hidden>ตำบล/แขวง/รหัสไปรษณีย์</option>
+                                                </select>
+                                            </div>
                                         </div>
-                                        <div class="col-md-4">
-                                            <label for="" class="form-label fw-semibold">ช่องทางติดต่ออื่นๆ :</label>
-                                            <input type="text" name="ct_other" id="ct_other" class="form-control" />
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <div class="col-md-12">
-                                            <label for="" class="form-label fw-semibold">ที่อยู่&nbsp;&nbsp;&nbsp;&nbsp;</label>
-                                            <input type="checkbox" class="form-check-input" name="ct_address2" id="ct_address2"
-                                                value="{{ client.company_address.address }} {{ client.company_address.subdistrict.name_th }} {{ client.company_address.district.name_th }} {{ client.company_address.province.name_th }} {{ client.company_address.subdistrict.zipcode }}"
-                                                onchange="copyCompanyAddress()" />
-                                            <label for="ct_address2"
-                                                class="form-label fw-semibold">&nbsp;ใช้ที่อยู่เหมือนบริษัท</label>
-                                            <input type="text" class="form-control" name="ct_address" id="ct_address" />
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3">
-                                        <div class="col-md-4">
-                                            <select name="ct_province" id="province2" class="form-select">
-                                                <option value selected disabled hidden>จังหวัด</option>
-                                                {% for p in provinces %}
-                                                <option value="{{ p.id }}">{{ p.name_th }}</option>
-                                                {% endfor %}
-                                            </select>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <select name="ct_district" id="district2" class="form-select">
-                                                <option value="" selected disabled hidden>อำเภอ/เขต</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <select name="ct_subdistrict" id="subdistrict2" class="form-select">
-                                                <option value="" selected disabled hidden>ตำบล/แขวง/รหัสไปรษณีย์</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
-                                <button type="button" id="submitContactBtn" class="btn btn-primary"><i class="fa-solid fa-plus"></i> เพิ่มผู้ติดต่อ</button>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">ปิด</button>
+                                    <button type="button" id="submitContactBtn" class="btn btn-primary"><i class="fa-solid fa-plus"></i> เพิ่มผู้ติดต่อ</button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="table-responsive mb-4">
-                    <table id="contact-table" class="table">
-                        <thead class="table-light">
-                            <tr>
-                                <th style="width: 5%;">#</th>
-                                <th style="width: 20%;">ผู้ติดต่อ</th>
-                                <th style="width: 5%;">ตำแหน่ง</th>
-                                <th style="width: 10%; text-align: center;"><i class="fa-solid fa-phone-volume"></i></th>
-                                <th style="width: 10%; text-align: center;"><i class="fa-solid fa-inbox"></i></th>
-                                <th style="width: 10%; text-align: center;"><i class="fa-brands fa-line"></i></th>
-                                <th style="width: 25%; text-align: center;"><i class="fa-solid fa-map-location-dot"></i></th>
-                                <th style="width: 10%; text-align: center;"><i class="fa-solid fa-comment-dots"></i></th>
-                                <th style="width: 5%; text-align: center;"><i class="fa-solid fa-gears"></i></th>
-                            </tr>
-                        </thead>
-                        <tbody class="table-group-divider">
-                            {% for c in contacts %}
-                            <tr>
-                                <td class="text-center">{{ forloop.counter }}</td>
-                                <td>
-                                    {% if c.name %}
-                                    {{ c.name }}
-                                    {% else %}
-                                    -
-                                    {% endif %}
-                                </td>
-                                <td class="text-center">
-                                    {% if c.position %}
-                                    {{ c.position }}
-                                    {% else %}
-                                    -
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if c.phone %}
-                                    {{ c.phone }}
-                                    {% else %}
-                                    -
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if c.email %}
-                                    {{ c.email }}
-                                    {% else %}
-                                    -
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if c.line %}
-                                    {{ c.line }}
-                                    {% else %}
-                                    -
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if c.address.address %}
-                                    {{ c.address.address }}
-                                    {{ c.address.subdistrict.name_th }}
-                                    {{ c.address.district.name_th }}
-                                    {{ c.address.province.name_th }}
-                                    {{ c.address.subdistrict.zipcode }}
-                                    {% elif c.address.address2 %}
-                                    {{ c.address.address2 }}
-                                    {{ c.address.subdistrict.name_th }}
-                                    {{ c.address.district.name_th }}
-                                    {{ c.address.province.name_th }}
-                                    {{ c.address.subdistrict.zipcode }}
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if c.other %}
-                                    {{ c.other }}
-                                    {% else %}
-                                    -
-                                    {% endif %}
-                                </td>
-                                <td class="text-center">
-                                    <button class="btn btn-outline-danger btn-sm delete-contact-btn" data-contact-id="{{ c.id }}"><i class="fa-regular fa-trash-can"></i></button>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                <input type="hidden" id="delete-contact-url" value="{% url 'taskcontrol:delete_contact' contact_id=0 %}">
-                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                    <a href="{% url 'taskcontrol:record_client' client_id=client.id %}" class="btn btn-outline-dark"><i class="fa-solid fa-arrow-left-long"></i> ย้อนกลับ</a>
-                    <a href="{% url 'taskcontrol:create_password' client_id=client.id %}" class="btn btn-dark">ถัดไป <i class="fa-solid fa-arrow-right-long"></i></a>
-                </div>
-            </section>
+    
+                    <div class="table-responsive mb-4">
+                        <table id="contact-table" class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 5%;">#</th>
+                                    <th style="width: 20%;">ผู้ติดต่อ</th>
+                                    <th style="width: 5%;">ตำแหน่ง</th>
+                                    <th style="width: 10%; text-align: center;"><i class="fa-solid fa-phone-volume"></i></th>
+                                    <th style="width: 10%; text-align: center;"><i class="fa-solid fa-inbox"></i></th>
+                                    <th style="width: 10%; text-align: center;"><i class="fa-brands fa-line"></i></th>
+                                    <th style="width: 25%; text-align: center;"><i class="fa-solid fa-map-location-dot"></i></th>
+                                    <th style="width: 10%; text-align: center;"><i class="fa-solid fa-comment-dots"></i></th>
+                                    <th style="width: 5%; text-align: center;"><i class="fa-solid fa-gears"></i></th>
+                                </tr>
+                            </thead>
+                            <tbody class="table-group-divider">
+                                {% for c in contacts %}
+                                <tr>
+                                    <td class="text-center">{{ forloop.counter }}</td>
+                                    <td>
+                                        {% if c.name %}
+                                        {{ c.name }}
+                                        {% else %}
+                                        -
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if c.position %}
+                                        {{ c.position }}
+                                        {% else %}
+                                        -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if c.phone %}
+                                        {{ c.phone }}
+                                        {% else %}
+                                        -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if c.email %}
+                                        {{ c.email }}
+                                        {% else %}
+                                        -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if c.line %}
+                                        {{ c.line }}
+                                        {% else %}
+                                        -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if c.address.address %}
+                                        {{ c.address.address }}
+                                        {{ c.address.subdistrict.name_th }}
+                                        {{ c.address.district.name_th }}
+                                        {{ c.address.province.name_th }}
+                                        {{ c.address.subdistrict.zipcode }}
+                                        {% elif c.address.address2 %}
+                                        {{ c.address.address2 }}
+                                        {{ c.address.subdistrict.name_th }}
+                                        {{ c.address.district.name_th }}
+                                        {{ c.address.province.name_th }}
+                                        {{ c.address.subdistrict.zipcode }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if c.other %}
+                                        {{ c.other }}
+                                        {% else %}
+                                        -
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-outline-danger btn-sm delete-contact-btn" data-contact-id="{{ c.id }}"><i class="fa-regular fa-trash-can"></i></button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <input type="hidden" id="delete-contact-url" value="{% url 'taskcontrol:delete_contact' contact_id=0 %}">
+                </section>
+            </div>
         </div>
     </div>
 </div>
 
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 <script>

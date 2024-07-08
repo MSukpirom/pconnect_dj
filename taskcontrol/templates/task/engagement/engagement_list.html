@@ -2,6 +2,10 @@
 {% block content %}
 
 <style>
+    .card {
+        border-radius: 20px;
+    }
+
     .all-job, .open-job-all, .close-job-all, .status-open, .status-in-progress, .status-review, .status-pend-client, .status-done, .tags-job {
         font-weight: 500;
         border-radius: 8px;
@@ -118,11 +122,11 @@
                                 {% for detail in engagement_details %}
                                     {% if detail.engagement == engagement and detail.engagement_category.name_th == 'บัญชี' %}
                                         {% if detail.type == "ครั้งเดียว" %}
-                                            <span class="badge tags-job"><i class="fa-solid fa-check-double fa-2xs"></i> {{ detail.type }}</span><br>
+                                            <span class="badge tags-job mb-2"><i class="fa-solid fa-check-double fa-2xs"></i> {{ detail.type }}</span><br>
                                         {% elif detail.type == "รายเดือน" %}
-                                            <span class="badge tags-job"><i class="fa-solid fa-check-double fa-2xs"></i> {{ detail.type }}</span><br>
+                                            <span class="badge tags-job mb-2"><i class="fa-solid fa-check-double fa-2xs"></i> {{ detail.type }}</span><br>
                                         {% else %}
-                                            <span class="badge tags-job"><i class="fa-solid fa-check-double fa-2xs"></i> {{ detail.type }}</span><br>
+                                            <span class="badge tags-job mb-2"><i class="fa-solid fa-check-double fa-2xs"></i> {{ detail.type }}</span><br>
                                         {% endif %}
                                     {% endif %}
                                 {% endfor %}
@@ -132,11 +136,11 @@
                                 {% for detail in engagement_details %}
                                     {% if detail.engagement == engagement and detail.engagement_category.name_th == 'ภาษี' %}
                                         {% if detail.type == "ครั้งเดียว" %}
-                                            <span class="badge tags-job"><i class="fa-solid fa-check-double fa-2xs"></i> {{ detail.type }}</span><br>
+                                            <span class="badge tags-job mb-2"><i class="fa-solid fa-check-double fa-2xs"></i> {{ detail.type }}</span><br>
                                         {% elif detail.type == "รายเดือน" %}
-                                            <span class="badge tags-job"><i class="fa-solid fa-check-double fa-2xs"></i> {{ detail.type }}</span><br>
+                                            <span class="badge tags-job mb-2"><i class="fa-solid fa-check-double fa-2xs"></i> {{ detail.type }}</span><br>
                                         {% else %}
-                                            <span class="badge tags-job"><i class="fa-solid fa-check-double fa-2xs"></i> {{ detail.type }}</span><br>
+                                            <span class="badge tags-job mb-2"><i class="fa-solid fa-check-double fa-2xs"></i> {{ detail.type }}</span><br>
                                         {% endif %}
                                     {% endif %}
                                 {% endfor %}
@@ -145,11 +149,11 @@
                                 {% for detail in engagement_details %}
                                     {% if detail.engagement == engagement and detail.engagement_category.name_th == 'เงินเดือน' %}
                                         {% if detail.type == "ครั้งเดียว" %}
-                                            <span class="badge tags-job"><i class="fa-solid fa-check-double fa-2xs"></i> {{ detail.type }}</span><br>
+                                            <span class="badge tags-job mb-2"><i class="fa-solid fa-check-double fa-2xs"></i> {{ detail.type }}</span><br>
                                         {% elif detail.type == "รายเดือน" %}
-                                            <span class="badge tags-job"><i class="fa-solid fa-check-double fa-2xs"></i> {{ detail.type }}</span><br>
+                                            <span class="badge tags-job mb-2"><i class="fa-solid fa-check-double fa-2xs"></i> {{ detail.type }}</span><br>
                                         {% else %}
-                                            <span class="badge tags-job"><i class="fa-solid fa-check-double fa-2xs"></i> {{ detail.type }}</span><br>
+                                            <span class="badge tags-job mb-2"><i class="fa-solid fa-check-double fa-2xs"></i> {{ detail.type }}</span><br>
                                         {% endif %}
                                     {% endif %}
                                 {% endfor %}
@@ -158,11 +162,11 @@
                                 {% for detail in engagement_details %}
                                     {% if detail.engagement == engagement and detail.engagement_category.name_th == 'รายงาน' %}
                                         {% if detail.engagement_type.name_th == "เลเวล 1" %}
-                                                <span class="badge tags-job"><i class="fa-solid fa-check-double fa-2xs"></i> {{ detail.engagement_type.name_th }}</span><br>
+                                                <span class="badge tags-job mb-2"><i class="fa-solid fa-check-double fa-2xs"></i> {{ detail.engagement_type.name_th }}</span><br>
                                             {% elif detail.engagement_type.name_th == "เลเวล 2" %}
-                                                <span class="badge tags-job"><i class="fa-solid fa-check-double fa-2xs"></i> {{ detail.engagement_type.name_th }}</span><br>
+                                                <span class="badge tags-job mb-2"><i class="fa-solid fa-check-double fa-2xs"></i> {{ detail.engagement_type.name_th }}</span><br>
                                             {% else %}
-                                                <span class="badge tags-job"><i class="fa-solid fa-check-double fa-2xs"></i> {{ detail.engagement_type.name_th }}</span><br>
+                                                <span class="badge tags-job mb-2"><i class="fa-solid fa-check-double fa-2xs"></i> {{ detail.engagement_type.name_th }}</span><br>
                                             {% endif %}
                                     {% endif %}
                                 {% endfor %}
@@ -182,14 +186,22 @@
     </div>
 </div>
 
+<!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Bootstrap Bundle JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+<!-- DataTables core and Bootstrap 5 integration -->
 <script src="https://cdn.datatables.net/2.0.8/js/dataTables.js"></script>
 <script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.js"></script>
+
+<!-- DataTables extensions -->
 <script src="https://cdn.datatables.net/searchpanes/2.3.1/js/dataTables.searchPanes.js"></script>
 <script src="https://cdn.datatables.net/searchpanes/2.3.1/js/searchPanes.bootstrap5.js"></script>
 <script src="https://cdn.datatables.net/select/2.0.2/js/dataTables.select.js"></script>
 <script src="https://cdn.datatables.net/select/2.0.2/js/select.bootstrap5.js"></script>
+
 
 <script>
     // Initializing DataTable

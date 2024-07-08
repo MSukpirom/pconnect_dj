@@ -1,21 +1,17 @@
 {% extends 'task/index.html' %} {% block content %}
 <style>
+    .card, .card-body {
+        box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+        background-color: #eaf4ff;
+        border-radius: 20px;
+    }
+
     tr.group,
     tr.group:hover {
     background-color: #e4edf4;
         td {
             font-weight: bold;
         }
-    }
-
-    .card {
-        margin-top: 1rem;
-    }
-
-    .card, .card-body {
-        box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
-        background-color: #eaf4ff;
-        border-radius: 20px;
     }
 
     .text-center {
@@ -186,199 +182,203 @@
 
 </style>
 
-<div class="card">
-    <div class="card-body">
-        <ul class="form-stepper form-stepper-horizontal text-center mx-auto pl-0 ">
-            <!-- Step 1 -->
-            <li class="form-stepper-unfinished text-center form-stepper-list">
-                <a class="mx-2">
-                    <span class="number-step"><i class="fi fi-sr-add-document"></i></span>
-                    <div class="number-lable">Engagement</div>
-                    <span class="form-stepper-circle text-muted">
-                        <span><i class="fa-solid fa-circle-check fa-lg"></i></span>
-                    </span>
-                </a>
-            </li>
-            <!-- Step 2 -->
-            <li class="form-stepper-unfinished text-center form-stepper-list">
-                <a class="mx-2">
-                    <span class="number-step"><i class="fi fi-sr-document"></i></span>
-                    <div class="number-lable">รายละเอียดงาน</div>
-                    <span class="form-stepper-circle text-muted">
-                        <span><i class="fa-regular fa-circle-dot fa-lg"></i></span>
-                    </span>
-                </a>
-            </li>
-            <!-- Step 3 -->
-            <li class="form-stepper-unfinished text-center form-stepper-list">
-                <a class="mx-2">
-                    <span class="number-step"><i class="fi fi-br-clip"></i></span>
-                    <div class="number-lable">แนบไฟล์</div>
-                    <span class="form-stepper-circle text-muted">
-                        <span><i class="fa-regular fa-circle fa-lg"></i></span>
-                    </span>
-                </a>
-            </li>
-        </ul>
-
-        <section class="form-step mb-3">
-            <div class="mt-1">
-                <h5 class="pb-2 mb-4 text-primary fw-semibold border-bottom border-primary">
-                    <i class="fi fi-sr-multiple" style="color: #53c536;"></i> 
-                    <span> เพิ่มรายละเอียดงาน  </span>
-                    <span style="color: #2A3547;"><i class="fi fi-br-hastag"></i> 
-                        {{ engagement.job_code }}
-                    </span>
-                </h5>
-                <form method="post" id="createJobForm">
-                    {% csrf_token %}
-                    <span style="color: tomato; font-size: 12px;">*กรุณาเลือกหมวดงานก่อน</span>
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="engagement_category_id" class="form-label">หมวดงาน :</label>
-                                <select class="form-select" id="engagement_category_id" name="engagement_category_id" required onchange="loadEngagementType()">
-                                    <option value="" selected disabled hidden>- กรุณาเลือก -</option>
-                                    {% for category in categories %}
-                                        <option value="{{ category.id }}">{{ category.name_th }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <label for="engagement_type_id" class="form-label">ประเภทงาน :</label>
-                                <select class="form-select" id="engagement_type_id" name="engagement_type_id" required/>
-                                    <option value="" selected disabled hidden>- กรุณาเลือก -</option>
-                                </select>
-                            </div>
-                            
-                        </div>
-                        <div class="col-md-2">
-                            <label for="type" class="form-label"><i class="fi fi-br-calendar-lines-pen"></i> ประเภท :</label>
-                            <select class="form-select" name="type" id="type" required>
-                                <option value="" selected disabled hidden>- กรุณาเลือก -</option>
-                                <option value="ครั้งเดียว">ครั้งเดียว</option>
-                                <option value="รายเดือน">รายเดือน</option>
-                                <option value="รายปี">รายปี</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label for="deadline" class="form-label"><i class="fi fi-sr-calendar-clock" style="color: tomato;"></i> เดดไลน์ :</label>
-                            <input type="date" class="form-control" id="deadline" name="deadline" required>
-                        </div>
-                        <div class="col-md-2">
-                            <label for="notification" class="form-label"><i class="fi fi-sr-alarm-clock" style="color: #ffb012;"></i> แจ้งเตือน :</label>
-                            <select class="form-select" name="notification" id="notification" required>
-                                <option value="" selected disabled hidden>- กรุณาเลือก -</option>
-                                <option value="0">ไม่ต้องแจ้งเตือน</option>
-                                <option value="3">3 วัน</option>
-                                <option value="5">5 วัน</option>
-                                <option value="7">7 วัน</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label for="start_date" class="form-label"><i class="fi fi-br-calendar-day"></i> เริ่มต้น :</label>
-                            <input type="date" class="form-control" id="start_date" name="start_date" required>
-                        </div>
-                        <div class="col-md-2">
-                            <label for="end_date" class="form-label"><i class="fi fi-br-calendar-day"></i> สิ้นสุด :</label>
-                            <input type="date" class="form-control" id="end_date" name="end_date" required>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="review_by" name="review_by" {% if engagement.reviewer %}checked{% endif %}>
-                                <label class="form-label" for="review_by">ผู้ตรวจทาน : 
-                                    <span class="text-decoration-underline" style="color: #5d87ff;">
-                                        {{ engagement.reviewer.first_name }}
-                                        {{ engagement.reviewer.last_name }}
-                                    </span>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="approved_by" id="approved_by" {% if engagement.approver %}checked{% endif %}>
-                                <label class="form-label" for="approved_by">ผู้อนุมัติ : 
-                                    <span class="text-decoration-underline" style="color: #5d87ff;">
-                                        {{ engagement.approver.first_name }}
-                                        {{ engagement.approver.last_name }}
-                                    </span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-4">
-                        <button type="reset" class="btn btn-light">ล้างข้อมูล</button>
-                        <button type="button" id="submitJobBtn" class="btn btn-primary"><i class="fa-solid fa-plus"></i> เพิ่มงานใหม่</button>
-                    </div>
-                </form>
-
-                <div class="table-responsive mb-4">
-                    <table id="engagement-job-table" class="table">
-                        <thead class="table-light" style="text-align: center;">
-                            <tr>
-                                <th style="width: 1%;">#</th>
-                                <th>หมวดงาน</th>
-                                <th>ประเภทงาน</th>
-                                <th><i class="fi fi-br-calendar-lines-pen"></i></th>
-                                <th><i class="fi fi-sr-calendar-clock" style="color: tomato;"></i></th>
-                                <th><i class="fi fi-sr-alarm-clock" style="color: #ffb012;"></i></th>
-                                <th>เริ่มต้น - สิ้นสุด</th>
-                                <th>ผู้ตรวจทาน</th>
-                                <th>ผู้อนุมัติ</th>
-                                <th style="width: 1%;"><i class="fa-solid fa-gears"></i></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for detail in engagement_detail_lists %}
-                                <tr>
-                                    <td class="text-center">{{ forloop.counter }}</td>
-                                    <td>{{ detail.engagement_category.name_th }}</td>
-                                    <td>{{ detail.engagement_type.name_th }}</td>
-                                    <td>{{ detail.type }}</td>
-                                    <td class="text-center">{{ detail.deadline|date:"d/m/Y" }}</td>
-                                    <td>{{ detail.notification }} วัน</td>
-                                    <td class="text-center">{{ detail.start_date|date:"d/m/Y" }} - {{ detail.end_date|date:"d/m/Y" }}</td>
-                                    <td class="text-center">
-                                        {% if detail.review_by %}
-                                        {{ detail.engagement.reviewer.first_name }}
-                                        {{ detail.engagement.reviewer.last_name }}
-                                        {% else %}
-                                        -
-                                        {% endif %}
-                                    </td>
-                                    <td class="text-center">
-                                        {% if detail.approved_by %}
-                                        {{ detail.engagement.approver.first_name }}
-                                        {{ detail.engagement.approver.last_name }}
-                                        {% else %}
-                                        -
-                                        {% endif %}
-                                    </td>
-                                    <td class="text-center">
-                                        <button class="btn btn-outline-danger btn-sm delete-job-btn" data-job-id="{{ detail.id }}">
-                                            <i class="fa-regular fa-trash-can"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+<div class="row">
+    <div class="card">
+        <div class="card-body">
+            <ul class="form-stepper form-stepper-horizontal text-center mx-auto pl-0 ">
+                <!-- Step 1 -->
+                <li class="form-stepper-unfinished text-center form-stepper-list">
+                    <a class="mx-2">
+                        <span class="number-step"><i class="fi fi-sr-add-document"></i></span>
+                        <div class="number-lable">Engagement</div>
+                        <span class="form-stepper-circle text-muted">
+                            <span><i class="fa-solid fa-circle-check fa-lg"></i></span>
+                        </span>
+                    </a>
+                </li>
+                <!-- Step 2 -->
+                <li class="form-stepper-unfinished text-center form-stepper-list">
+                    <a class="mx-2">
+                        <span class="number-step"><i class="fi fi-sr-document"></i></span>
+                        <div class="number-lable">รายละเอียดงาน</div>
+                        <span class="form-stepper-circle text-muted">
+                            <span><i class="fa-regular fa-circle-dot fa-lg"></i></span>
+                        </span>
+                    </a>
+                </li>
+                <!-- Step 3 -->
+                <li class="form-stepper-unfinished text-center form-stepper-list">
+                    <a class="mx-2">
+                        <span class="number-step"><i class="fi fi-br-clip"></i></span>
+                        <div class="number-lable">แนบไฟล์</div>
+                        <span class="form-stepper-circle text-muted">
+                            <span><i class="fa-regular fa-circle fa-lg"></i></span>
+                        </span>
+                    </a>
+                </li>
+            </ul>
+    
+            <section class="form-step mb-3">
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{% url 'taskcontrol:record_engagement' engagement_id=engagement.id %}" class="btn btn-outline-dark btn-sm"><i class="fa-solid fa-angles-left"></i></a>
+                    <a href="{% url 'taskcontrol:file_engagement_create' engagement_id=engagement.id %}" class="btn btn-dark btn-sm"><i class="fa-solid fa-angles-right"></i></a>
                 </div>
-                <input type="hidden" id="delete-job-url" value="{% url 'taskcontrol:engagement_job_delete' engagement_job_id=0 %}">
-            </div>
-            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                <a href="{% url 'taskcontrol:record_engagement' engagement_id=engagement.id %}" class="btn btn-outline-dark"><i class="fa-solid fa-circle-arrow-left"></i> ย้อนกลับ</a>
-                <a href="{% url 'taskcontrol:file_engagement_create' engagement_id=engagement.id %}" class="btn btn-dark">ถัดไป <i class="fa-solid fa-circle-arrow-right"></i></a>
-            </div>
-        </section>
+                <div class="mt-1">
+                    <h5 class="pb-2 mb-4 text-primary fw-semibold border-bottom border-primary">
+                        <i class="fi fi-sr-map-marker-plus" style="color: #53c536;"></i> 
+                        <span> เพิ่มรายละเอียดงาน  </span>
+                        <span style="color: #2A3547;"><i class="fi fi-br-hastag"></i> 
+                            {{ engagement.job_code }}
+                        </span>
+                    </h5>
+                    <form method="post" id="createJobForm">
+                        {% csrf_token %}
+                        <span style="color: tomato; font-size: 12px;">*กรุณาเลือกหมวดงานก่อน</span>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="engagement_category_id" class="form-label">หมวดงาน :</label>
+                                    <select class="form-select" id="engagement_category_id" name="engagement_category_id" required onchange="loadEngagementType()">
+                                        <option value="" selected disabled hidden>- กรุณาเลือก -</option>
+                                        {% for category in categories %}
+                                            <option value="{{ category.id }}">{{ category.name_th }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="engagement_type_id" class="form-label">ประเภทงาน :</label>
+                                    <select class="form-select" id="engagement_type_id" name="engagement_type_id" required/>
+                                        <option value="" selected disabled hidden>- กรุณาเลือก -</option>
+                                    </select>
+                                </div>
+                                
+                            </div>
+                            <div class="col-md-2">
+                                <label for="type" class="form-label"><i class="fi fi-br-calendar-lines-pen"></i> ประเภท :</label>
+                                <select class="form-select" name="type" id="type" required>
+                                    <option value="" selected disabled hidden>- กรุณาเลือก -</option>
+                                    <option value="ครั้งเดียว">ครั้งเดียว</option>
+                                    <option value="รายเดือน">รายเดือน</option>
+                                    <option value="รายปี">รายปี</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="deadline" class="form-label"><i class="fi fi-sr-calendar-clock" style="color: tomato;"></i> เดดไลน์ :</label>
+                                <input type="date" class="form-control" id="deadline" name="deadline" required>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="notification" class="form-label"><i class="fi fi-sr-alarm-clock" style="color: #ffb012;"></i> แจ้งเตือน :</label>
+                                <select class="form-select" name="notification" id="notification" required>
+                                    <option value="" selected disabled hidden>- กรุณาเลือก -</option>
+                                    <option value="0">ไม่ต้องแจ้งเตือน</option>
+                                    <option value="3">3 วัน</option>
+                                    <option value="5">5 วัน</option>
+                                    <option value="7">7 วัน</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="start_date" class="form-label"><i class="fi fi-br-calendar-day"></i> เริ่มต้น :</label>
+                                <input type="date" class="form-control" id="start_date" name="start_date" required>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="end_date" class="form-label"><i class="fi fi-br-calendar-day"></i> สิ้นสุด :</label>
+                                <input type="date" class="form-control" id="end_date" name="end_date" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="review_by" name="review_by" {% if engagement.reviewer %}checked{% endif %}>
+                                    <label class="form-label" for="review_by">ผู้ตรวจทาน : 
+                                        <span class="text-decoration-underline" style="color: #5d87ff;">
+                                            {{ engagement.reviewer.first_name }}
+                                            {{ engagement.reviewer.last_name }}
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="approved_by" id="approved_by" {% if engagement.approver %}checked{% endif %}>
+                                    <label class="form-label" for="approved_by">ผู้อนุมัติ : 
+                                        <span class="text-decoration-underline" style="color: #5d87ff;">
+                                            {{ engagement.approver.first_name }}
+                                            {{ engagement.approver.last_name }}
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-4">
+                            <button type="reset" class="btn btn-light">ล้างข้อมูล</button>
+                            <button type="button" id="submitJobBtn" class="btn btn-primary"><i class="fa-solid fa-plus"></i> เพิ่มงานใหม่</button>
+                        </div>
+                    </form>
+    
+                    <div class="table-responsive mb-4">
+                        <table id="engagement-job-table" class="table">
+                            <thead class="table-light" style="text-align: center;">
+                                <tr>
+                                    <th style="width: 1%;">#</th>
+                                    <th>หมวดงาน</th>
+                                    <th>ประเภทงาน</th>
+                                    <th><i class="fi fi-br-calendar-lines-pen"></i></th>
+                                    <th><i class="fi fi-sr-calendar-clock" style="color: tomato;"></i></th>
+                                    <th><i class="fi fi-sr-alarm-clock" style="color: #ffb012;"></i></th>
+                                    <th>เริ่มต้น - สิ้นสุด</th>
+                                    <th>ผู้ตรวจทาน</th>
+                                    <th>ผู้อนุมัติ</th>
+                                    <th style="width: 1%;"><i class="fa-solid fa-gears"></i></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for detail in engagement_detail_lists %}
+                                    <tr>
+                                        <td class="text-center">{{ forloop.counter }}</td>
+                                        <td>{{ detail.engagement_category.name_th }}</td>
+                                        <td>{{ detail.engagement_type.name_th }}</td>
+                                        <td>{{ detail.type }}</td>
+                                        <td class="text-center">{{ detail.deadline|date:"d/m/Y" }}</td>
+                                        <td>{{ detail.notification }} วัน</td>
+                                        <td class="text-center">{{ detail.start_date|date:"d/m/Y" }} - {{ detail.end_date|date:"d/m/Y" }}</td>
+                                        <td class="text-center">
+                                            {% if detail.review_by %}
+                                            {{ detail.engagement.reviewer.first_name }}
+                                            {{ detail.engagement.reviewer.last_name }}
+                                            {% else %}
+                                            -
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {% if detail.approved_by %}
+                                            {{ detail.engagement.approver.first_name }}
+                                            {{ detail.engagement.approver.last_name }}
+                                            {% else %}
+                                            -
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            <button class="btn btn-outline-danger btn-sm delete-job-btn" data-job-id="{{ detail.id }}">
+                                                <i class="fa-regular fa-trash-can"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <input type="hidden" id="delete-job-url" value="{% url 'taskcontrol:engagement_job_delete' engagement_job_id=0 %}">
+                </div>
+                
+            </section>
+        </div>
     </div>
 </div>
+
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
