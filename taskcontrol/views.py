@@ -637,6 +637,8 @@ def engagement_list(request):
         Prefetch('engagement_category', queryset=EngagementCategory.objects.all())
     )
 
+    if not request.user.is_superuser:
+        engagements = engagements.filter(Q(administrator=request.user))
     clients = Client.objects.all()
     total_engagements = engagements.count()
     open_engagements = engagements.filter(status__in=['OPEN_JOB', 'IN_PROGRESS', 'REVIEW', 'PENDING_CLIENT']).count()
@@ -1354,6 +1356,8 @@ def kanban_board(request):
 
     clients = Client.objects.exclude(status='0').all().order_by('code')
     engagements = Engagement.objects.filter(client__isnull=False)
+    if not request.user.is_superuser:
+        engagements = engagements.filter(Q(administrator=request.user))
 
     # 2 weeks
     fourteen_days_ago = timezone.now() - timezone.timedelta(days=14)
@@ -1390,6 +1394,9 @@ def kanban_board(request):
             ).exclude(
                 Q(status='DONE') & Q(completed_at__lte=fourteen_days_ago)
             ).order_by('number')
+    
+    if not request.user.is_superuser:
+        tasks = tasks.filter(create_by=request.user)
 
     for task in tasks:
         task.days_remaining = (task.due_date - today).days
