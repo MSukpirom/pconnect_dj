@@ -71,48 +71,153 @@
         </div>
     </div>
 
-    <!-- Modal Change Password -->
-    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="changePasswordModalLabel">เปลี่ยนรหัสผ่าน</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="changePasswordForm">
-                        <div class="mb-3">
-                            <label for="currentPassword" class="form-label">รหัสผ่านเดิม :</label>
-                            <input type="password" class="form-control" id="currentPassword" name="currentPassword">
-                        </div>
-                        <div class="mb-3">
-                            <label for="newPassword" class="form-label">รหัสผ่านใหม่ :</label>
-                            <input type="password" class="form-control" id="newPassword" name="newPassword">
-                            <ul>
-                                <li style="color: tomato; font-size: 11px;">- ตัวเลขอย่างน้อย 4 ตัว [0-9]</li>
-                                <li style="color: tomato; font-size: 11px;">- ตัวอักขระพิเศษ 1 ตัว [!@#$%^&*(),.?":{}|&lt;&gt;]</li>
-                                <li style="color: tomato; font-size: 11px;">- ตัวอักษรใหญ่ 1 ตัว [A-Z]</li>
-                            </ul>
-                        </div>
-                        <div class="mb-3">
-                            <label for="confirmPassword" class="form-label">ยืนยันรหัสผ่านใหม่ :</label>
-                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword">
-                        </div>
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="showPassword">
-                            <label class="form-check-label" for="showPassword">แสดงรหัสผ่าน</label>
+    <div class="col-md-9 col-sm-12 mb-4">
+        <!-- Nav tabs -->
+        <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pills-engagements-tab" data-bs-toggle="pill" data-bs-target="#pills-engagements" type="button" role="tab" aria-controls="pills-engagements" aria-selected="true">All Engagements</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-tasks-tab" data-bs-toggle="pill" data-bs-target="#pills-tasks" type="button" role="tab" aria-controls="pills-tasks" aria-selected="false">All Tasks</button>
+            </li>
+        </ul>
+    
+        <!-- Tab content -->
+        <div class="tab-content" id="pills-tabContent">
+            <div class="tab-pane fade show active" id="pills-engagements" role="tabpanel" aria-labelledby="pills-engagements-tab">
+                <div class="col-md-12 col-sm-12 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="engagement-details">
+                                <h5>All Engagements <span class="badge bg-primary fw-semibold">{{ count_engagement_details }}</span></h5>
+                                {% for engagement, engagement_details in engagement_details_by_engagement.items %}
+                                <h6>
+                                    <button class="btn btn-outline-primary toggle-collapse-engagement" type="button" data-bs-toggle="collapse" data-target="#collapseEngagement{{ engagement.id }}" aria-expanded="false" aria-controls="collapseEngagement{{ engagement.id }}">
+                                        <i class="fa-solid fa-caret-right me-2"></i> {{ engagement.job_code }}
+                                    </button>
+                                </h6>
+                                <div class="collapse" id="collapseEngagement{{ engagement.id }}">
+                                    <table class="table">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>#</th>
+                                                <th>ประเภทงาน</th>
+                                                <th>เดดไลน์</th>
+                                                <th>ผู้รับผิดชอบ</th>
+                                                <th>ผู้ตรวจทาน</th>
+                                                <th>ผู้อนุมัติ</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for detail in engagement_details %}
+                                            <tr>
+                                                <td>{{ forloop.counter }}</td>
+                                                <td>{{ detail.engagement_category.name_th }} <i class="fa-solid fa-angle-right"></i> {{ detail.engagement_type.name_th }}</td>
+                                                <td>{{ detail.deadline|date:"d/m/Y" }}</td>
+                                                <td>{{ detail.engagement.administrator.first_name }} {{ detail.engagement.administrator.last_name }}</td>
+                                                <td>{{ detail.engagement.reviewer.first_name }} {{ detail.engagement.reviewer.last_name }}</td>
+                                                <td>{{ detail.engagement.approver.first_name }} {{ detail.engagement.approver.last_name }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% endfor %}
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">ปิด</button>
-                    <button type="button" class="btn btn-primary" onclick="changePassword()">บันทึกเปลี่ยนรหัสผ่าน</button>
+            </div>
+    
+            <div class="tab-pane fade" id="pills-tasks" role="tabpanel" aria-labelledby="pills-tasks-tab">
+                <div class="col-md-12 col-sm-12 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="engagement-details">
+                                <h5>All Tasks <span class="badge bg-primary fw-semibold">{{ tasks.count }}</span></h5>
+                                {% for task in tasks %}
+                                <h6>
+                                    <button class="btn btn-outline-primary toggle-collapse-task" type="button" data-bs-toggle="collapse" data-target="#collapseTask{{ task.id }}" aria-expanded="false" aria-controls="collapseTask{{ task.id }}">
+                                        <i class="fa-solid fa-caret-right me-2"></i> {{ task.number }}
+                                    </button>
+                                </h6>
+                                <div class="collapse" id="collapseTask{{ task.id }}">
+                                    <table class="table">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Client</th>
+                                                <th>Job</th>
+                                                <th>Description</th>
+                                                <th>Due Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>{{ forloop.counter }}</td>
+                                                <td>{{ task.client.company_name }}</td>
+                                                <td>{{ task.new_job }}</td>
+                                                <td>{{ task.description }}</td>
+                                                <td>{{ task.due_date }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+<!-- Modal Change Password -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changePasswordModalLabel">เปลี่ยนรหัสผ่าน</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="changePasswordForm">
+                    <div class="mb-3">
+                        <label for="currentPassword" class="form-label">รหัสผ่านเดิม :</label>
+                        <input type="password" class="form-control" id="currentPassword" name="currentPassword">
+                    </div>
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">รหัสผ่านใหม่ :</label>
+                        <input type="password" class="form-control" id="newPassword" name="newPassword">
+                        <ul>
+                            <li style="color: tomato; font-size: 11px;">- ตัวเลขอย่างน้อย 4 ตัว [0-9]</li>
+                            <li style="color: tomato; font-size: 11px;">- ตัวอักขระพิเศษ 1 ตัว [!@#$%^&*(),.?":{}|&lt;&gt;]</li>
+                            <li style="color: tomato; font-size: 11px;">- ตัวอักษรใหญ่ 1 ตัว [A-Z]</li>
+                        </ul>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">ยืนยันรหัสผ่านใหม่ :</label>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="showPassword">
+                        <label class="form-check-label" for="showPassword">แสดงรหัสผ่าน</label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">ปิด</button>
+                <button type="button" class="btn btn-primary" onclick="changePassword()">บันทึกเปลี่ยนรหัสผ่าน</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
     
-    <div class="col-md-5 col-sm-12 mb-4">
+    
+    <!-- <div class="col-md-5 col-sm-12 mb-4">
         <div class="card">
             <div class="card-body">
                 <div class="engagement-details">
@@ -195,8 +300,7 @@
                 </div>
             </div>
         </div>
-    </div>
-</div>
+    </div> -->
     
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>

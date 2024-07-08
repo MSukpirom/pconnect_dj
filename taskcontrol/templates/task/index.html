@@ -124,7 +124,7 @@
                             <span class="hide-menu">Home</span>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="{% url 'taskcontrol:dashboard' %}" aria-expanded="false">
+                            <a class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'taskcontrol:dashboard' %}" aria-expanded="false">
                                 <span><i class="fa-solid fa-chart-pie"></i></span>
                                 <span class="hide-menu">Dashboard</span>
                             </a>
@@ -132,7 +132,7 @@
                         
                         <!-- Clients Section -->
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="{% url 'taskcontrol:client_list' %}" aria-expanded="false">
+                            <a class="sidebar-link {% if request.resolver_match.url_name == 'client_list' %}active{% endif %}" href="{% url 'taskcontrol:client_list' %}" aria-expanded="false">
                                 <span><i class="fa-solid fa-users"></i></span>
                                 <span class="hide-menu">Clients</span>
                             </a>
@@ -140,7 +140,7 @@
                         
                         <!-- Engagement Section -->
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="{% url 'taskcontrol:engagement_list' %}" aria-expanded="false">
+                            <a class="sidebar-link {% if request.resolver_match.url_name == 'engagement_list' %}active{% endif %}" href="{% url 'taskcontrol:engagement_list' %}" aria-expanded="false">
                                 <span><i class="fa-solid fa-box-archive"></i></span>
                                 <span class="hide-menu">Engagement</span>
                             </a>
@@ -148,7 +148,7 @@
                         
                         <!-- Tasks Control Section -->
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="{% url 'taskcontrol:kanban_board' %}" aria-expanded="false">
+                            <a class="sidebar-link {% if request.resolver_match.url_name == 'kanban_board' %}active{% endif %}" href="{% url 'taskcontrol:kanban_board' %}" aria-expanded="false">
                                 <span><i class="fa-solid fa-list-check"></i></span>
                                 <span class="hide-menu">Tasks Control</span>
                             </a>
@@ -159,19 +159,19 @@
                             <span class="hide-menu">Setting</span>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="{% url 'taskcontrol:manage_category' %}" aria-expanded="false">
+                            <a class="sidebar-link {% if request.resolver_match.url_name == 'manage_category' %}active{% endif %}" href="{% url 'taskcontrol:manage_category' %}" aria-expanded="false">
                                 <span><i class="fa-solid fa-layer-group"></i></span>
                                 <span class="hide-menu">Categories</span>
                             </a>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="{% url 'taskcontrol:manage_channel' %}" aria-expanded="false">
+                            <a class="sidebar-link {% if request.resolver_match.url_name == 'manage_channel' %}active{% endif %}" href="{% url 'taskcontrol:manage_channel' %}" aria-expanded="false">
                                 <span><i class="fa-solid fa-tags"></i></span>
                                 <span class="hide-menu">Channels</span>
                             </a>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="{% url 'taskcontrol:manage_register_type' %}" aria-expanded="false">
+                            <a class="sidebar-link {% if request.resolver_match.url_name == 'manage_register_type' %}active{% endif %}" href="{% url 'taskcontrol:manage_register_type' %}" aria-expanded="false">
                                 <span><i class="fa-solid fa-registered"></i></span>
                                 <span class="hide-menu">Registration</span>
                             </a>
@@ -179,7 +179,7 @@
                         
                         <!-- Profile Section -->
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="{% url 'taskcontrol:profile' request.user.id %}" aria-expanded="false">
+                            <a class="sidebar-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" href="{% url 'taskcontrol:profile' request.user.id %}" aria-expanded="false">
                                 <span><i class="fa-solid fa-user"></i></span>
                                 <span class="hide-menu" style="color: tomato;">Profile</span>
                             </a>
@@ -223,6 +223,12 @@
                                 {% endif %}
                             </a>
                             <div class="dropdown-menu dropdown-menu-end overflow-y-scroll" style="max-height: 400px; width: 250px;">
+                                {% if count <= 0 %}
+                                    <div class="text-center justify-content-center pt-3">
+                                        <p>ยังไม่มีการแจ้งเตือน</p> 
+                                    </div>
+                                {% endif %}
+                                
                                 {% if notification_detail %}
                                     <div class="box-title p-2">
                                         <i class="fi fi-br-circle-e" style="color: #0085FF;"></i>
@@ -274,7 +280,7 @@
                                                     </div>
                                                 </div>
                                         {% endif %}
-                                        </a>
+                                            </a>
                                     {% endfor %}
                                 {% endif %}
 

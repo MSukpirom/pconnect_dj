@@ -17,7 +17,12 @@ def notification(request):
         engagement_result = EngagementDetail.objects.exclude(
                                 Q(engagement__status='DONE',status='DONE')
                                     ).filter(
-                                    (Q(engagement__create_by=request.user) | Q(engagement__reviewer= request.user) | Q(engagement__approver= request.user) | Q(engagement__administrator=request.user)) 
+                                    (
+                                        Q(engagement__administrator=request.user) | 
+                                        Q(engagement__reviewer= request.user) | 
+                                        Q(engagement__approver= request.user) | 
+                                        Q(engagement__create_by=request.user)
+                                     ) 
                                     &
                                     (
                                         Q(deadline__lte=datetime.today()) |
@@ -40,6 +45,7 @@ def notification(request):
                                         output_field=BooleanField()
                                     )
                                 ).order_by('deadline')
+
         # Filter Task
         task_result = Task.objects.exclude(
                         Q(status='DONE')
