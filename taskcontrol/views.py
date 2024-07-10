@@ -35,10 +35,9 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            messages.success(request, 'เข้าสู่ระบบสำเร็จ')
-            return redirect('taskcontrol:dashboard')
+            return JsonResponse({'success': True})
         else:
-            messages.error(request, 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง')
+            return JsonResponse({'success': False, 'message': 'ผู้ใช้งาน หรือ รหัสผ่านไม่ถูกต้อง'})
     return render(request, 'accounts/login.html')
 
 #TODO Logout
@@ -1083,8 +1082,20 @@ def dashboard(request):
     clients = Client.objects.exclude(status='0').all().order_by('code')
     total_clients = clients.count()
     engagements = Engagement.objects.all()
+    if request.user.is_superuser:
+        engagements = engagements  # ให้ superuser เห็นทุกอย่าง
+    elif request.user.groups.filter(name='Head').exists():
+        engagements = engagements.filter(Q(administrator=request.user) | Q(administrator__groups__name='Team'))  # ให้ผู้จัดการเห็นงานของทีมตนเอง
+    elif request.user.groups.filter(name='Team').exists():
+        engagements = engagements.filter(Q(administrator=request.user))
     total_engagements = engagements.count()
     engagement_details = EngagementDetail.objects.exclude(status='DONE').all().order_by('engagement__job_code')
+    if request.user.is_superuser:
+        engagement_details = engagement_details  # ให้ superuser เห็นทุกอย่าง
+    elif request.user.groups.filter(name='Head').exists():
+        engagement_details = engagement_details.filter(Q(engagement__administrator=request.user) | Q(engagement__administrator__groups__name='Team'))  # ให้ผู้จัดการเห็นงานของทีมตนเอง
+    elif request.user.groups.filter(name='Team').exists():
+        engagement_details = engagement_details.filter(Q(engagement__administrator=request.user))
     count_engagement_detail_open_all = engagement_details.count()
     count_engagement_detail_done = EngagementDetail.objects.filter(status='DONE').count()
     open_job_engagement = engagements.filter(status__in=STATUS_OPEN_JOB).count()
@@ -1101,6 +1112,13 @@ def dashboard(request):
     tasks_due_current_month = Task.objects.exclude(status='DONE').filter(
         Q(due_date__month=current_month, due_date__year=current_year)
     )
+    if request.user.is_superuser:
+        tasks_due_current_month = tasks_due_current_month  # ให้ superuser เห็นทุกอย่าง
+    elif request.user.groups.filter(name='Head').exists():
+        tasks_due_current_month = tasks_due_current_month.filter(Q(create_by=request.user) | Q(create_by__groups__name='Team'))  # ให้ผู้จัดการเห็นงานของทีมตนเอง
+    elif request.user.groups.filter(name='Team').exists():
+        tasks_due_current_month = tasks_due_current_month.filter(Q(create_by=request.user))
+
 
     # ส่งข้อมูลไปยัง template
     return render(request, 'task/dashboard.html', {
@@ -1132,6 +1150,12 @@ def get_engagement_detail_dashboard(request):
         end_date_period = request.GET.get('end_date_period')
 
         engagement_details = EngagementDetail.objects.select_related('engagement').order_by('engagement__job_code')
+        if request.user.is_superuser:
+            engagement_details = engagement_details  # ให้ superuser เห็นทุกอย่าง
+        elif request.user.groups.filter(name='Head').exists():
+            engagement_details = engagement_details.filter(Q(engagement__administrator=request.user) | Q(engagement__administrator__groups__name='Team'))  # ให้ผู้จัดการเห็นงานของทีมตนเอง
+        elif request.user.groups.filter(name='Team').exists():
+            engagement_details = engagement_details.filter(Q(engagement__administrator=request.user))
 
         # Apply filters
         if client_id:
@@ -1177,6 +1201,8 @@ def get_engagement_detail_dashboard(request):
                 )
 
         engagement_details = engagement_details.exclude(status="DONE")
+        if not request.user.is_superuser:
+            engagement_details = engagement_details.filter(Q(engagement__administrator=request.user) | Q(engagement__create_by=request.user))
         
         engagement_data = []
         for detail in engagement_details:
@@ -1204,6 +1230,16 @@ def get_engagement_detail_status(request):
     status_counts = EngagementDetail.objects.filter(status__in=statuses).values('status').annotate(count=Count('status')).order_by(Case(
         *[When(status=status, then=pos) for pos, status in enumerate(statuses)]
     ))
+    
+    # if not request.user.is_superuser:
+    #     status_counts = status_counts.filter(Q(engagement__administrator = request.user) | Q(engagement__create_by=request.user))
+
+    if request.user.is_superuser:
+        status_counts = status_counts  # ให้ superuser เห็นทุกอย่าง
+    elif request.user.groups.filter(name='Head').exists():
+        status_counts = status_counts.filter(Q(engagement__administrator=request.user) | Q(engagement__administrator__groups__name='Team'))  # ให้ผู้จัดการเห็นงานของทีมตนเอง
+    elif request.user.groups.filter(name='Team').exists():
+        status_counts = status_counts.filter(Q(engagement__administrator=request.user))
 
     status_data = {status: count['count'] for status in statuses for count in status_counts if count['status'] == status}
 
@@ -1240,7 +1276,15 @@ def get_accounting(request):
         engagement_details = EngagementDetail.objects.filter(
             engagement_category__name_th='บัญชี',
             status=status
-        ).values('engagement_type__name_th')
+        )
+
+        if request.user.is_superuser:
+            engagement_details = engagement_details.values('engagement_type__name_th')  # ให้ superuser เห็นทุกอย่าง
+        elif request.user.groups.filter(name='Head').exists():
+            engagement_details = engagement_details.filter(Q(engagement__administrator=request.user) | Q(engagement__administrator__groups__name='Team')).values('engagement_type__name_th')  # ให้ผู้จัดการเห็นงานของทีมตนเอง
+        elif request.user.groups.filter(name='Team').exists():
+            engagement_details = engagement_details.filter(Q(engagement__administrator=request.user)).values('engagement_type__name_th')
+
 
         series_data = []
         for engagement_type in engagement_types:
@@ -1270,7 +1314,13 @@ def get_tax(request):
         engagement_details = EngagementDetail.objects.filter(
             engagement_category__name_th='ภาษี',
             status=status
-        ).values('engagement_type__name_th')
+        )
+        if request.user.is_superuser:
+            engagement_details = engagement_details.values('engagement_type__name_th')  # ให้ superuser เห็นทุกอย่าง
+        elif request.user.groups.filter(name='Head').exists():
+            engagement_details = engagement_details.filter(Q(engagement__administrator=request.user) | Q(engagement__administrator__groups__name='Team')).values('engagement_type__name_th')  # ให้ผู้จัดการเห็นงานของทีมตนเอง
+        elif request.user.groups.filter(name='Team').exists():
+            engagement_details = engagement_details.filter(Q(engagement__administrator=request.user)).values('engagement_type__name_th')
 
         series_data = []
         for engagement_type in engagement_types:
@@ -1300,7 +1350,13 @@ def get_payroll(request):
         engagement_details = EngagementDetail.objects.filter(
             engagement_category__name_th='เงินเดือน',
             status=status
-        ).values('engagement_type__name_th')
+        )
+        if request.user.is_superuser:
+            engagement_details = engagement_details.values('engagement_type__name_th')  # ให้ superuser เห็นทุกอย่าง
+        elif request.user.groups.filter(name='Head').exists():
+            engagement_details = engagement_details.filter(Q(engagement__administrator=request.user) | Q(engagement__administrator__groups__name='Team')).values('engagement_type__name_th')  # ให้ผู้จัดการเห็นงานของทีมตนเอง
+        elif request.user.groups.filter(name='Team').exists():
+            engagement_details = engagement_details.filter(Q(engagement__administrator=request.user)).values('engagement_type__name_th')
 
         series_data = []
         for engagement_type in engagement_types:
@@ -1330,7 +1386,13 @@ def get_report(request):
         engagement_details = EngagementDetail.objects.filter(
             engagement_category__name_th='รายงาน',
             status=status
-        ).values('engagement_type__name_th')
+        )
+        if request.user.is_superuser:
+            engagement_details = engagement_details.values('engagement_type__name_th')  # ให้ superuser เห็นทุกอย่าง
+        elif request.user.groups.filter(name='Head').exists():
+            engagement_details = engagement_details.filter(Q(engagement__administrator=request.user) | Q(engagement__administrator__groups__name='Team')).values('engagement_type__name_th')  # ให้ผู้จัดการเห็นงานของทีมตนเอง
+        elif request.user.groups.filter(name='Team').exists():
+            engagement_details = engagement_details.filter(Q(engagement__administrator=request.user)).values('engagement_type__name_th')
 
         series_data = []
         for engagement_type in engagement_types:
@@ -1356,8 +1418,13 @@ def kanban_board(request):
 
     clients = Client.objects.exclude(status='0').all().order_by('code')
     engagements = Engagement.objects.filter(client__isnull=False)
-    if not request.user.is_superuser:
-        engagements = engagements.filter(Q(administrator=request.user))
+    if request.user.is_superuser:
+        engagements = engagements  # ให้ superuser เห็นทุกอย่าง
+    elif request.user.groups.filter(name='Head').exists():
+        engagements = engagements.filter(Q(administrator=request.user) | Q(administrator__groups__name='Team'))  # ให้ผู้จัดการเห็นงานของทีมตนเอง
+    elif request.user.groups.filter(name='Team').exists():
+        engagements = engagements.filter(Q(administrator=request.user))  # ให้ลูกน้องเห็นงานตนเองและน้องฝึกงานในสาย
+
 
     # 2 weeks
     fourteen_days_ago = timezone.now() - timezone.timedelta(days=14)
@@ -1395,8 +1462,12 @@ def kanban_board(request):
                 Q(status='DONE') & Q(completed_at__lte=fourteen_days_ago)
             ).order_by('number')
     
-    if not request.user.is_superuser:
-        tasks = tasks.filter(create_by=request.user)
+    if request.user.is_superuser:
+        tasks = tasks  # ให้ superuser เห็นทุกอย่าง
+    elif request.user.groups.filter(name='Head').exists():
+        tasks = tasks.filter(Q(create_by=request.user) | Q(create_by__groups__name='Team'))  # ให้ผู้จัดการเห็นงานของทีมตนเอง
+    elif request.user.groups.filter(name='Team').exists():
+        tasks = tasks.filter(Q(create_by=request.user))  # ให้ลูกน้องเห็นงานตนเองและน้องฝึกงานในสาย
 
     for task in tasks:
         task.days_remaining = (task.due_date - today).days
@@ -1444,25 +1515,22 @@ def kanban_board(request):
 #TODO Kanban Update Status Engagement Detail
 @require_POST
 def update_status(request):
-    if request.method == 'POST':
-        id = request.POST.get('id')
-        new_status = request.POST.get('new_status')
+    item_id = request.POST.get('id')
+    new_status = request.POST.get('new_status')
 
-        # Determine whether the ID belongs to EngagementDetail or Task
-        if EngagementDetail.objects.filter(id=id).exists():
-            instance = get_object_or_404(EngagementDetail, id=id)
-        elif Task.objects.filter(id=id).exists():
-            instance = get_object_or_404(Task, id=id)
-        else:
-            return JsonResponse({'error': 'Object not found'}, status=404)
-
-        # Update the status
-        instance.status = new_status
-        instance.save()
-
-        return JsonResponse({'message': 'Status updated successfully'})
+    # Determine if the item is an EngagementDetail or a Task
+    if EngagementDetail.objects.filter(id=item_id).exists():
+        item = get_object_or_404(EngagementDetail, id=item_id)
+    elif Task.objects.filter(id=item_id).exists():
+        item = get_object_or_404(Task, id=item_id)
     else:
-        return JsonResponse({'error': 'Method not allowed'}, status=405)
+        return JsonResponse({'error': 'Item not found'}, status=404)
+
+    # Update the status
+    item.status = new_status
+    item.save()
+
+    return JsonResponse({'message': 'Status updated successfully'})
 
 #TODO Kanban NewTask 
 @login_required

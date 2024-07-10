@@ -190,33 +190,23 @@
     .badge-client { color: #a10f0a; }
     .badge-done { color: #054627; }
 
-    .kanban-column {
-        border: 1px solid transparent;
-        transition: border-color 0.3s;
-    }
-    
-    .kanban-column.highlight-open {
-        border: 3px solid #2e65ff;
-    }
-    
-    .kanban-column.highlight-progress {
-        border: 3px solid #7452ff;
-    }
-    
-    .kanban-column.highlight-review {
-        border: 3px solid #ffbb00;
-    }
-    
-    .kanban-column.highlight-client {
-        border: 3px solid #ff622e;
-    }
-    
-    .kanban-column.highlight-done {
-        border: 3px solid #7eca32
-    }
-    
-    .task-card.dragging {
+    .dragging {
         opacity: 0.5;
+    }
+    .highlight-open {
+        border: 3px solid #5d87ff;
+    }
+    .highlight-in_progress {
+        border: 3px solid #a161e4;
+    }
+    .highlight-review {
+        border: 3px solid #ffc107;
+    }
+    .highlight-pending_client {
+        border: 3px solid #ff5258;
+    }
+    .highlight-done {
+        border: 3px solid #6dc656;
     }
     
     #watermark {
@@ -401,6 +391,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
+{% csrf_token %}
 <script>
     // Function to allow drop on target
     function allowDrop(event) {
@@ -443,23 +434,22 @@
 
     // Function to update status via AJAX
     function updateStatus(id, newStatus) {
-        var updateStatusUrl = "{% url 'taskcontrol:update_status' %}";
-        var csrfToken = "{{ csrf_token }}";
+        var formData = new FormData();
+        formData.append('id', id);
+        formData.append('new_status', newStatus);
+    
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', updateStatusUrl, true);
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        xhr.setRequestHeader('X-CSRFToken', csrfToken);
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4) {
-                if (xhr.status === 200) {
-                    console.log('Status updated successfully');
-                    location.reload();
-                } else {
-                    console.error('Failed to update status:', xhr.responseText);
-                }
+        xhr.open('POST', "{% url 'taskcontrol:update_status' %}", true);
+        xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                console.log('Status updated successfully');
+                location.reload(); // Reload the page after successful update
+            } else {
+                console.log('Failed to update status');
             }
         };
-        xhr.send("id=" + id + "&new_status=" + newStatus);
+        xhr.send(formData);
     }
 
     // Function to handle drag enter
@@ -482,7 +472,7 @@
     function removeHighlight() {
         var columns = document.getElementsByClassName('kanban-column');
         for (var i = 0; i < columns.length; i++) {
-            columns[i].classList.remove('highlight-open', 'highlight-progress', 'highlight-review', 'highlight-client', 'highlight-done');
+            columns[i].classList.remove('highlight-open', 'highlight-in_progress', 'highlight-review', 'highlight-client', 'highlight-done');
         }
     }
 
@@ -502,6 +492,7 @@
         kanbanColumns[i].addEventListener('dragover', allowDrop);
     }
 
+    // Function to get CSRF token from cookies
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -516,6 +507,8 @@
         }
         return cookieValue;
     }
+    
 </script>
+
 
 {% endblock content %}
