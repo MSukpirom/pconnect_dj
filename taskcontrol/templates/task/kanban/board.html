@@ -391,7 +391,6 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
-{% csrf_token %}
 <script>
     // Function to allow drop on target
     function allowDrop(event) {
@@ -422,7 +421,7 @@
             return;
         }
 
-        updateStatus(id, newStatus);
+        updateStatus(id, newStatus, event.target);
         removeHighlight();
     }
 
@@ -433,20 +432,27 @@
     }
 
     // Function to update status via AJAX
-    function updateStatus(id, newStatus) {
+    function updateStatus(id, newStatus, target) {
         var formData = new FormData();
         formData.append('id', id);
         formData.append('new_status', newStatus);
-    
+
         var xhr = new XMLHttpRequest();
         xhr.open('POST', "{% url 'taskcontrol:update_status' %}", true);
-        xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+        xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
         xhr.onload = function() {
             if (xhr.status === 200) {
                 console.log('Status updated successfully');
-                location.reload(); // Reload the page after successful update
+                var taskCard = document.getElementById(id);
+                if (taskCard) {
+                    taskCard.setAttribute('data-status', newStatus);
+                    target.appendChild(taskCard);
+                } else {
+                    console.error('Task card not found');
+                }
             } else {
                 console.log('Failed to update status');
+                alert('Failed to update status. Please try again.');
             }
         };
         xhr.send(formData);
@@ -507,7 +513,6 @@
         }
         return cookieValue;
     }
-    
 </script>
 
 

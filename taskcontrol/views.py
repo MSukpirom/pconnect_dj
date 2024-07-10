@@ -12,7 +12,7 @@ from django.db.models import Max, Count, F, Subquery, Q, Case, When, Value, Char
 from collections import Counter
 from django.views.decorators.http import require_POST
 from dateutil.relativedelta import relativedelta
-from django.views.decorators.csrf import csrf_exempt
+import logging
 
 # Constants
 STATUS_OPEN_JOB = ('OPEN_JOB', 'PENDING_CLIENT', 'REVIEW', 'IN_PROGRESS')
@@ -1513,10 +1513,16 @@ def kanban_board(request):
     return render(request, 'task/kanban/board.html', context)
 
 #TODO Kanban Update Status Engagement Detail
-@require_POST
+# Initialize the logger
+logger = logging.getLogger(__name__)
+
+@transaction.atomic
 def update_status(request):
     item_id = request.POST.get('id')
     new_status = request.POST.get('new_status')
+
+    if not item_id or not new_status:
+        return JsonResponse({'error': 'Invalid data'}, status=400)
 
     # Determine if the item is an EngagementDetail or a Task
     if EngagementDetail.objects.filter(id=item_id).exists():
@@ -1529,6 +1535,8 @@ def update_status(request):
     # Update the status
     item.status = new_status
     item.save()
+
+    logger.info(f"Status of item ID {item_id} updated to {new_status}")
 
     return JsonResponse({'message': 'Status updated successfully'})
 
