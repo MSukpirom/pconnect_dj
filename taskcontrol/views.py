@@ -1513,7 +1513,6 @@ def kanban_board(request):
     return render(request, 'task/kanban/board.html', context)
 
 #TODO Kanban Update Status Engagement Detail
-# Initialize the logger
 logger = logging.getLogger(__name__)
 
 @transaction.atomic
@@ -1521,24 +1520,32 @@ def update_status(request):
     item_id = request.POST.get('id')
     new_status = request.POST.get('new_status')
 
-    if not item_id or not new_status:
-        return JsonResponse({'error': 'Invalid data'}, status=400)
+    try:
+        if not item_id or not new_status:
+            raise ValueError('Invalid data')
 
-    # Determine if the item is an EngagementDetail or a Task
-    if EngagementDetail.objects.filter(id=item_id).exists():
-        item = get_object_or_404(EngagementDetail, id=item_id)
-    elif Task.objects.filter(id=item_id).exists():
-        item = get_object_or_404(Task, id=item_id)
-    else:
-        return JsonResponse({'error': 'Item not found'}, status=404)
+        # Determine if the item is an EngagementDetail or a Task
+        try:
+            item = EngagementDetail.objects.get(id=item_id)
+        except EngagementDetail.DoesNotExist:
+            try:
+                item = Task.objects.get(id=item_id)
+            except Task.DoesNotExist:
+                raise ValueError('Item not found')
 
-    # Update the status
-    item.status = new_status
-    item.save()
+        # Update the status
+        item.status = new_status
+        item.save()
 
-    logger.info(f"Status of item ID {item_id} updated to {new_status}")
+        logger.info(f"Status of item ID {item_id} updated to {new_status}")
 
-    return JsonResponse({'message': 'Status updated successfully'})
+        return JsonResponse({'message': 'อัพเดทสถานะงานสำเร็จ'})
+
+    except ValueError as e:
+        return JsonResponse({'error': str(e)}, status=400)
+    except Exception as e:
+        logger.error(f"Error updating status: {str(e)}")
+        return JsonResponse({'error': 'An error occurred'}, status=500)
 
 #TODO Kanban NewTask 
 @login_required
